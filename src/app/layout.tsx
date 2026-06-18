@@ -17,6 +17,41 @@ export const metadata: Metadata = {
   title: "LockifyZ — Secure Password & Card Vault",
   description:
     "Your premium digital vault for passwords and credit cards. Military-grade encryption, beautiful interface, always accessible.",
+  keywords: ["password manager", "secure vault", "credential manager", "credit card wallet", "LockifyZ", "encryption", "pwa"],
+  authors: [{ name: "Muhammad Saif" }],
+  openGraph: {
+    title: "LockifyZ — Secure Password & Card Vault",
+    description: "Your premium digital vault for passwords and credit cards.",
+    url: "https://passgrid.vercel.app",
+    siteName: "LockifyZ",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "LockifyZ Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LockifyZ — Secure Password & Card Vault",
+    description: "Your premium digital vault for passwords and credit cards.",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
