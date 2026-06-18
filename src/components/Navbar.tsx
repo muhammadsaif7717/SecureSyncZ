@@ -51,12 +51,12 @@ export default function Navbar() {
           >
             <Image
               src="/logo.png"
-              alt="LockifyZ Logo"
+              alt="SecureSyncZ Logo"
               width={28}
               height={28}
               className="rounded-lg shadow-md shadow-emerald-500/20"
             />
-            <span>LockifyZ</span>
+            <span>SecureSyncZ</span>
           </Link>
 
           {/* Controls */}

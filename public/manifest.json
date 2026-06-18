@@ -1,6 +1,6 @@
 {
-  "name": "LockifyZ",
-  "short_name": "LockifyZ",
+  "name": "SecureSyncZ",
+  "short_name": "SecureSyncZ",
   "description": "Secure Password and Card Vault",
   "start_url": "/",
   "display": "standalone",

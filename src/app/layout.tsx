@@ -14,22 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LockifyZ — Secure Password & Card Vault",
+  title: "SecureSyncZ — Secure Password & Card Vault",
   description:
     "Your premium digital vault for passwords and credit cards. Military-grade encryption, beautiful interface, always accessible.",
-  keywords: ["password manager", "secure vault", "credential manager", "credit card wallet", "LockifyZ", "encryption", "pwa"],
+  keywords: ["password manager", "secure vault", "credential manager", "credit card wallet", "SecureSyncZ", "encryption", "pwa"],
   authors: [{ name: "Muhammad Saif" }],
   openGraph: {
-    title: "LockifyZ — Secure Password & Card Vault",
+    title: "SecureSyncZ — Secure Password & Card Vault",
     description: "Your premium digital vault for passwords and credit cards.",
     url: "https://passgrid.vercel.app",
-    siteName: "LockifyZ",
+    siteName: "SecureSyncZ",
     images: [
       {
         url: "/logo.png",
         width: 512,
         height: 512,
-        alt: "LockifyZ Logo",
+        alt: "SecureSyncZ Logo",
       },
     ],
     locale: "en_US",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "LockifyZ — Secure Password & Card Vault",
+    title: "SecureSyncZ — Secure Password & Card Vault",
     description: "Your premium digital vault for passwords and credit cards.",
     images: ["/logo.png"],
   },
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    title: "LockifyZ",
+    title: "SecureSyncZ",
     statusBarStyle: "black-translucent",
   },
 };

@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(response.data.user);
         showToast({
           title: "Registration Successful",
-          description: `Welcome to LockifyZ, ${response.data.user.username}!`,
+          description: `Welcome to SecureSyncZ, ${response.data.user.username}!`,
         });
         router.push("/passwords");
       }

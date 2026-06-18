@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="public/logo.png" alt="LockifyZ Logo" width="120" height="120" />
-  <h1>LockifyZ</h1>
+  <img src="public/logo.png" alt="SecureSyncZ Logo" width="120" height="120" />
+  <h1>SecureSyncZ</h1>
   <p><strong>Secure Password & Credit Card Vault</strong></p>
   <p>
     <a href="#features">Features</a> •
@@ -14,14 +14,14 @@
 
 ## 🛡️ Overview
 
-**LockifyZ** is a premium, beautifully designed digital vault for securely storing and managing your passwords and credit cards. Built with modern web technologies and a mobile-first approach, it features a glassmorphism UI, smooth micro-animations, and PWA capabilities—ensuring your sensitive data is always accessible and secured with military-grade encryption.
+**SecureSyncZ** is a premium, beautifully designed digital vault for securely storing and managing your passwords and credit cards. Built with modern web technologies and a mobile-first approach, it features a glassmorphism UI, smooth micro-animations, and PWA capabilities—ensuring your sensitive data is always accessible and secured with military-grade encryption.
 
 ## ✨ Features
 
 - **🔐 End-to-End Encryption:** Your passwords and cards are encrypted securely before storing them in the database.
 - **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with bottom navigation and touch-friendly UI.
 - **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, and smooth animations.
-- **🌐 Progressive Web App (PWA):** Install LockifyZ on your home screen for offline access and native app feel.
+- **🌐 Progressive Web App (PWA):** Install SecureSyncZ on your home screen for offline access and native app feel.
 - **💳 Card & Password Management:** Easily view, add, edit, and delete your credentials.
 - **🖼️ Profile Customization:** Custom avatars with ImgBB integration.
 
@@ -42,8 +42,8 @@ Follow these steps to set up the project locally.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/muhammadsaif7717/passgrid.git
-cd passgrid
+git clone https://github.com/muhammadsaif7717/SecureSyncZ.git
+cd SecureSyncZ
 ```
 
 ### 2. Install dependencies
@@ -76,7 +76,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
-Feel free to check the [issues page](https://github.com/muhammadsaif7717/passgrid/issues).
+Feel free to check the [issues page](https://github.com/muhammadsaif7717/SecureSyncZ/issues).
 
 ---
 
