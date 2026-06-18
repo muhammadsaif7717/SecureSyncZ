@@ -1,4 +1,5 @@
 import { connectDB } from "@/lib/connectDB";
+import { getUserFromRequest } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
@@ -7,6 +8,15 @@ export const DELETE = async (
   context: { params: Promise<{ id: string }> }
 ) => {
   try {
+    // Authenticate user
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+
     const db = await connectDB();
     const { id } = await context.params;
 
@@ -14,13 +24,16 @@ export const DELETE = async (
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
-    const result = await db
-      .collection("passwords")
-      .deleteOne({ _id: new ObjectId(id) });
+    // Delete only if user owns the password entry
+    const result = await db.collection("passwords").deleteOne({
+      _id: new ObjectId(id),
+      "user.email": user.email,
+      "user.username": user.username,
+    });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
-        { error: "Password not found" },
+        { error: "Password not found or unauthorized" },
         { status: 404 }
       );
     }

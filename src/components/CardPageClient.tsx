@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, CreditCard, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
@@ -25,9 +25,25 @@ const loadCardsData = async (): Promise<CardsData[]> => {
   return res;
 };
 
+const formatExpiry = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  const truncated = digits.substring(0, 4);
+  if (truncated.length === 3) {
+    return `${truncated.substring(0, 1)}/${truncated.substring(1, 3)}`;
+  } else if (truncated.length === 4) {
+    return `${truncated.substring(0, 2)}/${truncated.substring(2, 4)}`;
+  }
+  return truncated;
+};
+
 export default function CardPageClient({ name }: { name: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editableData, setEditableData] = useState<CardsData | null>(null);
+  const [visible, setVisible] = useState<Record<string, boolean>>({});
+
+  const toggleVisibility = (id: string) => {
+    setVisible((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -45,29 +61,33 @@ export default function CardPageClient({ name }: { name: string }) {
 
   if (isLoading) {
     return (
-      <div className="mt-10 text-center font-medium text-blue-600 dark:text-blue-400">
+      <div className="mt-10 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
         Loading...
       </div>
     );
   }
 
-  const copyToClipboard = (password: string) => {
-    navigator.clipboard.writeText(password);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
     showToast({
       title: "✅ Copied to clipboard",
-      description: "Password has been copied successfully.",
+      description: "Card info has been copied successfully.",
     });
   };
 
-  const filteredPassData = fetchedPasswordsData.filter(
-    (item) => item.name.toLowerCase() === name.toLowerCase()
-  );
+  const filteredPassData = fetchedPasswordsData.filter((item) => {
+    const groupName = item.serviceName || item.name;
+    return groupName.toLowerCase() === name.toLowerCase();
+  });
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editableData) return;
 
     const updatedCardData = {
+      name: editableData.name,
+      serviceName: editableData.serviceName,
+      cardType: editableData.cardType || "Others",
       cardNumber: editableData.cardNumber,
       expiry: editableData.expiry,
       cvv: editableData.cvv,
@@ -125,87 +145,241 @@ export default function CardPageClient({ name }: { name: string }) {
 
   if (filteredPassData.length === 0) {
     return (
-      <div className="mt-10 text-center font-medium text-red-600 dark:text-red-400">
-        No password data found.
+      <div className="mt-10 text-center text-sm font-medium text-red-500 dark:text-red-400">
+        No card data found.
       </div>
     );
   }
 
   return (
-    <section className="flex min-h-screen flex-col items-center bg-gray-50 px-4 py-10 dark:bg-gray-900">
-      {filteredPassData.map((card) => (
-        <div
-          key={card._id}
-          className="w-full max-w-md rounded-xl border border-gray-300 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800"
-        >
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {card.name}
-          </h2>
-          <p className="truncate text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Card Number:</span> {card.cardNumber}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => copyToClipboard(card.cardNumber)}
-              className="ml-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            >
-              <Copy size={16} />
-            </Button>
-          </p>
-          <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Expiry:</span> {card.expiry}
-          </p>
-          <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">CVV:</span> {card.cvv}
-          </p>
-          {card.note && (
-            <p className="truncate text-gray-700 dark:text-gray-300">
-              <span className="font-medium">Note:</span> {card.note}
-            </p>
-          )}
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Added on: {new Date(card.createdAt).toLocaleDateString()}
-          </p>
+    <section className="flex min-h-[calc(100vh-56px)] flex-col items-center bg-slate-50 px-4 py-6 sm:min-h-[calc(100vh-60px)] sm:py-10 dark:bg-[#0a0e1a]">
+      <div className="w-full max-w-md">
+        <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-slate-900 sm:mb-6 sm:text-2xl dark:text-white">
+          <CreditCard className="h-5 w-5 text-teal-500 sm:h-6 sm:w-6" />
+          <span className="capitalize">{name}</span>&apos;s Cards
+        </h2>
 
-          <div className="mt-4 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setEditableData(card);
-                setIsDialogOpen(true);
-              }}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => {
-                setDeleteId(card._id as string);
-                setIsDeleteDialogOpen(true);
-              }}
-            >
-              Delete
-            </Button>
+        {filteredPassData.map((card) => (
+          <div
+            key={card._id}
+            className="glass group mb-5 overflow-hidden rounded-2xl shadow-lg shadow-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 sm:mb-6 dark:shadow-black/20"
+          >
+            {/* Gradient top accent */}
+            <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+
+            <div className="space-y-4 p-4 sm:p-6">
+              {/* Card name & date */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-slate-900 sm:text-lg dark:text-white">
+                    {card.name}
+                  </h3>
+                  {card.cardType && (
+                    <span className="mt-1 inline-block rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                      {card.cardType}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {new Date(card.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+
+              {/* Card number */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Card Number
+                </Label>
+                <div className="relative flex items-center gap-2">
+                  <Input
+                    type={visible[card._id as string] ? "text" : "password"}
+                    value={card.cardNumber}
+                    readOnly
+                    className="h-10 flex-1 border-slate-200 bg-white/50 pr-20 font-mono text-sm tracking-widest text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => toggleVisibility(card._id as string)}
+                    className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                  >
+                    {visible[card._id as string] ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(card.cardNumber)}
+                    className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Expiry + CVV row */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Expiry
+                  </Label>
+                  <div className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                    {card.expiry}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    CVV
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      type={visible[`${card._id}-cvv`] ? "text" : "password"}
+                      value={card.cvv}
+                      readOnly
+                      className="h-10 border-slate-200 bg-white/50 pr-20 font-mono text-sm text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleVisibility(`${card._id}-cvv`)}
+                      className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                    >
+                      {visible[`${card._id}-cvv`] ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(card.cvv)}
+                      className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                    >
+                      <Copy size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Note */}
+              {card.note && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Note
+                  </Label>
+                  <p className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm text-slate-700 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-300">
+                    {card.note}
+                  </p>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-2 pt-2 sm:justify-end sm:gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 flex-1 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:flex-none dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                  onClick={() => {
+                    setEditableData(card);
+                    setIsDialogOpen(true);
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-10 flex-1 text-sm sm:flex-none"
+                  onClick={() => {
+                    setDeleteId(card._id as string);
+                    setIsDeleteDialogOpen(true);
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-900 dark:text-gray-100">
+        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Card</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-slate-900 dark:text-white">
+              Edit Card
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
               Update your card details below.
             </DialogDescription>
           </DialogHeader>
 
           {editableData && (
-            <form onSubmit={handleEdit} className="space-y-5">
-              <div>
-                <Label htmlFor="cardNumber" className="dark:text-gray-200">
+            <form onSubmit={handleEdit} className="space-y-3.5 sm:space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="serviceName" className="text-xs sm:text-sm">
+                  Service / Bank Name
+                </Label>
+                <Input
+                  id="serviceName"
+                  value={editableData.serviceName || ""}
+                  onChange={(e) =>
+                    setEditableData({
+                      ...editableData,
+                      serviceName: e.target.value,
+                    })
+                  }
+                  className="h-11 text-sm sm:h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-xs sm:text-sm">
+                  Cardholder Name
+                </Label>
+                <Input
+                  id="name"
+                  value={editableData.name}
+                  onChange={(e) =>
+                    setEditableData({
+                      ...editableData,
+                      name: e.target.value,
+                    })
+                  }
+                  className="h-11 text-sm sm:h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="cardType" className="text-xs sm:text-sm">
+                  Card Type
+                </Label>
+                <select
+                  id="cardType"
+                  value={editableData.cardType || "Visa"}
+                  onChange={(e) =>
+                    setEditableData({
+                      ...editableData,
+                      cardType: e.target.value,
+                    })
+                  }
+                  className="flex h-11 w-full items-center justify-between rounded-[10px] border border-slate-200 bg-transparent px-3 py-2 text-sm sm:h-10 dark:border-white/10 dark:bg-white/5"
+                >
+                  <option className="dark:bg-slate-800" value="Visa">
+                    Visa
+                  </option>
+                  <option className="dark:bg-slate-800" value="Mastercard">
+                    Mastercard
+                  </option>
+                  <option className="dark:bg-slate-800" value="Debit/Credit">
+                    Debit/Credit
+                  </option>
+                  <option className="dark:bg-slate-800" value="Others">
+                    Others
+                  </option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="cardNumber" className="text-xs sm:text-sm">
                   Card Number
                 </Label>
                 <Input
@@ -217,50 +391,67 @@ export default function CardPageClient({ name }: { name: string }) {
                       cardNumber: e.target.value,
                     })
                   }
-                  className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                  className="h-11 text-sm sm:h-10"
                 />
               </div>
-              <div>
-                <Label htmlFor="expiry" className="dark:text-gray-200">
-                  Expiry
-                </Label>
-                <Input
-                  id="expiry"
-                  value={editableData.expiry}
-                  onChange={(e) =>
-                    setEditableData({ ...editableData, expiry: e.target.value })
-                  }
-                  className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="expiry" className="text-xs sm:text-sm">
+                    Expiry
+                  </Label>
+                  <Input
+                    id="expiry"
+                    value={editableData.expiry}
+                    onChange={(e) =>
+                      setEditableData({
+                        ...editableData,
+                        expiry: formatExpiry(e.target.value),
+                      })
+                    }
+                    maxLength={5}
+                    className="h-11 text-sm sm:h-10"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="cvv" className="text-xs sm:text-sm">
+                    CVV
+                  </Label>
+                  <Input
+                    id="cvv"
+                    value={editableData.cvv}
+                    onChange={(e) =>
+                      setEditableData({
+                        ...editableData,
+                        cvv: e.target.value,
+                      })
+                    }
+                    className="h-11 text-sm sm:h-10"
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="cvv" className="dark:text-gray-200">
-                  CVV
-                </Label>
-                <Input
-                  id="cvv"
-                  value={editableData.cvv}
-                  onChange={(e) =>
-                    setEditableData({ ...editableData, cvv: e.target.value })
-                  }
-                  className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                />
-              </div>
-              <div>
-                <Label htmlFor="note" className="dark:text-gray-200">
+              <div className="space-y-1.5">
+                <Label htmlFor="note" className="text-xs sm:text-sm">
                   Note
                 </Label>
                 <Input
                   id="note"
                   value={editableData.note || ""}
                   onChange={(e) =>
-                    setEditableData({ ...editableData, note: e.target.value })
+                    setEditableData({
+                      ...editableData,
+                      note: e.target.value,
+                    })
                   }
-                  className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                  className="h-11 text-sm sm:h-10"
                 />
               </div>
-              <DialogFooter className="pt-4">
-                <Button type="submit">Save changes</Button>
+              <DialogFooter className="pt-3 sm:pt-4">
+                <Button
+                  type="submit"
+                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white sm:h-10 sm:w-auto dark:from-emerald-500 dark:to-teal-500"
+                >
+                  Save changes
+                </Button>
               </DialogFooter>
             </form>
           )}
@@ -269,24 +460,30 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-900 dark:text-gray-100">
+        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this password? This action cannot
-              be undone.
+            <DialogTitle className="text-slate-900 dark:text-white">
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+              Are you sure you want to delete this card? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="space-x-3">
+          <DialogFooter className="flex-col gap-2 sm:flex-row sm:space-x-2">
             <Button
               variant="outline"
+              className="h-11 text-sm sm:h-10"
               onClick={() => setIsDeleteDialogOpen(false)}
-              className="dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>
+            <Button
+              variant="destructive"
+              className="h-11 text-sm sm:h-10"
+              onClick={handleDeleteConfirm}
+            >
               Delete
             </Button>
           </DialogFooter>

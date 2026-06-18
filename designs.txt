@@ -1,0 +1,345 @@
+================================================================================
+                    PASSGUARD — DESIGN SPECIFICATION
+                        Theme: "Obsidian Vault"
+================================================================================
+
+1. DESIGN PHILOSOPHY
+────────────────────
+PassGuard's visual identity is built around the concept of a premium digital
+vault. The design evokes trust, security, and sophistication through deep
+backgrounds, emerald accents, and frosted-glass surfaces. Every element is
+crafted mobile-first for PWA compatibility.
+
+Core Principles:
+  • Dark-first design with a carefully crafted light mode
+  • Glassmorphism (frosted glass) surfaces for cards and containers
+  • Emerald/teal accent colors — conveying security & trust
+  • Mobile-first responsive layout (PWA-ready)
+  • Smooth micro-animations for a premium feel
+  • High contrast for accessibility (WCAG AA compliant)
+
+================================================================================
+
+2. COLOR PALETTE
+────────────────
+
+2.1 Dark Mode (Default)
+  Background:           #0a0e1a  (deep navy-charcoal)
+  Foreground:           #e8ecf1  (cool white)
+  Card:                 rgba(15, 23, 42, 0.60) with backdrop-blur
+  Card Foreground:      #e8ecf1
+  Primary:              #34d399  (emerald-400)
+  Primary Foreground:   #022c22  (emerald-950)
+  Secondary:            #1e293b  (slate-800)
+  Secondary Foreground: #e2e8f0
+  Muted:                #1e293b
+  Muted Foreground:     #94a3b8  (slate-400)
+  Accent:               #1e293b
+  Accent Foreground:    #e2e8f0
+  Destructive:          #f87171  (red-400)
+  Border:               rgba(255, 255, 255, 0.08)
+  Input:                rgba(255, 255, 255, 0.10)
+  Ring:                 #10b981  (emerald-500)
+
+2.2 Light Mode
+  Background:           #f8fafc  (slate-50)
+  Foreground:           #0f172a  (slate-900)
+  Card:                 rgba(255, 255, 255, 0.80) with backdrop-blur
+  Card Foreground:      #0f172a
+  Primary:              #059669  (emerald-600)
+  Primary Foreground:   #ffffff
+  Secondary:            #f1f5f9  (slate-100)
+  Secondary Foreground: #1e293b
+  Muted:                #f1f5f9
+  Muted Foreground:     #64748b  (slate-500)
+  Accent:               #f1f5f9
+  Accent Foreground:    #1e293b
+  Destructive:          #ef4444  (red-500)
+  Border:               rgba(0, 0, 0, 0.08)
+  Input:                rgba(0, 0, 0, 0.06)
+  Ring:                 #059669  (emerald-600)
+
+2.3 Gradients
+  Primary Gradient:     from #10b981 → #14b8a6 → #06b6d4
+                        (emerald-500 → teal-500 → cyan-500)
+  Hero Glow:            Radial gradient of emerald-500/20 + teal-500/15
+  Button Gradient:      from #059669 → #0d9488 (emerald-600 → teal-600)
+  Text Gradient:        from #34d399 → #2dd4bf → #22d3ee (dark mode)
+                        from #059669 → #0d9488 → #0891b2 (light mode)
+
+================================================================================
+
+3. TYPOGRAPHY
+─────────────
+Font Family:          "Inter" (Google Fonts), system-ui fallback
+Heading Weights:      800 (ExtraBold) for h1, 700 (Bold) for h2-h3
+Body Weight:          400 (Regular), 500 (Medium) for labels
+Mono Font:            "Geist Mono" for code/passwords
+
+Scale (mobile-first):
+  h1:   2.25rem (36px)  →  3rem (48px) md  →  4rem (64px) lg
+  h2:   1.5rem  (24px)  →  1.875rem (30px) md
+  h3:   1.125rem(18px)  →  1.25rem (20px) md
+  body: 0.875rem(14px)  →  1rem (16px) md
+  small:0.75rem (12px)  →  0.875rem (14px) md
+
+================================================================================
+
+4. SPACING & LAYOUT (Mobile-First)
+───────────────────────────────────
+Base Unit:            4px (0.25rem)
+Container Padding:    16px (mobile) → 24px (tablet) → 32px (desktop)
+Card Padding:         16px (mobile) → 24px (desktop)
+Card Border Radius:   16px (1rem)
+Button Border Radius: 10px (0.625rem)
+Input Border Radius:  10px (0.625rem)
+
+Breakpoints (Tailwind):
+  sm:   640px   (large phone / small tablet)
+  md:   768px   (tablet)
+  lg:   1024px  (desktop)
+  xl:   1280px  (wide desktop)
+
+Max Content Widths:
+  Auth Cards:         400px (mobile fills 100%)
+  List Containers:    640px
+  Post Form:          560px
+  Feature Grid:       1120px
+  Navbar:             Full width (content max 1280px)
+
+================================================================================
+
+5. COMPONENT DESIGNS
+────────────────────
+
+5.1 Navbar
+  • Sticky top, glass background (backdrop-blur-xl)
+  • Height: 56px (mobile), 60px (desktop)
+  • Logo: Shield emoji in emerald gradient pill + "PassGuard" text
+  • Mobile: hamburger menu → slide-in glass sheet from left
+  • Desktop: horizontal nav links with emerald underline on active
+  • User badge: emerald-tinted pill with shield icon
+  • Theme toggle: ghost button with smooth sun/moon transition
+
+5.2 Hero Section (Homepage)
+  • Full viewport height minus navbar
+  • Animated emerald/teal glow orbs in background
+  • Centered content:
+    - Security badge pill (emerald tint, subtle pulse)
+    - Large hero heading with gradient text
+    - Subtitle paragraph, muted color
+    - Two CTA buttons: primary gradient + glass outline
+  • Feature grid: 1 col (mobile) → 2 col (sm) → 4 col (lg)
+  • Feature cards: glass surface, icon in emerald-tinted circle
+
+5.3 Auth Cards (Sign In / Sign Up)
+  • Centered in viewport, glass card with emerald border glow on hover
+  • Lock icon in emerald circle at top
+  • Gradient heading text
+  • Inputs with icon prefix, emerald focus ring
+  • Submit: full-width emerald gradient button with scale animation
+  • Link to alternate auth page in footer
+
+5.4 List Pages (Passwords / Cards)
+  • Glass container card, emerald top accent border (2px)
+  • Section heading centered
+  • Table rows with hover: emerald left-border slide-in + background tint
+  • Chevron icon on right, muted → emerald on hover
+  • Mobile: full width with comfortable touch targets (min 48px row height)
+
+5.5 Detail Pages (Password / Card View)
+  • Glass cards for each entry
+  • Labeled inputs (read-only) with clean styling
+  • Password field: eye toggle + copy button with emerald hover
+  • Action buttons row: Edit (emerald outline) | Delete (red) | Share (teal)
+  • Edit/Delete dialogs: glass panels with emerald focus ring
+
+5.6 Post/Add Page
+  • Glass container, centered
+  • Tab switcher: two pills with emerald active state
+  • Input fields with placeholder text, emerald focus
+  • Full-width emerald gradient submit button
+  • Responsive grid for expiry/CVV fields (2 col on all sizes)
+
+5.7 Credit Card Visual (Card Detail)
+  • Premium credit card appearance:
+    - Gradient border (emerald → teal)
+    - Card number in monospace font
+    - Expiry and CVV side-by-side
+    - Glass background with subtle pattern
+
+================================================================================
+
+6. ANIMATIONS & MICRO-INTERACTIONS
+───────────────────────────────────
+
+6.1 CSS Keyframes
+  @keyframes glow-pulse    — Subtle emerald glow breathing (3s ease infinite)
+  @keyframes float         — Gentle vertical float for bg orbs (6s ease infinite)
+  @keyframes shimmer       — Button gradient shimmer on hover (2s linear)
+  @keyframes fade-in-up    — Content entrance (0.5s ease-out)
+  @keyframes border-glow   — Card border emerald glow on hover (0.3s)
+
+6.2 Interaction States
+  Buttons:
+    • Hover: scale(1.02) + brightness increase
+    • Active: scale(0.98)
+    • Focus: emerald ring with 2px offset
+
+  Cards:
+    • Hover: translateY(-2px) + enhanced shadow + border-glow
+    • Transition: 300ms ease
+
+  Nav Links:
+    • Active: emerald underline with glow
+    • Hover: text color → emerald with smooth transition
+
+  Inputs:
+    • Focus: emerald ring + slightly lighter background
+    • Transition: 200ms ease
+
+  Table Rows:
+    • Hover: emerald left-border (3px) slides in from left
+    • Background subtly tints toward emerald
+
+================================================================================
+
+7. GLASSMORPHISM SPECIFICATION
+──────────────────────────────
+.glass {
+  background: rgba(255, 255, 255, 0.05);     /* dark mode */
+  background: rgba(255, 255, 255, 0.70);     /* light mode */
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);  /* dark */
+  border: 1px solid rgba(0, 0, 0, 0.06);        /* light */
+  border-radius: 16px;
+}
+
+================================================================================
+
+8. RESPONSIVE DESIGN STRATEGY (Mobile-First PWA)
+─────────────────────────────────────────────────
+
+8.1 Core Principles
+  • All layouts start at 320px minimum width
+  • Touch targets: minimum 44×44px
+  • No horizontal scrolling at any breakpoint
+  • Content reflows naturally — single column on mobile
+  • Font sizes use rem for accessibility scaling
+  • Safe area padding for notched devices (env(safe-area-inset-*))
+
+8.2 Breakpoint Behavior
+
+  320px–639px (Mobile):
+    • Single column layouts
+    • Full-width cards with 16px padding
+    • Hamburger menu for navigation
+    • Hero text: 2.25rem
+    • Feature cards: stacked (1 column)
+    • Action buttons: full width or 50/50 split
+    • Bottom safe area padding for PWA
+
+  640px–767px (Large Phone / Small Tablet):
+    • Feature cards: 2-column grid
+    • Auth cards: max-width 400px, centered
+    • List containers: max-width 560px
+
+  768px–1023px (Tablet):
+    • Desktop nav visible, hamburger hidden
+    • Hero text: 3rem
+    • Wider card padding (24px)
+    • Feature cards: 2-column grid
+
+  1024px+ (Desktop):
+    • Full desktop layout
+    • Hero text: 4rem
+    • Feature cards: 4-column grid
+    • Max content width: 1280px
+    • Generous whitespace
+
+8.3 PWA Considerations
+  • Standalone display mode support
+  • Status bar color matches navbar background
+  • No reliance on browser chrome
+  • Touch-optimized: large tap targets, swipe-friendly
+  • Smooth 60fps animations (transform/opacity only)
+  • Reduced motion: respects prefers-reduced-motion
+
+================================================================================
+
+9. DARK MODE vs LIGHT MODE — DESIGN DETAILS
+────────────────────────────────────────────
+
+9.1 Dark Mode (Preferred)
+  • Deep navy-charcoal background (#0a0e1a)
+  • Cards: frosted glass at 60% opacity with blur
+  • Text: cool white (#e8ecf1) for body, pure white for headings
+  • Emerald accents glow softly against the dark
+  • Shadows are subtle (dark shadows on dark surfaces)
+  • Borders: white at 8% opacity (barely visible, structural)
+  • Inputs: slightly lighter than card surface
+  • Active states: emerald-400 (#34d399)
+
+9.2 Light Mode
+  • Warm off-white background (#f8fafc)
+  • Cards: white glass at 80% opacity with blur
+  • Text: dark slate (#0f172a) for body, near-black for headings
+  • Emerald accents are deeper (emerald-600, #059669)
+  • Shadows: soft, diffused, gray-tinted
+  • Borders: black at 8% opacity
+  • Inputs: white surface with subtle border
+  • Active states: emerald-600 (#059669)
+
+9.3 Transition Between Modes
+  • No jarring flash — CSS transitions on background, color, border
+  • ShadCN's ThemeProvider handles class-based switching
+  • All components tested in both modes
+
+================================================================================
+
+10. FILE STRUCTURE (Affected Files)
+───────────────────────────────────
+  Root:
+    designs.txt                       ← This file
+
+  src/app:
+    globals.css                       ← Theme tokens + animations
+    layout.tsx                        ← Font + metadata
+    page.tsx                          ← Homepage redesign
+    sign-in/page.tsx                  ← Auth redesign
+    sign-up/page.tsx                  ← Auth redesign
+    passwords/page.tsx                ← Background update
+    cards/page.tsx                    ← Background update
+    post/page.tsx                     ← Post form redesign
+
+  src/components:
+    Navbar.tsx                        ← Glass navbar
+    PasswordsList.tsx                 ← List redesign
+    CardsList.tsx                     ← List redesign
+    PasswordPageClient.tsx            ← Detail redesign
+    CardPageClient.tsx                ← Detail redesign
+    mode-toggle.tsx                   ← Accent update
+
+  Config:
+    tailwind.config.js                ← New colors
+
+================================================================================
+
+11. ICON LIBRARY
+────────────────
+Using: lucide-react (already installed)
+Key icons used:
+  • Shield, Lock, Key           — security / vault
+  • CreditCard                  — cards section
+  • Eye, EyeOff                 — password visibility
+  • Copy, Clipboard             — copy to clipboard
+  • ArrowRight, ChevronRight    — navigation / CTAs
+  • Menu                        — mobile hamburger
+  • LogOut                      — sign out
+  • Sun, Moon                   — theme toggle
+  • Mail, User                  — auth form icons
+
+================================================================================
+END OF DESIGN SPECIFICATION
+================================================================================

@@ -8,7 +8,7 @@ export type PasswordsData = {
   createdAt: string;
   user: UserData;
   website: string;
-  name: string;
+  name?: string;
   username: string;
   password: string;
   note?: string;
@@ -19,6 +19,8 @@ export type CardsData = {
   createdAt: string;
   user: UserData;
   name: string;
+  serviceName?: string;
+  cardType?: string;
   cardNumber: string;
   expiry: string;
   cvv: string;

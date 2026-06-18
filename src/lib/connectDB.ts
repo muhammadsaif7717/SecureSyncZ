@@ -30,7 +30,15 @@ export const connectDB = async () => {
     await client.connect();
     db = client.db(dbName);
 
-    console.log("Connected to MongoDB");
+    // Automatically create compound indexes to reduce search time complexity to O(log N)
+    await db
+      .collection("passwords")
+      .createIndex({ "user.email": 1, "user.username": 1 });
+    await db
+      .collection("cards")
+      .createIndex({ "user.email": 1, "user.username": 1 });
+
+    console.log("Connected to MongoDB and verified indexes");
     return db;
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);

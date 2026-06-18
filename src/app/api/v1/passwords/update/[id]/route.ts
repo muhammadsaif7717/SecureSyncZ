@@ -1,4 +1,6 @@
 import { connectDB } from "@/lib/connectDB";
+import { getUserFromRequest } from "@/lib/auth";
+import { encrypt } from "@/lib/encryption";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
@@ -7,6 +9,15 @@ export const PUT = async (
   context: { params: Promise<{ id: string }> }
 ) => {
   try {
+    // Authenticate user
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json(
+        { message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+
     const { id } = await context.params;
     const body = await request.json();
     const { username, password, note } = body;
@@ -18,17 +29,27 @@ export const PUT = async (
       );
     }
 
-    const db = await connectDB();
-    const result = await db
-      .collection("passwords")
-      .updateOne(
-        { _id: new ObjectId(id) },
-        { $set: { username, password, note } }
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "Invalid ID format" },
+        { status: 400 }
       );
+    }
+
+    const db = await connectDB();
+    // Update only if user owns this entry
+    const result = await db.collection("passwords").updateOne(
+      {
+        _id: new ObjectId(id),
+        "user.email": user.email,
+        "user.username": user.username,
+      },
+      { $set: { username, password: encrypt(password), note } }
+    );
 
     if (result.matchedCount === 0) {
       return NextResponse.json(
-        { message: "Password entry not found" },
+        { message: "Password entry not found or unauthorized" },
         { status: 404 }
       );
     }

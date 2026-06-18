@@ -1,11 +1,12 @@
 import { connectDB } from "@/lib/connectDB";
-import { currentUser } from "@clerk/nextjs/server";
+import { getUserFromRequest } from "@/lib/auth";
+import { decrypt } from "@/lib/encryption";
 import { NextResponse } from "next/server";
 
-export const GET = async () => {
+export const GET = async (req: Request) => {
   try {
-    // Get authenticated user from Clerk
-    const user = await currentUser();
+    // Get authenticated user from custom JWT token
+    const user = await getUserFromRequest(req);
 
     if (!user) {
       return NextResponse.json(
@@ -14,13 +15,11 @@ export const GET = async () => {
       );
     }
 
-    // Extract email and username from user object
-    const email = user.emailAddresses?.[0]?.emailAddress;
-    const username = user.username;
+    const { email, username } = user;
 
     if (!email || !username) {
       return NextResponse.json(
-        { error: "User email or username not found" },
+        { error: "User email or username not found in token" },
         { status: 400 }
       );
     }
@@ -28,16 +27,23 @@ export const GET = async () => {
     // Connect to MongoDB database
     const db = await connectDB();
 
-    // Fetch all password records belonging to this user
-    const userPasswords = await db
+    // Fetch all card records belonging to this user
+    const userCards = await db
       .collection("cards")
       .find({ "user.email": email, "user.username": username })
       .toArray();
 
-    // Return user's filtered password data
-    return NextResponse.json(userPasswords, { status: 200 });
+    const decryptedCards = userCards.map((item) => ({
+      ...item,
+      cardNumber: decrypt(item.cardNumber),
+      expiry: decrypt(item.expiry),
+      cvv: decrypt(item.cvv),
+    }));
+
+    // Return user's filtered card data
+    return NextResponse.json(decryptedCards, { status: 200 });
   } catch (error) {
-    console.error("Error fetching secure data:", error);
+    console.error("Error fetching secure cards data:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
