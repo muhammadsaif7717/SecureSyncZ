@@ -57,7 +57,12 @@ export async function POST(req: Request) {
     const response = NextResponse.json(
       {
         message: "User signed up successfully",
-        user: { id: userId, email: newUser.email, username: newUser.username },
+        user: {
+          id: userId,
+          email: newUser.email,
+          username: newUser.username,
+          hasPasskey: false,
+        },
       },
       { status: 201 }
     );

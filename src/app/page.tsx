@@ -23,15 +23,15 @@ export default function Home() {
     },
     {
       icon: <Shield className="h-5 w-5 text-cyan-500 sm:h-6 sm:w-6" />,
-      title: "Hashed & Secured",
+      title: "Advanced Passkeys",
       description:
-        "All passwords stored in the database are hashed with industry-standard bcryptjs cryptographics.",
+        "Skip the traditional passwords and use secure 6-digit passkeys for instant and safe vault access.",
     },
     {
       icon: <Clipboard className="h-5 w-5 text-green-500 sm:h-6 sm:w-6" />,
-      title: "Micro-interactions",
+      title: "Profile Personalization",
       description:
-        "Easy clipboard copying, instant visibility toggling, and note association tools.",
+        "Customize your vault experience with fast profile picture uploads and dynamic user settings.",
     },
   ];
 
@@ -63,7 +63,7 @@ export default function Home() {
         <p className="animate-fade-in-up stagger-1 mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mt-6 sm:max-w-2xl sm:text-base md:text-lg dark:text-slate-400">
           SecureSyncZ provides a premium, client-side verified vault to store
           and access your sensitive data securely. Protected by custom JWT
-          authentication.
+          authentication and modern 6-digit Passkeys for lightning-fast access.
         </p>
 
         {/* Buttons */}

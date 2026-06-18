@@ -19,11 +19,14 @@
 ## ✨ Features
 
 - **🔐 End-to-End Encryption:** Your passwords and cards are encrypted securely before storing them in the database.
+- **🚀 Advanced Passkeys:** Skip traditional passwords with secure, lightning-fast 6-digit passkey authentication.
 - **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with bottom navigation and touch-friendly UI.
 - **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, and smooth animations.
 - **🌐 Progressive Web App (PWA):** Install SecureSyncZ on your home screen for offline access and native app feel.
 - **💳 Card & Password Management:** Easily view, add, edit, and delete your credentials.
-- **🖼️ Profile Customization:** Custom avatars with ImgBB integration.
+- **🛡️ Password Tools:** Built-in secure password generator and live password strength meter.
+- **📋 Micro-interactions:** Automatic clipboard copying, instant visibility toggling, and note association tools.
+- **🖼️ Profile Customization:** Custom avatars with quick file-size validation and ImgBB integration.
 
 ## 🛠️ Tech Stack
 
@@ -75,11 +78,25 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
-Feel free to check the [issues page](https://github.com/muhammadsaif7717/SecureSyncZ/issues).
+Contributions, issues, and feature requests are very welcome!
+Developers are highly encouraged to fork, customize this project further, and collaborate with me to make it even better.
+Feel free to check the [issues page](https://github.com/muhammadsaif7717/SecureSyncZ/issues) to start contributing.
+
+## 👨‍💻 Author / Credits
+
+**MD. SAIF ISLAM**
+
+- **Portfolio / Contact:** [developer-saif.vercel.app](https://developer-saif.vercel.app/)
+- **GitHub:** [@muhammadsaif7717](https://github.com/muhammadsaif7717)
+
+Feel free to reach out through my portfolio if you have any questions, feedback, or want to collaborate!
+
+## 📄 License
+
+This project is completely free to use. It is licensed under the MIT License—meaning anyone can use, modify, customize, and distribute this website without any cost. See the [LICENSE](LICENSE) file for the full legal details.
 
 ---
 
 <div align="center">
-  Built with ❤️ using Next.js & TailwindCSS
+  Built with ❤️ by <a href="https://developer-saif.vercel.app/">MD. SAIF ISLAM</a> using Next.js & TailwindCSS
 </div>

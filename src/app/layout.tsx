@@ -5,7 +5,9 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import Navbar from "@/components/Navbar";
 import QueryProvider from "@/providers/QueryProvider";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+
+import PasskeyModal from "@/components/PasskeyModal";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geistMono = Geist_Mono({
@@ -14,6 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://passgrid.vercel.app"
+  ),
   title: "SecureSyncZ — Secure Password & Card Vault",
   description:
     "Your premium digital vault for passwords and credit cards. Military-grade encryption, beautiful interface, always accessible.",
@@ -85,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
       >
@@ -104,6 +109,7 @@ export default function RootLayout({
                   className: "glass !border-emerald-500/20 !text-foreground",
                 }}
               />
+              <PasskeyModal />
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

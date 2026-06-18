@@ -25,6 +25,7 @@ export async function GET(req: Request) {
       email: user.email,
       username: user.username,
       profilePicture: user.profilePicture,
+      hasPasskey: !!user.passkey,
     };
 
     return NextResponse.json({ user: returnUser }, { status: 200 });

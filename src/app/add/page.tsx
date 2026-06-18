@@ -209,19 +209,19 @@ export default function PostPage() {
 
         <div className="p-4 sm:p-6">
           <Tabs defaultValue="password" className="w-full">
-            <TabsList className="mb-5 grid w-full grid-cols-2 rounded-xl bg-slate-100 p-1 sm:mb-6 dark:bg-white/5">
+            <TabsList className="mb-6 flex w-full rounded-2xl bg-slate-100/80 p-2 shadow-inner sm:mb-8 dark:bg-[#131b2f]/80">
               <TabsTrigger
                 value="password"
-                className="flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm sm:py-2 sm:text-sm dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-emerald-400"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-slate-500 transition-all duration-300 hover:text-slate-700 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border dark:data-[state=active]:border-white/5 dark:data-[state=active]:bg-gradient-to-br dark:data-[state=active]:from-[#1e293b] dark:data-[state=active]:to-[#0f172a] dark:data-[state=active]:text-emerald-400 dark:data-[state=active]:shadow-black/50"
               >
-                <Key className="h-3.5 w-3.5" />
+                <Key className="h-4 w-4" />
                 Passwords
               </TabsTrigger>
               <TabsTrigger
                 value="card"
-                className="flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm sm:py-2 sm:text-sm dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-emerald-400"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-slate-500 transition-all duration-300 hover:text-slate-700 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border dark:data-[state=active]:border-white/5 dark:data-[state=active]:bg-gradient-to-br dark:data-[state=active]:from-[#1e293b] dark:data-[state=active]:to-[#0f172a] dark:data-[state=active]:text-emerald-400 dark:data-[state=active]:shadow-black/50"
               >
-                <CreditCard className="h-3.5 w-3.5" />
+                <CreditCard className="h-4 w-4" />
                 Credit Cards
               </TabsTrigger>
             </TabsList>

@@ -2,12 +2,26 @@
 
 import React, { useState, useRef } from "react";
 import { useAuth } from "@/providers/AuthProvider";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Shield, Camera, Loader2, Save, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import axios from "axios";
 import { showToast } from "@/lib/toast";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 export default function ProfilePage() {
   const { user, updateUser, isLoading } = useAuth();
@@ -19,8 +33,15 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passkey, setPasskey] = useState("");
+  const [showPasskey, setShowPasskey] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Confirmation Modal state
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
   // Sync state when user loads
   React.useEffect(() => {
@@ -41,6 +62,20 @@ export default function ProfilePage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Limit file size to 2MB to ensure fast loading
+    const MAX_FILE_SIZE = 2 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      showToast({
+        title: "File Too Large",
+        description:
+          "Profile picture must be less than 2MB for faster loading.",
+      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
 
     const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
     if (!apiKey) {
@@ -81,23 +116,47 @@ export default function ProfilePage() {
   };
 
   const hasChanges = user
-    ? username !== user.username || email !== user.email || password.length > 0
+    ? username !== user.username ||
+      email !== user.email ||
+      password.length > 0 ||
+      passkey.length === 6
     : false;
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!hasChanges) {
+      showToast({ title: "Info", description: "No changes to save." });
+      return;
+    }
+
     if (password && password !== confirmPassword) {
+      showToast({ title: "Error", description: "Passwords do not match." });
+      return;
+    }
+
+    // Instead of calling the API right away, open the modal to get current password
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmAndSubmitUpdate = async () => {
+    if (!currentPassword) {
       showToast({
-        title: "Validation Error",
-        description: "Passwords do not match.",
+        title: "Error",
+        description: "Please enter your current password.",
       });
       return;
     }
-    setIsSaving(true);
 
+    setIsSaving(true);
     try {
-      const payload: Record<string, string> = { username, email };
+      const payload: Record<string, string> = {
+        username,
+        email,
+        currentPassword,
+      };
       if (password) payload.password = password;
+      if (passkey.length === 6) payload.passkey = passkey;
 
       const updateRes = await axios.post(
         "/api/v1/auth/profile/update",
@@ -106,15 +165,19 @@ export default function ProfilePage() {
       updateUser(updateRes.data.user);
       setPassword(""); // Clear password fields
       setConfirmPassword("");
+      setCurrentPassword("");
+      setPasskey("");
+      setIsConfirmModalOpen(false);
       showToast({
         title: "Success",
         description: "Profile updated successfully!",
       });
-    } catch (error) {
-      console.error("Profile update failed", error);
+    } catch (err) {
       showToast({
-        title: "Update Failed",
-        description: "Could not update profile details.",
+        title: err instanceof Error ? err.message : "Error",
+        description: axios.isAxiosError(err)
+          ? err.response?.data?.error || "Failed to update profile."
+          : "Failed to update profile.",
       });
     } finally {
       setIsSaving(false);
@@ -139,6 +202,9 @@ export default function ProfilePage() {
                   src={user.profilePicture}
                   alt="Profile"
                   fill
+                  sizes="96px"
+                  priority
+                  unoptimized
                   className="object-cover"
                 />
               ) : (
@@ -248,23 +314,128 @@ export default function ProfilePage() {
               </div>
             )}
 
+            <div className="pt-2">
+              <label className="mb-1.5 flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300">
+                <span>New 6-Digit Passkey (Optional)</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPasskey(!showPasskey)}
+                  className="p-0.5 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                  aria-label={showPasskey ? "Hide passkey" : "Show passkey"}
+                >
+                  {showPasskey ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </label>
+              <div className="flex justify-center pt-2">
+                <InputOTP
+                  maxLength={6}
+                  pattern={REGEXP_ONLY_DIGITS}
+                  value={passkey}
+                  onChange={(value) => setPasskey(value)}
+                >
+                  <InputOTPGroup className="gap-2">
+                    {[...Array(6)].map((_, i) => (
+                      <InputOTPSlot
+                        key={i}
+                        index={i}
+                        showChar={showPasskey}
+                        className="h-10 w-10 rounded-md border-slate-200 bg-white/60 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Must be exactly 6 digits.
+              </p>
+            </div>
+
             <div className="pt-4">
               <Button
                 type="submit"
-                disabled={isSaving || !hasChanges}
-                className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 dark:from-emerald-500 dark:to-teal-500"
+                disabled={!hasChanges}
+                className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 font-semibold text-white transition-all hover:shadow-lg hover:shadow-emerald-500/25 active:scale-[0.99] disabled:opacity-50 dark:from-emerald-500 dark:to-teal-500"
               >
-                {isSaving ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2 h-4 w-4" />
-                )}
                 Save Changes
               </Button>
             </div>
           </form>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-slate-900 dark:text-white">
+              Confirm Changes
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+              Please enter your current password to apply these updates to your
+              profile.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Current Password
+              </label>
+              <div className="relative">
+                <Input
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && currentPassword && !isSaving) {
+                      e.preventDefault();
+                      confirmAndSubmitUpdate();
+                    }
+                  }}
+                  className="h-11 border-slate-200 bg-white/60 pr-10 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 p-0.5 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col gap-2 sm:flex-row sm:space-x-2">
+            <Button
+              variant="outline"
+              className="h-11 text-sm sm:h-10"
+              onClick={() => setIsConfirmModalOpen(false)}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmAndSubmitUpdate}
+              disabled={!currentPassword || isSaving}
+              className="h-11 bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white sm:h-10 dark:from-emerald-500 dark:to-teal-500"
+            >
+              {isSaving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Confirm Update
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

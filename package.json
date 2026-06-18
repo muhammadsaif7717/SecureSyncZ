@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "prettier --write . && next build",
-    "start": "next start",
+    "dev": "NODE_OPTIONS='--no-warnings' next dev --turbopack",
+    "build": "prettier --write . && NODE_OPTIONS='--no-warnings' next build",
+    "start": "NODE_OPTIONS='--no-warnings' next start",
     "lint": "next lint",
     "format": "prettier --write ."
   },
@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "input-otp": "^1.4.2",
     "jose": "^6.2.3",
     "lucide-react": "^0.508.0",
     "mongodb": "^6.16.0",

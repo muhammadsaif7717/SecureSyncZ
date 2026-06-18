@@ -10,6 +10,7 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
+  SheetDescription,
   SheetClose,
 } from "@/components/ui/sheet";
 
@@ -77,74 +78,85 @@ export default function Navbar() {
                   </SheetTrigger>
                   <SheetContent
                     side="right"
-                    className="glass w-[280px] border-l border-black/[0.06] dark:border-white/[0.06]"
+                    className="flex w-[300px] flex-col border-l border-white/10 bg-white/80 p-0 backdrop-blur-2xl sm:w-[350px] dark:bg-[#0a0e1a]/90"
                   >
-                    <SheetTitle className="text-left text-lg font-bold text-slate-900 dark:text-white">
-                      Account
-                    </SheetTitle>
+                    <div className="flex flex-col border-b border-black/5 bg-slate-50/50 p-6 dark:border-white/5 dark:bg-slate-900/30">
+                      <SheetTitle className="mb-4 text-left text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+                        My Account
+                      </SheetTitle>
+                      <SheetDescription className="sr-only">
+                        Account navigation menu
+                      </SheetDescription>
 
-                    <div className="mt-6 flex flex-col gap-4">
-                      {/* User display */}
-                      <div className="flex flex-col items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-50/50 p-4 dark:bg-emerald-950/20">
+                      <div className="flex items-center gap-4">
                         {user.profilePicture ? (
-                          <div className="relative h-14 w-14 overflow-hidden rounded-full shadow-md">
+                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-emerald-500/20 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0d1224]">
                             <Image
                               src={user.profilePicture}
                               alt={user.username}
                               fill
+                              sizes="56px"
                               className="object-cover"
                             />
                           </div>
                         ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md">
-                            <Shield className="h-6 w-6" />
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md ring-2 ring-emerald-500/20 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0d1224]">
+                            <Shield className="h-7 w-7" />
                           </div>
                         )}
-                        <div className="w-full text-center">
+                        <div className="flex min-w-0 flex-col">
                           <p className="truncate text-base font-semibold text-slate-900 capitalize dark:text-white">
                             {user.username}
                           </p>
-                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
                             {user.email}
                           </p>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="flex flex-col gap-2">
+                    <div className="flex flex-1 flex-col px-4 py-6">
+                      <div className="space-y-1">
+                        <div className="px-2 pb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                          Settings
+                        </div>
                         <SheetClose asChild>
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              setTheme(theme === "dark" ? "light" : "dark")
-                            }
-                            className="w-full gap-2 font-medium"
+                          <Link
+                            href="/edit-profile"
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
                           >
-                            <Sun className="hidden h-4 w-4 dark:block" />
-                            <Moon className="block h-4 w-4 dark:hidden" />
-                            Toggle Theme
-                          </Button>
-                        </SheetClose>
-
-                        <SheetClose asChild>
-                          <Link href="/edit-profile" className="w-full">
-                            <Button
-                              variant="outline"
-                              className="w-full gap-2 font-medium"
-                            >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
                               <UserIcon className="h-4 w-4" />
-                              Edit Profile
-                            </Button>
+                            </div>
+                            Edit Profile
                           </Link>
                         </SheetClose>
 
+                        <button
+                          onClick={() =>
+                            setTheme(theme === "dark" ? "light" : "dark")
+                          }
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400">
+                            <Sun className="hidden h-4 w-4 dark:block" />
+                            <Moon className="block h-4 w-4 dark:hidden" />
+                          </div>
+                          Theme: {theme === "dark" ? "Dark" : "Light"}
+                        </button>
+                      </div>
+
+                      <div className="mt-auto pt-4">
                         <SheetClose asChild>
                           <Button
-                            variant="destructive"
+                            variant="ghost"
                             onClick={logout}
-                            className="w-full gap-2 font-medium"
+                            className="w-full justify-start gap-3 rounded-xl px-3 py-6 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
                           >
-                            <LogOut className="h-4 w-4" />
-                            Logout
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400">
+                              <LogOut className="h-4 w-4" />
+                            </div>
+                            Log out securely
                           </Button>
                         </SheetClose>
                       </div>

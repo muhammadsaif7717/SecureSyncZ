@@ -13,25 +13,12 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const {
-      username,
-      email,
-      password,
-      profilePicture,
-      passkey,
-      currentPassword,
-    } = body;
+    const { passkey } = body;
 
-    const isOnlyProfilePicture =
-      profilePicture !== undefined &&
-      !username &&
-      !email &&
-      !password &&
-      !passkey;
-
-    if (!currentPassword && !isOnlyProfilePicture) {
+    if (!passkey || passkey.length !== 6) {
+      console.log("Passkey setup error 400: Invalid passkey sent", { passkey });
       return NextResponse.json(
-        { error: "Current password is required to save changes." },
+        { error: "A 6-digit passkey is required." },
         { status: 400 }
       );
     }
@@ -46,44 +33,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (currentPassword) {
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-      if (!isMatch) {
-        return NextResponse.json(
-          { error: "Incorrect current password." },
-          { status: 401 }
-        );
-      }
-    }
+    console.log(
+      "Passkey setup: User passkey in DB is",
+      user.passkey,
+      "typeof",
+      typeof user.passkey
+    );
 
-    const updateData: Record<string, unknown> = {};
-
-    if (username) updateData.username = username;
-    if (email) updateData.email = email.toLowerCase();
-    if (profilePicture !== undefined)
-      updateData.profilePicture = profilePicture;
-
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      updateData.password = await bcrypt.hash(password, salt);
-    }
-
-    if (passkey) {
-      const salt = await bcrypt.genSalt(10);
-      updateData.passkey = await bcrypt.hash(passkey, salt);
-    }
-
-    if (Object.keys(updateData).length === 0) {
+    if (user.passkey && user.passkey.trim() !== "") {
+      console.log("Passkey setup error 400: Passkey already set", {
+        userPasskey: user.passkey,
+      });
       return NextResponse.json(
-        { error: "No fields to update" },
+        { error: "Passkey already set." },
         { status: 400 }
       );
     }
 
-    // Update user in DB
+    console.log(
+      "Passkey setup: Validation passed, proceeding to hash and save."
+    );
+    const salt = await bcrypt.genSalt(10);
+    const hashedPasskey = await bcrypt.hash(passkey, salt);
+
     const result = await usersCollection.findOneAndUpdate(
       { _id: new ObjectId(userPayload.id) },
-      { $set: updateData },
+      { $set: { passkey: hashedPasskey } },
       { returnDocument: "after" }
     );
 
@@ -100,11 +75,11 @@ export async function POST(req: Request) {
     };
 
     return NextResponse.json(
-      { message: "Profile updated successfully", user: returnUser },
+      { message: "Passkey set successfully", user: returnUser },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Profile update error:", error);
+    console.error("Passkey setup error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

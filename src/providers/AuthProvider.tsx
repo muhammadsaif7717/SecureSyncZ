@@ -10,6 +10,7 @@ interface User {
   email: string;
   username: string;
   profilePicture?: string;
+  hasPasskey?: boolean;
 }
 
 interface AuthContextType {
@@ -37,7 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(response.data.user);
         }
       } catch (error) {
-        console.warn("Not authenticated on mount:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          // Expected: user is simply not logged in
+        } else {
+          console.error("Auth check failed:", error);
+        }
       } finally {
         setIsLoading(false);
       }
