@@ -61,8 +61,8 @@ export default function Home() {
 
         {/* Subtitle */}
         <p className="animate-fade-in-up stagger-1 mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mt-6 sm:max-w-2xl sm:text-base md:text-lg dark:text-slate-400">
-          SecureSyncZ provides a premium, client-side verified vault to store and
-          access your sensitive data securely. Protected by custom JWT
+          SecureSyncZ provides a premium, client-side verified vault to store
+          and access your sensitive data securely. Protected by custom JWT
           authentication.
         </p>
 

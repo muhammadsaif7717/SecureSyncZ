@@ -17,7 +17,15 @@ export const metadata: Metadata = {
   title: "SecureSyncZ — Secure Password & Card Vault",
   description:
     "Your premium digital vault for passwords and credit cards. Military-grade encryption, beautiful interface, always accessible.",
-  keywords: ["password manager", "secure vault", "credential manager", "credit card wallet", "SecureSyncZ", "encryption", "pwa"],
+  keywords: [
+    "password manager",
+    "secure vault",
+    "credential manager",
+    "credit card wallet",
+    "SecureSyncZ",
+    "encryption",
+    "pwa",
+  ],
   authors: [{ name: "Muhammad Saif" }],
   openGraph: {
     title: "SecureSyncZ — Secure Password & Card Vault",

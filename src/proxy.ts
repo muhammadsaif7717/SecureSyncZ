@@ -9,7 +9,7 @@ const JWT_SECRET =
 const protectedPaths = ["/passwords", "/cards", "/post"];
 const authPaths = ["/sign-in", "/sign-up"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if pathname starts with any protected path
