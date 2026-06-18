@@ -38,6 +38,7 @@ export default function PostPage() {
     username: "",
     password: "",
     note: "",
+    tags: [],
   });
 
   const [newCard, setNewCard] = useState<CardsData>({
@@ -48,14 +49,29 @@ export default function PostPage() {
     createdAt: new Date().toISOString(),
     name: "",
     serviceName: "",
+    website: "",
     cardType: "Visa",
     cardNumber: "",
     expiry: "",
     cvv: "",
     note: "",
+    tags: [],
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("password");
+
+  React.useEffect(() => {
+    const savedTab = localStorage.getItem("addPageActiveTab");
+    if (savedTab) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
+  const handleTabChange = (val: string) => {
+    setActiveTab(val);
+    localStorage.setItem("addPageActiveTab", val);
+  };
 
   const generatePassword = () => {
     const charset =
@@ -149,6 +165,7 @@ export default function PostPage() {
       username: "",
       password: "",
       note: "",
+      tags: [],
     });
   };
 
@@ -187,11 +204,13 @@ export default function PostPage() {
       createdAt: new Date().toISOString(),
       name: "",
       serviceName: "",
+      website: "",
       cardType: "Visa",
       cardNumber: "",
       expiry: "",
       cvv: "",
       note: "",
+      tags: [],
     });
   };
 
@@ -208,7 +227,11 @@ export default function PostPage() {
         <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 
         <div className="p-4 sm:p-6">
-          <Tabs defaultValue="password" className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
             <TabsList className="mb-6 flex w-full rounded-2xl bg-slate-100/80 p-2 shadow-inner sm:mb-8 dark:bg-[#131b2f]/80">
               <TabsTrigger
                 value="password"
@@ -313,6 +336,20 @@ export default function PostPage() {
                       )}
                     </div>
 
+                    <Input
+                      placeholder="Tags (comma separated, e.g. Work, Personal)"
+                      value={newPassword.tags?.join(", ") || ""}
+                      onChange={(e) =>
+                        setNewPassword({
+                          ...newPassword,
+                          tags: e.target.value
+                            .split(",")
+                            .map((t) => t.trimStart()),
+                        })
+                      }
+                      className={inputClasses}
+                    />
+
                     <Textarea
                       placeholder="Add a secret note... (optional)"
                       value={newPassword.note}
@@ -365,6 +402,14 @@ export default function PostPage() {
                       required
                       className={inputClasses}
                     />
+                    <Input
+                      placeholder="Bank URL / Website (optional)"
+                      value={newCard.website || ""}
+                      onChange={(e) =>
+                        setNewCard({ ...newCard, website: e.target.value })
+                      }
+                      className={inputClasses}
+                    />
                     <select
                       value={newCard.cardType || "Visa"}
                       onChange={(e) =>
@@ -414,6 +459,19 @@ export default function PostPage() {
                         className={inputClasses}
                       />
                     </div>
+                    <Input
+                      placeholder="Tags (comma separated, e.g. Finance, Shopping)"
+                      value={newCard.tags?.join(", ") || ""}
+                      onChange={(e) =>
+                        setNewCard({
+                          ...newCard,
+                          tags: e.target.value
+                            .split(",")
+                            .map((t) => t.trimStart()),
+                        })
+                      }
+                      className={inputClasses}
+                    />
                     <Textarea
                       placeholder="Add a secret card note... (optional)"
                       value={newCard.note}

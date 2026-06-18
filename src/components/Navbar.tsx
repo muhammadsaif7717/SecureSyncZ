@@ -24,25 +24,57 @@ import {
   User as UserIcon,
   Sun,
   Moon,
+  Download,
+  Upload,
+  Search,
+  ShieldCheck,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/AuthProvider";
+import { GlobalSearchModal } from "@/components/GlobalSearchModal";
+import { BackupModal } from "@/components/BackupModal";
+import { useState } from "react";
 
 const navLinks = [
   { href: "/cards", label: "Cards", icon: CreditCard },
   { href: "/passwords", label: "Passwords", icon: Key },
   { href: "/add", label: "Add", icon: PlusCircle },
+  { href: "/health", label: "Health", icon: ShieldCheck },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const { setTheme, theme } = useTheme();
   const { user, logout, isLoading } = useAuth();
+  const [backupModalOpen, setBackupModalOpen] = useState(false);
+  const [backupType, setBackupType] = useState<"passwords" | "cards">(
+    "passwords"
+  );
+  const [backupAction, setBackupAction] = useState<"export" | "import">(
+    "export"
+  );
+
+  const openBackupModal = (
+    type: "passwords" | "cards",
+    action: "export" | "import"
+  ) => {
+    setBackupType(type);
+    setBackupAction(action);
+    setBackupModalOpen(true);
+  };
 
   return (
     <>
+      <BackupModal
+        isOpen={backupModalOpen}
+        onClose={() => setBackupModalOpen(false)}
+        type={backupType}
+        action={backupAction}
+      />
       <header className="sticky top-0 z-50 w-full border-b border-black/[0.06] bg-white/70 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#0a0e1a]/80">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-[60px] sm:px-6">
           {/* Logo */}
@@ -65,7 +97,37 @@ export default function Navbar() {
             {!user && !isLoading && <ModeToggle />}
 
             {!isLoading && user ? (
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                {/* Search Trigger Button */}
+                <button
+                  onClick={() =>
+                    document.dispatchEvent(
+                      new KeyboardEvent("keydown", { key: "k", metaKey: true })
+                    )
+                  }
+                  className="hidden h-9 w-40 items-center justify-between rounded-lg border border-slate-200 bg-white/50 px-3 text-sm text-slate-500 transition-colors hover:border-emerald-300 hover:bg-white sm:flex dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-emerald-500/30 dark:hover:bg-white/10"
+                >
+                  <span className="flex items-center gap-2">
+                    <Search className="h-4 w-4" />
+                    Search...
+                  </span>
+                  <kbd className="hidden rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 sm:inline-block dark:bg-slate-800 dark:text-slate-400">
+                    ⌘K
+                  </kbd>
+                </button>
+                <button
+                  onClick={() =>
+                    document.dispatchEvent(
+                      new KeyboardEvent("keydown", { key: "k", metaKey: true })
+                    )
+                  }
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-700 sm:hidden dark:text-slate-300"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+
+                <GlobalSearchModal />
+
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button
@@ -143,6 +205,51 @@ export default function Navbar() {
                             <Moon className="block h-4 w-4 dark:hidden" />
                           </div>
                           Theme: {theme === "dark" ? "Dark" : "Light"}
+                        </button>
+
+                        <div className="my-2 border-t border-slate-200 dark:border-slate-800"></div>
+                        <div className="px-2 py-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                          Data Management
+                        </div>
+
+                        <button
+                          onClick={() => openBackupModal("passwords", "export")}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+                            <Download className="h-4 w-4" />
+                          </div>
+                          Export Passwords
+                        </button>
+
+                        <button
+                          onClick={() => openBackupModal("passwords", "import")}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+                            <Upload className="h-4 w-4" />
+                          </div>
+                          Import Passwords
+                        </button>
+
+                        <button
+                          onClick={() => openBackupModal("cards", "export")}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+                            <Download className="h-4 w-4" />
+                          </div>
+                          Export Cards
+                        </button>
+
+                        <button
+                          onClick={() => openBackupModal("cards", "import")}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+                            <Upload className="h-4 w-4" />
+                          </div>
+                          Import Cards
                         </button>
                       </div>
 

@@ -30,6 +30,8 @@ export const POST = async (req: Request) => {
       username: body.username,
       password: encrypt(body.password),
       note: body.note || "",
+      isFavorite: body.isFavorite || false,
+      tags: body.tags || [],
       createdAt: new Date().toISOString(),
       // Securely associate with the authenticated user
       user: {

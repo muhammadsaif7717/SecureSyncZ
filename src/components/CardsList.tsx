@@ -44,6 +44,7 @@ const CardsList = () => {
       item: CardsData;
       groupName: string;
       matchesSearch: boolean;
+      hasFavorite: boolean;
     }
   >();
 
@@ -60,17 +61,28 @@ const CardsList = () => {
         item.cardType.toLowerCase().includes(searchQuery.toLowerCase()));
 
     if (!groups.has(key)) {
-      groups.set(key, { count: 1, item, groupName, matchesSearch: !!matches });
+      groups.set(key, {
+        count: 1,
+        item,
+        groupName,
+        matchesSearch: !!matches,
+        hasFavorite: !!item.isFavorite,
+      });
     } else {
       const existing = groups.get(key)!;
       existing.count += 1;
       if (matches) existing.matchesSearch = true;
+      if (item.isFavorite) existing.hasFavorite = true;
     }
   });
 
-  const displayGroups = Array.from(groups.values()).filter(
-    (g) => g.matchesSearch
-  );
+  const displayGroups = Array.from(groups.values())
+    .filter((g) => g.matchesSearch)
+    .sort((a, b) => {
+      if (a.hasFavorite && !b.hasFavorite) return -1;
+      if (!a.hasFavorite && b.hasFavorite) return 1;
+      return a.groupName.localeCompare(b.groupName);
+    });
 
   return (
     <div className="glass mx-auto w-full max-w-2xl overflow-hidden rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20">
@@ -101,22 +113,32 @@ const CardsList = () => {
         ) : (
           <Table>
             <TableBody>
-              {displayGroups.map(({ item, count, groupName }) => (
+              {displayGroups.map(({ item, count, groupName, hasFavorite }) => (
                 <TableRow
                   onClick={() => handleClick(groupName)}
                   key={item._id}
                   className="group cursor-pointer border-b border-slate-100 transition-all hover:bg-emerald-50/50 dark:border-white/[0.04] dark:hover:bg-emerald-500/10"
                 >
-                  <TableCell className="py-3.5 text-sm font-semibold text-slate-800 capitalize sm:py-3 dark:text-slate-200">
-                    {groupName}
-                    {count > 0 && (
-                      <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
-                        {count} saved
-                      </span>
-                    )}
+                  <TableCell className="py-3.5 text-sm font-semibold text-slate-800 sm:py-3 dark:text-slate-200">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+                        <CreditCard className="h-4 w-4" />
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="capitalize">{groupName}</span>
+                        {hasFavorite && (
+                          <svg
+                            className="h-3.5 w-3.5 fill-current text-yellow-500"
+                            viewBox="0 0 24 24"
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
                   </TableCell>
-                  <TableCell className="hidden text-sm text-slate-500 sm:table-cell dark:text-slate-400">
-                    •••• {item.cardNumber.slice(-4)}
+                  <TableCell className="hidden font-mono text-sm text-slate-500 sm:table-cell dark:text-slate-400">
+                    •••• •••• •••• {item.cardNumber.slice(-4)}
                   </TableCell>
                   <TableCell className="text-right">
                     <ChevronRight className="ml-auto h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-emerald-500 dark:text-slate-500" />

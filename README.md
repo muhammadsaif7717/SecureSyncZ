@@ -24,8 +24,11 @@
 - **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, and smooth animations.
 - **🌐 Progressive Web App (PWA):** Install SecureSyncZ on your home screen for offline access and native app feel.
 - **💳 Card & Password Management:** Easily view, add, edit, and delete your credentials.
-- **🛡️ Password Tools:** Built-in secure password generator and live password strength meter.
-- **📋 Micro-interactions:** Automatic clipboard copying, instant visibility toggling, and note association tools.
+- **🛡️ Password Health Dashboard:** Built-in dashboard to detect weak, reused, and old passwords to keep your vault secure.
+- **📁 Organization & Quality of Life:** Add Tags/Categories to credentials, and pin your favorites to the top of your lists.
+- **🔍 Global Search:** Instantly find your credentials from anywhere using the Cmd+K Command Palette.
+- **🔒 AES Encrypted Backups:** Export your vault as an AES-256 encrypted JSON file using a custom Master Password, and import via Drag-and-Drop.
+- **⏱️ Auto-Lock:** Automatically secures your vault after 3 minutes of inactivity.
 - **🖼️ Profile Customization:** Custom avatars with quick file-size validation and ImgBB integration.
 
 ## 🛠️ Tech Stack

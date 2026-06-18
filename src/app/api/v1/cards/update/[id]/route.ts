@@ -20,7 +20,18 @@ export const PUT = async (
 
     const { id } = await context.params;
     const body = await request.json();
-    const { name, serviceName, cardType, cardNumber, expiry, cvv, note } = body;
+    const {
+      name,
+      serviceName,
+      cardType,
+      cardNumber,
+      expiry,
+      cvv,
+      note,
+      website,
+      isFavorite,
+      tags,
+    } = body;
 
     if (!cardNumber || !expiry || !cvv) {
       return NextResponse.json(
@@ -53,6 +64,9 @@ export const PUT = async (
           expiry: encrypt(expiry),
           cvv: encrypt(cvv),
           note,
+          website,
+          isFavorite,
+          tags,
         },
       }
     );

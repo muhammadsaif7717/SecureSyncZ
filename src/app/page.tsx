@@ -13,25 +13,25 @@ export default function Home() {
       icon: <Key className="h-5 w-5 text-emerald-500 sm:h-6 sm:w-6" />,
       title: "Password Manager",
       description:
-        "Store, organize, and copy your passwords securely with automatic clipboard integration.",
+        "Store, organize, and copy your passwords securely with tags, favorites, and automatic clipboard integration.",
     },
     {
       icon: <CreditCard className="h-5 w-5 text-teal-500 sm:h-6 sm:w-6" />,
       title: "Credit Card Vault",
       description:
-        "Manage your credit cards, expiry dates, and CVVs in a clean and safe digital environment.",
+        "Manage your credit cards, expiry dates, and CVVs securely with categories and global search.",
     },
     {
       icon: <Shield className="h-5 w-5 text-cyan-500 sm:h-6 sm:w-6" />,
-      title: "Advanced Passkeys",
+      title: "Password Health",
       description:
-        "Skip the traditional passwords and use secure 6-digit passkeys for instant and safe vault access.",
+        "Built-in dashboard to instantly detect weak, reused, or outdated passwords in your vault.",
     },
     {
       icon: <Clipboard className="h-5 w-5 text-green-500 sm:h-6 sm:w-6" />,
-      title: "Profile Personalization",
+      title: "Encrypted Backups",
       description:
-        "Customize your vault experience with fast profile picture uploads and dynamic user settings.",
+        "Export and import your entire vault as an AES-256 encrypted JSON file using a master password.",
     },
   ];
 

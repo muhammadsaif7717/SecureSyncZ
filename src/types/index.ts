@@ -12,6 +12,8 @@ export type PasswordsData = {
   username: string;
   password: string;
   note?: string;
+  isFavorite?: boolean;
+  tags?: string[];
 };
 
 export type CardsData = {
@@ -25,4 +27,7 @@ export type CardsData = {
   expiry: string;
   cvv: string;
   note?: string;
+  website?: string;
+  isFavorite?: boolean;
+  tags?: string[];
 };

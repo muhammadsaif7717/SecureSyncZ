@@ -20,7 +20,7 @@ export const PUT = async (
 
     const { id } = await context.params;
     const body = await request.json();
-    const { username, password, note } = body;
+    const { username, password, note, website, isFavorite, tags } = body;
 
     if (!username || !password) {
       return NextResponse.json(
@@ -44,7 +44,16 @@ export const PUT = async (
         "user.email": user.email,
         "user.username": user.username,
       },
-      { $set: { username, password: encrypt(password), note } }
+      {
+        $set: {
+          username,
+          password: encrypt(password),
+          note,
+          website,
+          isFavorite,
+          tags,
+        },
+      }
     );
 
     if (result.matchedCount === 0) {

@@ -50,6 +50,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadUser();
   }, []);
 
+  // Auto-lock inactivity timer (5 minutes)
+  useEffect(() => {
+    if (!user) return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    const lockVault = () => {
+      showToast({
+        title: "Vault Locked",
+        description: "Your session was locked due to inactivity.",
+      });
+      logout();
+    };
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(lockVault, 3 * 60 * 1000); // 3 minutes
+    };
+
+    resetTimer();
+
+    const events = [
+      "mousemove",
+      "mousedown",
+      "keypress",
+      "touchmove",
+      "scroll",
+    ];
+    const handleActivity = () => resetTimer();
+
+    events.forEach((event) => window.addEventListener(event, handleActivity));
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach((event) =>
+        window.removeEventListener(event, handleActivity)
+      );
+    };
+  }, [user]);
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {

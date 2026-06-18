@@ -17,7 +17,7 @@ export async function GET(req: Request) {
       .findOne({ _id: new ObjectId(userPayload.id) });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
     }
 
     const returnUser = {

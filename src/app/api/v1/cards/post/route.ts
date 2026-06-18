@@ -38,6 +38,9 @@ export const POST = async (req: Request) => {
       expiry: encrypt(body.expiry),
       cvv: encrypt(body.cvv),
       note: body.note || "",
+      website: body.website || "",
+      isFavorite: body.isFavorite || false,
+      tags: body.tags || [],
       createdAt: new Date().toISOString(),
       // Securely associate with the authenticated user
       user: {

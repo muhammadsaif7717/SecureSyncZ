@@ -9,6 +9,7 @@ import getPasswords from "@/lib/getPasswords";
 import { useQuery } from "@tanstack/react-query";
 import { PasswordsData } from "@/types";
 import { useCLG } from "@/lib/useCLG";
+import { extractRootDomain } from "@/lib/utils";
 
 const loadPasswordsData = async () => {
   const data = await getPasswords();
@@ -41,31 +42,45 @@ const PasswordsList = () => {
 
   const groups = new Map<
     string,
-    { count: number; item: PasswordsData; matchesSearch: boolean }
+    {
+      count: number;
+      item: PasswordsData;
+      matchesSearch: boolean;
+      hasFavorite: boolean;
+    }
   >();
 
   fetchedPasswordsData.forEach((item) => {
-    const key = item.website.toLowerCase();
-
+    const rootDomain = extractRootDomain(item.website);
+    const key = rootDomain.toLowerCase();
     const matches =
-      searchQuery === "" ||
-      item.website.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      rootDomain.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.note &&
         item.note.toLowerCase().includes(searchQuery.toLowerCase()));
 
     if (!groups.has(key)) {
-      groups.set(key, { count: 1, item, matchesSearch: !!matches });
+      groups.set(key, {
+        count: 1,
+        item: { ...item, website: rootDomain },
+        matchesSearch: !!matches,
+        hasFavorite: !!item.isFavorite,
+      });
     } else {
       const existing = groups.get(key)!;
       existing.count += 1;
       if (matches) existing.matchesSearch = true;
+      if (item.isFavorite) existing.hasFavorite = true;
     }
   });
 
-  const displayGroups = Array.from(groups.values()).filter(
-    (g) => g.matchesSearch
-  );
+  const displayGroups = Array.from(groups.values())
+    .filter((g) => g.matchesSearch)
+    .sort((a, b) => {
+      if (a.hasFavorite && !b.hasFavorite) return -1;
+      if (!a.hasFavorite && b.hasFavorite) return 1;
+      return a.item.website.localeCompare(b.item.website);
+    });
 
   return (
     <div className="glass mx-auto w-full max-w-2xl overflow-hidden rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20">
@@ -96,19 +111,39 @@ const PasswordsList = () => {
         ) : (
           <Table>
             <TableBody>
-              {displayGroups.map(({ item, count }) => (
+              {displayGroups.map(({ item, count, hasFavorite }) => (
                 <TableRow
                   onClick={() => handleClick(item.website)}
                   key={item._id}
                   className="group cursor-pointer border-b border-slate-100 transition-all hover:bg-emerald-50/50 dark:border-white/[0.04] dark:hover:bg-emerald-500/10"
                 >
                   <TableCell className="py-3.5 text-sm font-semibold text-slate-800 sm:py-3 dark:text-slate-200">
-                    {item.website}
-                    {count > 0 && (
-                      <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
-                        {count} saved
-                      </span>
-                    )}
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${item.website}&sz=64`}
+                        alt={`${item.website} icon`}
+                        className="h-6 w-6 rounded-md bg-white p-0.5 shadow-sm"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                      <div className="flex items-center gap-1.5">
+                        <span>{item.website}</span>
+                        {hasFavorite && (
+                          <svg
+                            className="h-3.5 w-3.5 fill-current text-yellow-500"
+                            viewBox="0 0 24 24"
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        )}
+                      </div>
+                      {count > 0 && (
+                        <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
+                          {count} saved
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="hidden text-sm text-slate-500 sm:table-cell dark:text-slate-400">
                     {item.username}
