@@ -11,7 +11,14 @@ if (!ENCRYPTION_KEY) {
 }
 
 export const encrypt = (text: string): string => {
-  if (!ENCRYPTION_KEY) return text; // Fallback if no key
+  if (!ENCRYPTION_KEY) {
+    throw new Error("ENCRYPTION_KEY is missing. Cannot encrypt data safely.");
+  }
+  if (Buffer.from(ENCRYPTION_KEY, "hex").length !== 32) {
+    throw new Error(
+      "ENCRYPTION_KEY must be exactly 32 bytes (64 hex characters)."
+    );
+  }
 
   try {
     const iv = crypto.randomBytes(IV_LENGTH);
@@ -25,7 +32,7 @@ export const encrypt = (text: string): string => {
     return iv.toString("hex") + ":" + encrypted.toString("hex");
   } catch (error) {
     console.error("Encryption error:", error);
-    return text; // Return plain text on failure
+    throw new Error("Encryption failed.");
   }
 };
 

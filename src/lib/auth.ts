@@ -1,9 +1,11 @@
 import * as jose from "jose";
 import { cookies } from "next/headers";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  "fallback_default_secret_key_1234567890_change_me_in_production";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is not defined!");
+}
 
 export async function signToken(payload: {
   id: string;

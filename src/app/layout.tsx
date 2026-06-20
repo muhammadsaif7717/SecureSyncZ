@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     "encryption",
     "pwa",
   ],
-  authors: [{ name: "Muhammad Saif" }],
+  authors: [{ name: "MD. SAIF ISLAM" }],
   openGraph: {
     title: "SecureSyncZ — Secure Password & Card Vault",
     description: "Your premium digital vault for passwords and credit cards.",
