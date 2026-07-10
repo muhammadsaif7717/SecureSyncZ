@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import getPasswords from "@/lib/getPasswords";
@@ -11,10 +11,21 @@ import {
   AlertTriangle,
   Clock,
   Key,
+  KeyRound,
+  Loader2,
 } from "lucide-react";
 import { extractRootDomain } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useEncryption } from "@/providers/EncryptionProvider";
+import { Card } from "@/components/ui/card";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import VerifyPasskey from "@/components/VerifyPasskey";
 
 const getPasswordStrength = (password: string) => {
   if (!password) return 0;
@@ -29,13 +40,14 @@ const getPasswordStrength = (password: string) => {
 
 export default function HealthDashboard() {
   const { user, isLoading: authLoading } = useAuth();
+  const { isUnlocked, cryptoKey } = useEncryption();
 
   const { data: passwords = [], isLoading: pLoading } = useQuery<
     PasswordsData[]
   >({
-    queryKey: ["passwords"],
-    queryFn: getPasswords,
-    enabled: !!user,
+    queryKey: ["passwords", !!cryptoKey],
+    queryFn: () => getPasswords(cryptoKey),
+    enabled: !!user && !!cryptoKey,
   });
 
   const isLoading = authLoading || pLoading;
@@ -108,6 +120,12 @@ export default function HealthDashboard() {
     );
   }
 
+  if (!isUnlocked) {
+    return (
+      <VerifyPasskey reasonText="Please enter your 6-digit passkey to view your vault health." />
+    );
+  }
+
   if (passwords.length === 0) {
     return (
       <div className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center space-y-4 px-4 text-center text-sm text-slate-500">
@@ -123,7 +141,7 @@ export default function HealthDashboard() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-slate-50 px-4 py-6 sm:px-6 sm:py-10 dark:bg-[#0a0e1a]">
+    <div className="min-h-[calc(100vh-56px)] bg-slate-50 px-4 py-6 pb-32 sm:px-6 sm:py-10 sm:pb-36 dark:bg-[#0a0e1a]">
       <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
         {/* Header / Score Card */}
         <div className="glass overflow-hidden rounded-2xl shadow-xl shadow-black/5 dark:shadow-black/20">
@@ -171,17 +189,29 @@ export default function HealthDashboard() {
               </div>
             </div>
             {weakPasswords.length > 0 ? (
-              <div className="space-y-2">
+              <div className="custom-scrollbar max-h-[60vh] space-y-2 overflow-y-auto pr-2 sm:max-h-[500px]">
                 {weakPasswords.map((p) => (
                   <Link
                     key={p._id}
                     href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
-                    className="flex items-center justify-between rounded-lg bg-white/50 p-2 text-sm hover:bg-red-50 dark:bg-white/5 dark:hover:bg-red-500/10"
+                    className="flex items-center justify-between rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-red-50 dark:bg-white/5 dark:hover:bg-red-500/10"
                   >
-                    <span className="truncate text-slate-700 dark:text-slate-300">
-                      {p.website}
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${extractRootDomain(p.website)}&sz=64`}
+                        alt={`${extractRootDomain(p.website)} icon`}
+                        className="h-5 w-5 shrink-0 rounded bg-white p-0.5 shadow-sm"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                      <span className="truncate font-medium text-slate-700 dark:text-slate-300">
+                        {extractRootDomain(p.website)}
+                      </span>
+                    </div>
+                    <span className="shrink-0 text-xs font-semibold text-red-500">
+                      Update
                     </span>
-                    <span className="text-xs text-red-500">Update</span>
                   </Link>
                 ))}
               </div>
@@ -208,7 +238,7 @@ export default function HealthDashboard() {
               </div>
             </div>
             {reusedPasswords.length > 0 ? (
-              <div className="space-y-4">
+              <div className="custom-scrollbar max-h-[60vh] space-y-4 overflow-y-auto pr-2 sm:max-h-[500px]">
                 {reusedPasswords.map((group, idx) => (
                   <div key={idx} className="space-y-1">
                     <p className="text-xs font-semibold text-slate-500">
@@ -218,12 +248,25 @@ export default function HealthDashboard() {
                       <Link
                         key={p._id}
                         href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
-                        className="flex items-center justify-between rounded-lg bg-white/50 p-2 text-sm hover:bg-yellow-50 dark:bg-white/5 dark:hover:bg-yellow-500/10"
+                        className="flex items-center justify-between rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-yellow-50 dark:bg-white/5 dark:hover:bg-yellow-500/10"
                       >
-                        <span className="truncate text-slate-700 dark:text-slate-300">
-                          {p.website}
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <img
+                            src={`https://www.google.com/s2/favicons?domain=${extractRootDomain(p.website)}&sz=64`}
+                            alt={`${extractRootDomain(p.website)} icon`}
+                            className="h-5 w-5 shrink-0 rounded bg-white p-0.5 shadow-sm"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
+                            }}
+                          />
+                          <span className="truncate font-medium text-slate-700 dark:text-slate-300">
+                            {extractRootDomain(p.website)}
+                          </span>
+                        </div>
+                        <span className="shrink-0 text-xs font-semibold text-yellow-500">
+                          Update
                         </span>
-                        <span className="text-xs text-yellow-500">Update</span>
                       </Link>
                     ))}
                   </div>
@@ -252,22 +295,32 @@ export default function HealthDashboard() {
               </div>
             </div>
             {oldPasswords.length > 0 ? (
-              <div className="space-y-2">
+              <div className="custom-scrollbar max-h-[60vh] space-y-2 overflow-y-auto pr-2 sm:max-h-[500px]">
                 {oldPasswords.map((p) => (
                   <Link
                     key={p._id}
                     href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
-                    className="flex items-center justify-between rounded-lg bg-white/50 p-2 text-sm hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/10"
+                    className="flex items-center justify-between rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/10"
                   >
-                    <div className="flex flex-col overflow-hidden">
-                      <span className="truncate text-slate-700 dark:text-slate-300">
-                        {p.website}
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        {new Date(p.createdAt).toLocaleDateString()}
-                      </span>
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${extractRootDomain(p.website)}&sz=64`}
+                        alt={`${extractRootDomain(p.website)} icon`}
+                        className="h-5 w-5 shrink-0 rounded bg-white p-0.5 shadow-sm"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                      <div className="flex min-w-0 flex-col overflow-hidden">
+                        <span className="truncate font-medium text-slate-700 dark:text-slate-300">
+                          {extractRootDomain(p.website)}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(p.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                    <span className="shrink-0 text-xs text-blue-500">
+                    <span className="shrink-0 text-xs font-semibold text-blue-500">
                       Update
                     </span>
                   </Link>

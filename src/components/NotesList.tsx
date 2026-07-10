@@ -1,32 +1,29 @@
 "use client";
 
 import React from "react";
-import { ChevronRight, Key, Search } from "lucide-react";
+import { ChevronRight, FileText, Search } from "lucide-react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import getPasswords from "@/lib/getPasswords";
+import getNotes from "@/lib/getNotes";
 import { useQuery } from "@tanstack/react-query";
-import { PasswordsData } from "@/types";
-import { useCLG } from "@/lib/useCLG";
-import { extractRootDomain } from "@/lib/utils";
+import { NotesData } from "@/types";
 import { useEncryption } from "@/providers/EncryptionProvider";
 
-const loadPasswordsData = async (cryptoKey: CryptoKey | null) => {
-  const data = await getPasswords(cryptoKey);
+const loadNotesData = async (cryptoKey: CryptoKey | null) => {
+  const data = await getNotes(cryptoKey);
   return data;
 };
 
-const PasswordsList = () => {
+const NotesList = () => {
   const router = useRouter();
   const { cryptoKey } = useEncryption();
 
-  const { data = [], isLoading } = useQuery<PasswordsData[]>({
-    queryKey: ["passwords", !!cryptoKey],
-    queryFn: () => loadPasswordsData(cryptoKey),
+  const { data = [], isLoading } = useQuery<NotesData[]>({
+    queryKey: ["notes", !!cryptoKey],
+    queryFn: () => loadNotesData(cryptoKey),
   });
-  const fetchedPasswordsData = data ?? [];
-  useCLG("fetchedPasswordsData", fetchedPasswordsData);
+  const fetchedNotesData = data ?? [];
 
   const [searchQuery, setSearchQuery] = React.useState("");
 
@@ -38,33 +35,30 @@ const PasswordsList = () => {
     );
   }
 
-  const handleClick = (website: string) => {
-    router.push(`/passwords/${encodeURIComponent(website.toLowerCase())}`);
+  const handleClick = (title: string) => {
+    router.push(`/notes/${encodeURIComponent(title.toLowerCase())}`);
   };
 
   const groups = new Map<
     string,
     {
       count: number;
-      item: PasswordsData;
+      item: NotesData;
       matchesSearch: boolean;
       hasFavorite: boolean;
     }
   >();
 
-  fetchedPasswordsData.forEach((item) => {
-    const rootDomain = extractRootDomain(item.website);
-    const key = rootDomain.toLowerCase();
+  fetchedNotesData.forEach((item) => {
+    const key = item.title.toLowerCase();
     const matches =
-      rootDomain.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.note &&
-        item.note.toLowerCase().includes(searchQuery.toLowerCase()));
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.content.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (!groups.has(key)) {
       groups.set(key, {
         count: 1,
-        item: { ...item, website: rootDomain },
+        item: { ...item },
         matchesSearch: !!matches,
         hasFavorite: !!item.isFavorite,
       });
@@ -81,7 +75,7 @@ const PasswordsList = () => {
     .sort((a, b) => {
       if (a.hasFavorite && !b.hasFavorite) return -1;
       if (!a.hasFavorite && b.hasFavorite) return 1;
-      return a.item.website.localeCompare(b.item.website);
+      return a.item.title.localeCompare(b.item.title);
     });
 
   return (
@@ -91,15 +85,15 @@ const PasswordsList = () => {
 
       <div className="p-4 sm:p-5 lg:p-6">
         <h2 className="mb-4 flex items-center justify-center gap-2 text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
-          <Key className="h-5 w-5 text-emerald-500" />
-          Saved Passwords
+          <FileText className="h-5 w-5 text-emerald-500" />
+          Secure Notes
         </h2>
 
         <div className="relative mb-5 sm:mb-6">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             type="text"
-            placeholder="Search websites, usernames, notes..."
+            placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-10 border-slate-200 bg-white/60 pl-9 text-sm transition-colors focus:border-emerald-300 focus:bg-white dark:border-white/10 dark:bg-white/5 dark:placeholder-slate-500 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
@@ -108,29 +102,21 @@ const PasswordsList = () => {
 
         {displayGroups.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            No passwords found.
+            No notes found.
           </p>
         ) : (
           <Table>
             <TableBody>
               {displayGroups.map(({ item, count, hasFavorite }) => (
                 <TableRow
-                  onClick={() => handleClick(item.website)}
+                  onClick={() => handleClick(item.title)}
                   key={item._id}
                   className="group cursor-pointer border-b border-slate-100 transition-all hover:bg-emerald-50/50 dark:border-white/[0.04] dark:hover:bg-emerald-500/10"
                 >
                   <TableCell className="py-3.5 text-sm font-semibold text-slate-800 sm:py-3 dark:text-slate-200">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={`https://www.google.com/s2/favicons?domain=${item.website}&sz=64`}
-                        alt={`${item.website} icon`}
-                        className="h-6 w-6 rounded-md bg-white p-0.5 shadow-sm"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
                       <div className="flex items-center gap-1.5">
-                        <span>{item.website}</span>
+                        <span>{item.title}</span>
                         {hasFavorite && (
                           <svg
                             className="h-3.5 w-3.5 fill-current text-yellow-500"
@@ -140,15 +126,15 @@ const PasswordsList = () => {
                           </svg>
                         )}
                       </div>
-                      {count > 0 && (
+                      {count > 1 && (
                         <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
-                          {count} saved
+                          {count}
                         </span>
                       )}
                     </div>
                   </TableCell>
                   <TableCell className="hidden text-sm text-slate-500 sm:table-cell dark:text-slate-400">
-                    {item.username}
+                    {new Date(item.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
                     <ChevronRight className="ml-auto h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-emerald-500 dark:text-slate-500" />
@@ -163,4 +149,4 @@ const PasswordsList = () => {
   );
 };
 
-export default PasswordsList;
+export default NotesList;

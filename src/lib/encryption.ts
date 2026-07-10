@@ -11,29 +11,9 @@ if (!ENCRYPTION_KEY) {
 }
 
 export const encrypt = (text: string): string => {
-  if (!ENCRYPTION_KEY) {
-    throw new Error("ENCRYPTION_KEY is missing. Cannot encrypt data safely.");
-  }
-  if (Buffer.from(ENCRYPTION_KEY, "hex").length !== 32) {
-    throw new Error(
-      "ENCRYPTION_KEY must be exactly 32 bytes (64 hex characters)."
-    );
-  }
-
-  try {
-    const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv(
-      ALGORITHM,
-      Buffer.from(ENCRYPTION_KEY, "hex"),
-      iv
-    );
-    let encrypted = cipher.update(text);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return iv.toString("hex") + ":" + encrypted.toString("hex");
-  } catch (error) {
-    console.error("Encryption error:", error);
-    throw new Error("Encryption failed.");
-  }
+  // Pass-through: Zero-Knowledge Client-Side Encryption
+  // The server no longer encrypts data; the client does.
+  return text;
 };
 
 export const decrypt = (text: string): string => {

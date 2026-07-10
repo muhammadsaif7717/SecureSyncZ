@@ -35,8 +35,14 @@ import axios from "axios";
 import getCards from "@/lib/getCards";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
-const loadCardsData = async (): Promise<CardsData[]> => {
-  const res = await getCards();
+import { useEncryption } from "@/providers/EncryptionProvider";
+import { encryptData } from "@/lib/clientCrypto";
+import VerifyPasskey from "@/components/VerifyPasskey";
+
+const loadCardsData = async (
+  cryptoKey: CryptoKey | null
+): Promise<CardsData[]> => {
+  const res = await getCards(cryptoKey);
   return res;
 };
 
@@ -57,10 +63,6 @@ export default function CardPageClient({ name }: { name: string }) {
   const [editableData, setEditableData] = useState<CardsData | null>(null);
   const [visible, setVisible] = useState<Record<string, boolean>>({});
 
-  const [isVerified, setIsVerified] = useState(false);
-  const [passkey, setPasskey] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-
   const toggleVisibility = (id: string) => {
     setVisible((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -68,43 +70,18 @@ export default function CardPageClient({ name }: { name: string }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const { cryptoKey, isUnlocked } = useEncryption();
+
   const {
     data = [],
     isLoading,
     refetch,
   } = useQuery<CardsData[]>({
-    queryKey: ["cards"],
-    queryFn: loadCardsData,
+    queryKey: ["cards", !!cryptoKey],
+    queryFn: () => loadCardsData(cryptoKey),
   });
 
   const fetchedPasswordsData = data ?? [];
-
-  const handleVerify = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (passkey.length !== 6) return;
-
-    setIsVerifying(true);
-    try {
-      const response = await axios.post("/api/v1/auth/passkey/verify", {
-        passkey,
-      });
-      if (response.data.success) {
-        setIsVerified(true);
-        showToast({ title: "Success", description: "Passkey verified!" });
-      }
-    } catch (err) {
-      showToast({ title: "Error", description: "Invalid passkey. Try again." });
-      setPasskey("");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  useEffect(() => {
-    if (passkey.length === 6 && !isVerifying) {
-      handleVerify();
-    }
-  }, [passkey]);
 
   if (isLoading) {
     return (
@@ -118,8 +95,27 @@ export default function CardPageClient({ name }: { name: string }) {
     navigator.clipboard.writeText(text);
     showToast({
       title: "✅ Copied to clipboard",
-      description: "Card info has been copied successfully.",
+      description:
+        "Card info has been copied successfully. It will be cleared from your clipboard in 30 seconds.",
     });
+
+    // Auto-clear clipboard after 30 seconds
+    setTimeout(async () => {
+      try {
+        const currentClipboard = await navigator.clipboard.readText();
+        // Only clear if the clipboard still contains the text we copied
+        if (currentClipboard === text) {
+          await navigator.clipboard.writeText("");
+          showToast({
+            title: "🛡️ Clipboard Cleared",
+            description:
+              "Your copied data has been removed from the clipboard for security.",
+          });
+        }
+      } catch (e) {
+        // Ignore clipboard read errors
+      }
+    }, 30000);
   };
 
   const filteredPassData = fetchedPasswordsData.filter((item) => {
@@ -138,14 +134,24 @@ export default function CardPageClient({ name }: { name: string }) {
     e.preventDefault();
     if (!editableData) return;
 
+    const encryptedCardNumber = await encryptData(
+      editableData.cardNumber,
+      cryptoKey!
+    );
+    const encryptedExpiry = await encryptData(editableData.expiry, cryptoKey!);
+    const encryptedCvv = await encryptData(editableData.cvv, cryptoKey!);
+    const encryptedNote = editableData.note
+      ? await encryptData(editableData.note, cryptoKey!)
+      : "";
+
     const updatedCardData = {
       name: editableData.name,
       serviceName: editableData.serviceName,
       cardType: editableData.cardType || "Others",
-      cardNumber: editableData.cardNumber,
-      expiry: editableData.expiry,
-      cvv: editableData.cvv,
-      note: editableData.note,
+      cardNumber: encryptedCardNumber,
+      expiry: encryptedExpiry,
+      cvv: encryptedCvv,
+      note: encryptedNote,
       website: editableData.website,
     };
 
@@ -178,14 +184,25 @@ export default function CardPageClient({ name }: { name: string }) {
   const handleToggleFavorite = async (item: CardsData) => {
     try {
       const url = await getURL();
+
+      const encryptedCardNumber = await encryptData(
+        item.cardNumber,
+        cryptoKey!
+      );
+      const encryptedExpiry = await encryptData(item.expiry, cryptoKey!);
+      const encryptedCvv = await encryptData(item.cvv, cryptoKey!);
+      const encryptedNote = item.note
+        ? await encryptData(item.note, cryptoKey!)
+        : "";
+
       await axios.put(`${url}/cards/update/${item._id}`, {
         name: item.name,
         serviceName: item.serviceName,
         cardType: item.cardType || "Others",
-        cardNumber: item.cardNumber,
-        expiry: item.expiry,
-        cvv: item.cvv,
-        note: item.note,
+        cardNumber: encryptedCardNumber,
+        expiry: encryptedExpiry,
+        cvv: encryptedCvv,
+        note: encryptedNote,
         website: item.website,
         isFavorite: !item.isFavorite,
         tags: item.tags,
@@ -230,60 +247,16 @@ export default function CardPageClient({ name }: { name: string }) {
     );
   }
 
-  if (!isVerified) {
+  if (!isUnlocked) {
     return (
-      <section className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center bg-slate-50 px-4 py-6 sm:min-h-[calc(100vh-60px)] dark:bg-[#0a0e1a]">
-        <div className="w-full max-w-md">
-          <div className="glass overflow-hidden rounded-2xl border border-emerald-500/20 p-6 shadow-xl dark:shadow-emerald-500/5">
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                <KeyRound className="h-6 w-6" />
-              </div>
-              <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-white">
-                Verify Passkey
-              </h2>
-              <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-                Please enter your 6-digit passkey to access cards for{" "}
-                <span className="font-semibold capitalize">{name}</span>.
-              </p>
-
-              <form
-                onSubmit={handleVerify}
-                className="flex w-full flex-col items-center space-y-6"
-              >
-                <InputOTP
-                  maxLength={6}
-                  pattern={REGEXP_ONLY_DIGITS}
-                  value={passkey}
-                  onChange={(value) => setPasskey(value)}
-                  autoFocus
-                >
-                  <InputOTPGroup className="gap-2">
-                    {[...Array(6)].map((_, i) => (
-                      <InputOTPSlot
-                        key={i}
-                        index={i}
-                        className="h-12 w-12 rounded-md border-slate-200 bg-white/60 text-lg sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
-                      />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
-
-                <Button
-                  type="submit"
-                  disabled={passkey.length !== 6 || isVerifying}
-                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-emerald-500/25 active:scale-[0.99] dark:from-emerald-500 dark:to-teal-500"
-                >
-                  {isVerifying ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Verify Access
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
+      <VerifyPasskey
+        reasonText={
+          <>
+            Please enter your 6-digit passkey to access cards for{" "}
+            <span className="font-semibold capitalize">{name}</span>.
+          </>
+        }
+      />
     );
   }
 
@@ -536,7 +509,7 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
+        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Card
@@ -707,7 +680,7 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
+        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Confirm Deletion

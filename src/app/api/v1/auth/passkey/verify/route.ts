@@ -3,9 +3,20 @@ import { getUserFromRequest } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcryptjs";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const isAllowed = checkRateLimit(`passkey_${ip}`, 10, 15 * 60 * 1000); // 10 attempts per 15 mins
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: "Too many passkey attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const userPayload = await getUserFromRequest(req);
 
     if (!userPayload) {

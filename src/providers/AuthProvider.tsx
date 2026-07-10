@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Registration Successful",
           description: `Welcome to SecureSyncZ, ${response.data.user.username}!`,
         });
-        router.push("/passwords");
+        // Redirect is handled by the caller (SignUpPage) after EmergencyKitModal
       }
     } catch (error) {
       let errorMsg = "Registration failed. Please try again.";

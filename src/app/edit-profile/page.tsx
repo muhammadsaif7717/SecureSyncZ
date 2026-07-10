@@ -369,7 +369,7 @@ export default function ProfilePage() {
 
       {/* Confirmation Modal */}
       <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
-        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
+        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Confirm Changes
