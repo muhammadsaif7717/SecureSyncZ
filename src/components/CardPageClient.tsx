@@ -607,7 +607,9 @@ export default function CardPageClient({ name }: { name: string }) {
                   onChange={(e) =>
                     setEditableData({
                       ...editableData,
-                      cardNumber: e.target.value,
+                      cardNumber: e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 16),
                     })
                   }
                   className="h-11 text-sm sm:h-10"
@@ -641,7 +643,7 @@ export default function CardPageClient({ name }: { name: string }) {
                     onChange={(e) =>
                       setEditableData({
                         ...editableData,
-                        cvv: e.target.value,
+                        cvv: e.target.value.replace(/\D/g, "").slice(0, 4),
                       })
                     }
                     className="h-11 text-sm sm:h-10"
