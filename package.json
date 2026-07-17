@@ -20,7 +20,7 @@
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "csv-parse": "^7.0.0",
+    "csv-parse": "^7.0.1",
     "csv-stringify": "^6.8.0",
     "input-otp": "^1.4.2",
     "jose": "^6.2.3",

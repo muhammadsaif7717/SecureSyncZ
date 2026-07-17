@@ -32,7 +32,7 @@ export function EmergencyKitModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="bg-white sm:max-w-md dark:bg-slate-900 [&>button]:hidden">
+      <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900 [&>button]:hidden">
         <DialogHeader>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
             <ShieldAlert className="h-6 w-6" />

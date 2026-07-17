@@ -55,7 +55,6 @@ export function EncryptionProvider({
         title: "Vault Locked",
         description: "Your session was locked due to inactivity.",
       });
-      router.push("/passkey");
     };
 
     const resetTimer = () => {

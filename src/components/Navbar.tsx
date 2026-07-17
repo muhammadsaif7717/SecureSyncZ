@@ -40,6 +40,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { GlobalSearchModal } from "@/components/GlobalSearchModal";
 import { BackupModal } from "@/components/BackupModal";
 import { EmergencyKitModal } from "@/components/EmergencyKitModal";
+import { DeleteDataModal } from "@/components/DeleteDataModal";
 import { useState, useEffect } from "react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
@@ -56,12 +57,10 @@ export default function Navbar() {
   const { setTheme, theme } = useTheme();
   const { user, logout, isLoading } = useAuth();
   const [backupModalOpen, setBackupModalOpen] = useState(false);
-  const [backupType, setBackupType] = useState<"passwords" | "cards">(
-    "passwords"
-  );
   const [backupAction, setBackupAction] = useState<"export" | "import">(
     "export"
   );
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [showEmergencyKit, setShowEmergencyKit] = useState(false);
   const [secretKey, setSecretKey] = useState("");
   const isVisible = useScrollDirection();
@@ -82,11 +81,7 @@ export default function Navbar() {
     }
   };
 
-  const openBackupModal = (
-    type: "passwords" | "cards",
-    action: "export" | "import"
-  ) => {
-    setBackupType(type);
+  const openBackupModal = (action: "export" | "import") => {
     setBackupAction(action);
     setBackupModalOpen(true);
   };
@@ -108,13 +103,16 @@ export default function Navbar() {
       <BackupModal
         isOpen={backupModalOpen}
         onClose={() => setBackupModalOpen(false)}
-        type={backupType}
         action={backupAction}
       />
       <EmergencyKitModal
         isOpen={showEmergencyKit}
         secretKey={secretKey}
         onConfirm={() => setShowEmergencyKit(false)}
+      />
+      <DeleteDataModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
       />
       <header className="sticky top-0 z-50 w-full border-b border-black/[0.06] bg-white/70 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#0a0e1a]/80">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-[60px] sm:px-6">
@@ -181,7 +179,7 @@ export default function Navbar() {
                   </SheetTrigger>
                   <SheetContent
                     side="right"
-                    className="flex w-[300px] flex-col border-l border-white/10 bg-white/80 p-0 backdrop-blur-2xl sm:w-[350px] dark:bg-[#0a0e1a]/90"
+                    className="flex w-[85vw] max-w-[350px] flex-col border-l border-white/10 bg-white/80 p-0 backdrop-blur-2xl sm:w-[350px] dark:bg-[#0a0e1a]/90"
                   >
                     <div className="flex flex-col border-b border-black/5 bg-slate-50/50 p-6 dark:border-white/5 dark:bg-slate-900/30">
                       <SheetTitle className="mb-4 text-left text-lg font-bold tracking-tight text-slate-900 dark:text-white">
@@ -264,47 +262,37 @@ export default function Navbar() {
                         </button>
 
                         <button
-                          onClick={() => openBackupModal("passwords", "export")}
+                          onClick={() => openBackupModal("export")}
                           className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
                             <Download className="h-4 w-4" />
                           </div>
-                          Export Passwords
+                          Export Data
                         </button>
 
                         <button
-                          onClick={() => openBackupModal("passwords", "import")}
+                          onClick={() => openBackupModal("import")}
                           className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
                             <Upload className="h-4 w-4" />
                           </div>
-                          Import Passwords
-                        </button>
-
-                        <button
-                          onClick={() => openBackupModal("cards", "export")}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
-                        >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
-                            <Download className="h-4 w-4" />
-                          </div>
-                          Export Cards
-                        </button>
-
-                        <button
-                          onClick={() => openBackupModal("cards", "import")}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
-                        >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
-                            <Upload className="h-4 w-4" />
-                          </div>
-                          Import Cards
+                          Import Data
                         </button>
                       </div>
 
-                      <div className="mt-auto pt-4">
+                      <div className="mt-auto space-y-2 pt-4">
+                        <button
+                          onClick={() => setDeleteModalOpen(true)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400">
+                            <ShieldAlert className="h-4 w-4" />
+                          </div>
+                          Delete All Data
+                        </button>
+
                         <SheetClose asChild>
                           <Button
                             variant="ghost"
@@ -357,7 +345,7 @@ export default function Navbar() {
             isVisible ? "translate-y-0" : "translate-y-[150%]"
           )}
         >
-          <nav className="relative flex gap-2 sm:gap-4">
+          <nav className="relative flex gap-1 sm:gap-4">
             {navLinks.map((link, idx) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -367,7 +355,7 @@ export default function Navbar() {
                   href={link.href}
                   onClick={handleNavClick}
                   className={cn(
-                    "group relative z-10 flex w-16 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:text-xs",
+                    "group relative z-10 flex w-[52px] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:text-xs",
                     isActive
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"

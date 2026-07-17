@@ -28,7 +28,8 @@
 - **🛡️ Password Health Dashboard:** Built-in dashboard to detect weak, reused, and old passwords to keep your vault secure.
 - **📁 Organization & Quality of Life:** Add Tags/Categories to credentials, and pin your favorites to the top of your lists.
 - **🔍 Global Search:** Instantly find your credentials from anywhere using the Cmd+K Command Palette.
-- **🔒 AES Encrypted Backups:** Export your vault as an AES-256 encrypted JSON file using a custom Master Password, and import via Drag-and-Drop.
+- **🔒 Zero-Knowledge Backups:** Export your entire vault (Passwords, Cards, Notes) as a single JSON file. The exported data remains encrypted, ensuring it can only be unlocked with your secret key. Import via Drag-and-Drop (JSON/CSV supported).
+- **🗑️ Delete All Data (Danger Zone):** Instantly wipe all your data from the server with a single confirmation, giving you complete control over your digital footprint.
 - **⏱️ Auto-Lock:** Automatically secures your vault after 3 minutes of inactivity.
 - **🖼️ Profile Customization:** Custom avatars with quick file-size validation and ImgBB integration.
 
