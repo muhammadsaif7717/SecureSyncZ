@@ -377,7 +377,7 @@ export default function Navbar() {
                   href={link.href}
                   onClick={handleNavClick}
                   className={cn(
-                    "group relative z-10 flex w-[55px] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-1.5 text-[9px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:py-2 sm:text-xs",
+                    "group relative z-10 flex w-[64px] flex-col items-center justify-center gap-1 rounded-2xl px-1.5 py-2 text-[10px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:py-2 sm:text-xs",
                     isActive
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
@@ -395,7 +395,7 @@ export default function Navbar() {
                       "mb-0.5 transition-all duration-300",
                       isActive
                         ? "h-5 w-5 scale-110 sm:h-6 sm:w-6"
-                        : "h-4 w-4 group-hover:-translate-y-0.5 group-hover:scale-110 sm:h-5 sm:w-5"
+                        : "h-5 w-5 group-hover:-translate-y-0.5 group-hover:scale-110 sm:h-5 sm:w-5"
                     )}
                   />
                   <span className="tracking-wide">{link.label}</span>

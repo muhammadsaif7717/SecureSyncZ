@@ -185,7 +185,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] items-start justify-center bg-slate-50 px-4 py-6 sm:min-h-[calc(100vh-60px)] sm:py-10 dark:bg-[#0a0e1a]">
+    <div className="flex min-h-[calc(100vh-56px)] items-start justify-center bg-slate-50 px-4 pt-6 pb-32 sm:min-h-[calc(100vh-60px)] sm:pt-10 sm:pb-36 dark:bg-[#0a0e1a]">
       <div className="glass w-full max-w-xl overflow-hidden rounded-2xl shadow-xl shadow-black/5 dark:shadow-black/20">
         <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 
@@ -369,7 +369,7 @@ export default function ProfilePage() {
 
       {/* Confirmation Modal */}
       <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
-        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+        <DialogContent className="rounded-2xl bg-white sm:max-w-md dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Confirm Changes

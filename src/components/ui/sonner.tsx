@@ -24,6 +24,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       position={position}
       closeButton
+      swipeDirections={["left", "right", "top"]}
       style={
         {
           "--normal-bg": "var(--popover)",
