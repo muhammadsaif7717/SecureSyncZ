@@ -1,0 +1,21 @@
+🚀 Thrilled to introduce SecureSyncZ — a next-generation, all-in-one Password Manager, Credit Card Vault, and Secure Notes app built with privacy at its core! 🔒✨
+
+🌟 Core Features:
+• 🔑 Comprehensive Vault: Manage passwords, credit cards, and secure notes all in one place.
+• 📊 Health Insights: Identify weak, reused, or compromised passwords instantly.
+• ⚡ Global Search: Navigate effortlessly with Cmd+K / Ctrl+K.
+• 📥 Total Data Ownership: Seamlessly import or export your encrypted data.
+• 🎨 Premium UI/UX: Fast, responsive design featuring Dark/Light modes, glassmorphism, and beautiful iOS-inspired forms.
+
+🛡️ Why It's Secure:
+• Zero-Knowledge Architecture: Data is encrypted locally on your device before reaching the server. We never see your data.
+• Two-Secret System: Mathematically impossible to crack without both your 64-character Secret Key (device token) and your Passkey.
+• Auto-Lock Mechanism: Automatically locks your vault after inactivity to protect you on shared devices.
+
+💡 Why Use It?
+SecureSyncZ delivers enterprise-grade security without sacrificing user experience. Whether you're a developer storing sensitive API keys or a user organizing bank details, it gives you absolute peace of mind and total control.
+
+Feedback and feature requests are welcome! 👇
+
+#WebDev #CyberSecurity #ZeroKnowledge #Nextjs #PasswordManager #SecureSyncZ
+
