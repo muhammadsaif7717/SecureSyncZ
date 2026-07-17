@@ -121,18 +121,18 @@ const PasswordsList = () => {
                   key={item._id}
                   className="group cursor-pointer border-b border-slate-100 transition-all hover:bg-emerald-50/50 dark:border-white/[0.04] dark:hover:bg-emerald-500/10"
                 >
-                  <TableCell className="py-3.5 text-sm font-semibold text-slate-800 sm:py-3 dark:text-slate-200">
-                    <div className="flex items-center gap-3">
+                  <TableCell className="max-w-[150px] py-3.5 text-sm font-semibold text-slate-800 sm:max-w-[300px] sm:py-3 dark:text-slate-200">
+                    <div className="flex min-w-0 items-center gap-3">
                       <img
                         src={`https://www.google.com/s2/favicons?domain=${item.website}&sz=64`}
                         alt={`${item.website} icon`}
-                        className="h-6 w-6 rounded-md bg-white p-0.5 shadow-sm"
+                        className="h-6 w-6 shrink-0 rounded-md bg-white p-0.5 shadow-sm"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
-                      <div className="flex items-center gap-1.5">
-                        <span>{item.website}</span>
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <span className="truncate">{item.website}</span>
                         {hasFavorite && (
                           <svg
                             className="h-3.5 w-3.5 fill-current text-yellow-500"

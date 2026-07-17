@@ -197,10 +197,7 @@ export default function NotePageClient({ name }: { name: string }) {
     return (
       <VerifyPasskey
         reasonText={
-          <>
-            Please enter your 6-digit passkey to access notes for{" "}
-            <span className="font-semibold capitalize">{name}</span>.
-          </>
+          <>Please enter your 6-digit passkey to access your secure notes.</>
         }
       />
     );

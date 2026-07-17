@@ -268,10 +268,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
     return (
       <VerifyPasskey
         reasonText={
-          <>
-            Please enter your 6-digit passkey to access passwords for{" "}
-            <span className="font-semibold capitalize">{name}</span>.
-          </>
+          <>Please enter your 6-digit passkey to access your saved passwords.</>
         }
       />
     );
