@@ -18,6 +18,7 @@ import { showToast } from "@/lib/toast";
 import { generateSecretKey } from "@/lib/clientCrypto";
 import { EmergencyKitModal } from "@/components/EmergencyKitModal";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignUpPage() {
   const { signup, isLoading } = useAuth();
@@ -70,7 +71,7 @@ export default function SignUpPage() {
       // Note: We no longer automatically redirect to /passwords here.
       // We wait for the user to confirm the Emergency Kit modal.
     } catch (error) {
-      console.error("Signup page error:", error);
+      // Error is handled and toasted by AuthProvider
     } finally {
       setIsSubmitting(false);
     }

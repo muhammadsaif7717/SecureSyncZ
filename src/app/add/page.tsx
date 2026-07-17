@@ -155,12 +155,12 @@ export default function PostPage() {
         Loading...
       </div>
     );
-  if (!user)
-    if (!isUnlocked) {
-      return (
-        <VerifyPasskey reasonText="Please enter your 6-digit passkey to add items." />
-      );
-    }
+  if (!user) return null;
+  if (!isUnlocked) {
+    return (
+      <VerifyPasskey reasonText="Please enter your 6-digit passkey to add items." />
+    );
+  }
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

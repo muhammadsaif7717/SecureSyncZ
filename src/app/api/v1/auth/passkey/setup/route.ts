@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const { passkey } = body;
 
     if (!passkey || passkey.length !== 6) {
-      console.log("Passkey setup error 400: Invalid passkey sent", { passkey });
+      // console.log("Passkey setup error 400: Invalid passkey sent", { passkey });
       return NextResponse.json(
         { error: "A 6-digit passkey is required." },
         { status: 400 }
@@ -33,26 +33,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    console.log(
+    /* console.log(
       "Passkey setup: User passkey in DB is",
       user.passkey,
       "typeof",
       typeof user.passkey
-    );
+    ); */
 
     if (user.passkey && user.passkey.trim() !== "") {
-      console.log("Passkey setup error 400: Passkey already set", {
+      /* console.log("Passkey setup error 400: Passkey already set", {
         userPasskey: user.passkey,
-      });
+      }); */
       return NextResponse.json(
         { error: "Passkey already set." },
         { status: 400 }
       );
     }
 
-    console.log(
+    /* console.log(
       "Passkey setup: Validation passed, proceeding to hash and save."
-    );
+    ); */
     const salt = await bcrypt.genSalt(10);
     const hashedPasskey = await bcrypt.hash(passkey, salt);
 

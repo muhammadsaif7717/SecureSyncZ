@@ -11,7 +11,7 @@ export function useCLG(arg1: unknown, arg2?: unknown): void {
 
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      console.log(`[${label}]`, value);
+      // Intentionally left blank to remove console logs
     }
   }, [label, value]);
 }

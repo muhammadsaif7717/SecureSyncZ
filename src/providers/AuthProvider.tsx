@@ -103,7 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Logged In Successfully",
           description: `Welcome back, ${response.data.user.username}!`,
         });
-        router.push("/passwords");
       }
     } catch (error) {
       let errorMsg = "Login failed. Please check credentials.";

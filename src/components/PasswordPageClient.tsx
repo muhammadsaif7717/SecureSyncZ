@@ -168,7 +168,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
 
     const id = editableData._id;
     const url = await getURL();
-    console.log(url);
+    // console.log(url);
 
     try {
       const response = await axios.put(

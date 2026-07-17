@@ -1,10 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { deriveKey, generateSecretKey } from "@/lib/clientCrypto";
+import { deriveKey } from "@/lib/clientCrypto";
 import { showToast } from "@/lib/toast";
-import { useRouter } from "next/navigation";
-import { EmergencyKitModal } from "@/components/EmergencyKitModal";
+import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface EncryptionContextType {
   cryptoKey: CryptoKey | null;
@@ -23,22 +23,25 @@ export function EncryptionProvider({
   children: React.ReactNode;
 }) {
   const [cryptoKey, setCryptoKey] = useState<CryptoKey | null>(null);
-  const [showEmergencyKit, setShowEmergencyKit] = useState(false);
-  const [newlyGeneratedKey, setNewlyGeneratedKey] = useState("");
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, isLoading, logout } = useAuth();
 
-  // Auto-generate secret key on mount if missing
+  // Check if secret key is missing or tampered
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      let secretKeyHex = localStorage.getItem("secureSyncZ_secretKey");
-      if (!secretKeyHex) {
-        secretKeyHex = generateSecretKey();
-        localStorage.setItem("secureSyncZ_secretKey", secretKeyHex);
-        setNewlyGeneratedKey(secretKeyHex);
-        setShowEmergencyKit(true);
+    if (typeof window !== "undefined" && !isLoading && user) {
+      const secretKeyHex = localStorage.getItem("secureSyncZ_secretKey");
+      const isValidKey = secretKeyHex && /^[0-9a-fA-F]{64}$/.test(secretKeyHex);
+
+      if (!isValidKey && pathname !== "/sign-in" && pathname !== "/sign-up") {
+        logout();
+        showToast({
+          title: "Session Terminated",
+          description: "Missing or invalid security key. Please log in again.",
+        });
       }
     }
-  }, []);
+  }, [user, isLoading, logout, pathname]);
 
   // Auto-lock inactivity timer (3 minutes)
   useEffect(() => {
@@ -108,11 +111,6 @@ export function EncryptionProvider({
       value={{ cryptoKey, isUnlocked: !!cryptoKey, unlockVault, lockVault }}
     >
       {children}
-      <EmergencyKitModal
-        isOpen={showEmergencyKit}
-        secretKey={newlyGeneratedKey}
-        onConfirm={() => setShowEmergencyKit(false)}
-      />
     </EncryptionContext.Provider>
   );
 }
