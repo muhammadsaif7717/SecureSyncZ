@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
           // Expected: user is simply not logged in
         } else {
-          console.error("Auth check failed:", error);
+          // console.error("Auth check failed:", error);
         }
       } finally {
         setIsLoading(false);
@@ -161,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       router.push("/sign-in");
     } catch (error) {
-      console.error("Logout error:", error);
+      // console.error("Logout error:", error);
       showToast({
         title: "Logout Error",
         description: "Failed to log out correctly.",

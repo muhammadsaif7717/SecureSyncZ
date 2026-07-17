@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   FileText,
   ShieldAlert,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -67,7 +68,9 @@ export default function Navbar() {
   const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
-    const index = navLinks.findIndex((link) => pathname === link.href);
+    const index = navLinks.findIndex(
+      (link) => pathname === link.href || pathname.startsWith(link.href + "/")
+    );
     setActiveIndex(index);
   }, [pathname]);
 
@@ -97,6 +100,24 @@ export default function Navbar() {
       );
     }
   };
+
+  if (pathname === "/sign-in" || pathname === "/sign-up") {
+    return (
+      <header className="fixed top-0 z-50 flex w-full items-center justify-between p-4 sm:p-6">
+        <Link href="/">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-slate-600 transition-colors hover:bg-black/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Button>
+        </Link>
+        <ModeToggle />
+      </header>
+    );
+  }
 
   return (
     <>
@@ -341,21 +362,22 @@ export default function Navbar() {
       {user && (
         <div
           className={cn(
-            "fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center justify-center rounded-[20px] border border-black/5 bg-white/80 px-2 py-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-in-out dark:border-white/10 dark:bg-[#0a0e1a]/80",
+            "fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center justify-center rounded-[20px] border border-black/5 bg-white/80 px-2 py-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-in-out dark:border-white/10 dark:bg-[#0a0e1a]/80",
             isVisible ? "translate-y-0" : "translate-y-[150%]"
           )}
         >
           <nav className="relative flex gap-1 sm:gap-4">
             {navLinks.map((link, idx) => {
               const Icon = link.icon;
-              const isActive = pathname === link.href;
+              const isActive =
+                pathname === link.href || pathname.startsWith(link.href + "/");
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={handleNavClick}
                   className={cn(
-                    "group relative z-10 flex w-[52px] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:text-xs",
+                    "group relative z-10 flex w-[55px] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-1.5 text-[9px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:py-2 sm:text-xs",
                     isActive
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
@@ -372,8 +394,8 @@ export default function Navbar() {
                     className={cn(
                       "mb-0.5 transition-all duration-300",
                       isActive
-                        ? "h-6 w-6 scale-110"
-                        : "h-5 w-5 group-hover:-translate-y-0.5 group-hover:scale-110"
+                        ? "h-5 w-5 scale-110 sm:h-6 sm:w-6"
+                        : "h-4 w-4 group-hover:-translate-y-0.5 group-hover:scale-110 sm:h-5 sm:w-5"
                     )}
                   />
                   <span className="tracking-wide">{link.label}</span>

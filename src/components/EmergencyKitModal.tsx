@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, ShieldAlert, Download } from "lucide-react";
+import { Copy, ShieldAlert, Download, X } from "lucide-react";
 import { showToast } from "@/lib/toast";
 
 interface EmergencyKitModalProps {
@@ -32,7 +32,16 @@ export function EmergencyKitModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900 [&>button]:hidden">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md scale-95 rounded-2xl bg-white transition-transform sm:w-full sm:scale-100 dark:bg-slate-900 [&>button]:hidden">
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={onConfirm}
+            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
+        </div>
         <DialogHeader>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
             <ShieldAlert className="h-6 w-6" />

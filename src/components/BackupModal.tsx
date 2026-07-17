@@ -112,7 +112,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
         <DialogHeader>
           <DialogTitle>
             {action === "export" ? "Export Backup (JSON)" : "Import Backup"}

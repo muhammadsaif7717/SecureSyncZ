@@ -36,7 +36,9 @@ const CardsList = () => {
   }
 
   const handleClick = (name: string) => {
-    router.push(`/cards/${name.toLowerCase()}`);
+    router.push(
+      `/cards/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`
+    );
   };
 
   const groups = new Map<
@@ -121,13 +123,13 @@ const CardsList = () => {
                   key={item._id}
                   className="group cursor-pointer border-b border-slate-100 transition-all hover:bg-emerald-50/50 dark:border-white/[0.04] dark:hover:bg-emerald-500/10"
                 >
-                  <TableCell className="py-3.5 text-sm font-semibold text-slate-800 sm:py-3 dark:text-slate-200">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+                  <TableCell className="max-w-[150px] py-3.5 text-sm font-semibold text-slate-800 sm:max-w-[300px] sm:py-3 dark:text-slate-200">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
                         <CreditCard className="h-4 w-4" />
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="capitalize">{groupName}</span>
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <span className="truncate capitalize">{groupName}</span>
                         {hasFavorite && (
                           <svg
                             className="h-3.5 w-3.5 fill-current text-yellow-500"

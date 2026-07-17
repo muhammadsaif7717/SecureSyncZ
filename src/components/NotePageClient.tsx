@@ -83,11 +83,18 @@ export default function NotePageClient({ name }: { name: string }) {
     }, 30000);
   };
 
-  const decodedName = decodeURIComponent(name).toLowerCase();
+  const decodedSlug = decodeURIComponent(name)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
 
-  const filteredNotes = fetchedNotesData.filter(
-    (item) => item.title.toLowerCase() === decodedName
-  );
+  const filteredNotes = fetchedNotesData.filter((item) => {
+    return item.title.toLowerCase().replace(/\s+/g, "-") === decodedSlug;
+  });
+
+  const actualName =
+    filteredNotes.length > 0
+      ? filteredNotes[0].title
+      : decodeURIComponent(name);
 
   const displayNotes = filteredNotes.filter((item) =>
     item.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -190,37 +197,23 @@ export default function NotePageClient({ name }: { name: string }) {
     return (
       <VerifyPasskey
         reasonText={
-          <>
-            Please enter your 6-digit passkey to access notes for{" "}
-            <span className="font-semibold capitalize">{name}</span>.
-          </>
+          <>Please enter your 6-digit passkey to access your secure notes.</>
         }
       />
     );
   }
 
   return (
-    <section>
+    <section className="pb-28">
       <div className="mx-auto max-w-xl px-4 py-6 sm:p-6">
         <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-slate-900 sm:mb-6 sm:text-2xl dark:text-white">
           <FileText className="h-6 w-6 text-emerald-500" />
-          <span className="capitalize">{name}</span> Notes
+          <span className="capitalize">{actualName}</span>
         </h2>
 
-        <div className="relative mb-5 sm:mb-6">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <Input
-            type="text"
-            placeholder="Search within content..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-10 border-slate-200 bg-white/60 pl-9 text-sm transition-colors focus:border-emerald-300 focus:bg-white dark:border-white/10 dark:bg-white/5 dark:placeholder-slate-500 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
-          />
-        </div>
-
-        {displayNotes.length === 0 && searchQuery !== "" ? (
+        {displayNotes.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            No content found matching "{searchQuery}".
+            Note not found.
           </p>
         ) : (
           displayNotes.map((item) => (
@@ -274,11 +267,9 @@ export default function NotePageClient({ name }: { name: string }) {
                     Title
                   </Label>
                   <div className="relative">
-                    <Input
-                      value={item.title}
-                      readOnly
-                      className="h-10 border-slate-200 bg-white/50 pr-10 text-sm dark:border-white/[0.08] dark:bg-white/5"
-                    />
+                    <div className="flex h-auto min-h-[40px] w-full items-center rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-10 text-sm break-words break-all whitespace-pre-wrap dark:border-white/[0.08] dark:bg-white/5">
+                      {item.title}
+                    </div>
                     <button
                       type="button"
                       aria-label="Copy title"
@@ -295,11 +286,9 @@ export default function NotePageClient({ name }: { name: string }) {
                     Content
                   </Label>
                   <div className="relative">
-                    <Textarea
-                      value={item.content}
-                      readOnly
-                      className="min-h-[120px] resize-none border-slate-200 bg-white/50 pr-10 text-sm dark:border-white/[0.08] dark:bg-white/5"
-                    />
+                    <div className="min-h-[120px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-10 text-sm break-words break-all whitespace-pre-wrap dark:border-white/[0.08] dark:bg-white/5">
+                      {item.content}
+                    </div>
                     <button
                       type="button"
                       aria-label="Copy content"
@@ -311,10 +300,11 @@ export default function NotePageClient({ name }: { name: string }) {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:justify-between sm:gap-4 sm:pt-4">
+                {/* Action buttons — stack on mobile */}
+                <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:justify-end sm:gap-4 sm:pt-4">
                   <Button
                     variant="outline"
-                    className="h-10 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:w-1/4 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                    className="h-10 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:w-28 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                     onClick={() => {
                       setEditableData(item);
                       setIsDialogOpen(true);
@@ -328,12 +318,9 @@ export default function NotePageClient({ name }: { name: string }) {
                       setIsDeleteDialogOpen(true);
                     }}
                     variant="destructive"
-                    className="h-10 text-sm sm:w-1/4"
+                    className="h-10 text-sm sm:w-28"
                   >
                     Delete
-                  </Button>
-                  <Button variant="secondary" className="h-10 text-sm sm:w-1/4">
-                    Share
                   </Button>
                 </div>
               </div>
@@ -344,7 +331,7 @@ export default function NotePageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Note
@@ -385,7 +372,7 @@ export default function NotePageClient({ name }: { name: string }) {
                       content: e.target.value,
                     })
                   }
-                  className="min-h-[150px] text-sm"
+                  className="min-h-[150px] text-sm break-words break-all"
                 />
               </div>
               <DialogFooter className="pt-3 sm:pt-4">
@@ -403,7 +390,7 @@ export default function NotePageClient({ name }: { name: string }) {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Confirm Deletion

@@ -31,7 +31,7 @@ export async function proxy(request: NextRequest) {
       await jose.jwtVerify(token, secret);
       isValid = true;
     } catch (error) {
-      console.warn("Invalid token in middleware:", error);
+      // console.warn("Invalid token in middleware:", error);
     }
   }
 
