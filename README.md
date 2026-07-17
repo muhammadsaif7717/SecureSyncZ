@@ -21,8 +21,8 @@
 - **🔐 Zero-Knowledge Encryption:** Your data is encrypted locally on your device _before_ it reaches the server. We never see your data.
 - **🛡️ Two-Secret Security Model:** Your vault is protected by a combination of your Master Password and an unrecoverable 64-character device-level Secret Key.
 - **🚀 Advanced Passkeys:** Skip traditional passwords with secure, lightning-fast 6-digit passkey authentication.
-- **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with bottom navigation and touch-friendly UI.
-- **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, and smooth animations.
+- **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with scalable bottom navigation, touch-friendly swipeable alerts, and intelligent layout adjustments.
+- **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, smooth micro-animations, and clean iOS Settings-inspired forms for effortless data entry.
 - **🌐 Progressive Web App (PWA):** Install SecureSyncZ on your home screen for offline access and native app feel.
 - **💳 Comprehensive Vault:** Safely manage Passwords, Credit Cards, and Secure Notes.
 - **🛡️ Password Health Dashboard:** Built-in dashboard to detect weak, reused, and old passwords to keep your vault secure.
