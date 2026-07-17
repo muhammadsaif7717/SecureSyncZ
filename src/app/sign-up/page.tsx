@@ -119,7 +119,7 @@ export default function SignUpPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className="h-11 border-slate-200 bg-white/60 pl-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
+                  className="h-11 border-slate-200 bg-white/60 pl-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 sm:pl-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
                   disabled={isLoading || isSubmitting}
                 />
               </div>
@@ -141,7 +141,7 @@ export default function SignUpPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-11 border-slate-200 bg-white/60 pl-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
+                  className="h-11 border-slate-200 bg-white/60 pl-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 sm:pl-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
                   disabled={isLoading || isSubmitting}
                 />
               </div>
@@ -162,7 +162,7 @@ export default function SignUpPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-11 border-slate-200 bg-white/60 pr-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
+                  className="h-11 border-slate-200 bg-white/60 pr-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 sm:pr-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
                   disabled={isLoading || isSubmitting}
                 />
                 <button
