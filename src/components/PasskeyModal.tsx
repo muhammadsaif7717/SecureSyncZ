@@ -74,7 +74,7 @@ export default function PasskeyModal() {
         });
       }
     } catch (error: any) {
-      console.error("Failed to set passkey:", error);
+      // console.error("Failed to set passkey:", error);
       const errorMessage =
         error.response?.data?.error ||
         "Failed to set passkey. Please try again.";
@@ -90,7 +90,7 @@ export default function PasskeyModal() {
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent
-        className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900"
+        className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
@@ -124,7 +124,7 @@ export default function PasskeyModal() {
                   key={i}
                   index={i}
                   showChar={true}
-                  className="h-12 w-12 rounded-md border-slate-200 bg-white/60 text-lg sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
+                  className="h-10 w-10 rounded-md border-slate-200 bg-white/60 text-base sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
                 />
               ))}
             </InputOTPGroup>

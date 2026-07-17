@@ -105,7 +105,7 @@ export default function ProfilePage() {
       updateUser(updateRes.data.user);
       showToast({ title: "Success", description: "Profile picture updated!" });
     } catch (error) {
-      console.error("Image upload failed", error);
+      // console.error("Image upload failed", error);
       showToast({
         title: "Upload Failed",
         description: "Failed to upload image. Check API key.",

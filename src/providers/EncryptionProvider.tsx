@@ -88,7 +88,7 @@ export function EncryptionProvider({
       let secretKeyHex = localStorage.getItem("secureSyncZ_secretKey");
 
       if (!secretKeyHex) {
-        console.error("Missing secret key even after mount generation.");
+        // console.error("Missing secret key even after mount generation.");
         return false;
       }
 
@@ -96,7 +96,7 @@ export function EncryptionProvider({
       setCryptoKey(derivedKey);
       return true;
     } catch (error) {
-      console.error("Failed to unlock vault:", error);
+      // console.error("Failed to unlock vault:", error);
       return false;
     }
   };

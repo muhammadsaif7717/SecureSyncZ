@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Shield, Mail } from "lucide-react";
+import { Eye, EyeOff, Shield, Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
@@ -25,6 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function SignInPage() {
   const { login, isLoading } = useAuth();
@@ -77,7 +78,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="relative flex min-h-[calc(100vh-56px)] items-center justify-center bg-slate-50 px-4 py-8 sm:min-h-[calc(100vh-60px)] sm:py-12 dark:bg-[#0a0e1a]">
+    <div className="relative flex min-h-[100dvh] items-center justify-center bg-slate-50 px-4 py-8 sm:py-12 dark:bg-[#0a0e1a]">
       {/* Background glow effects */}
       <div className="animate-glow-pulse absolute top-1/4 left-1/4 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-emerald-500/[0.06]" />
       <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-teal-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-teal-500/[0.05]" />

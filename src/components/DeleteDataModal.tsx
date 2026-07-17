@@ -87,7 +87,7 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl border-red-500/20 bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl border-red-500/20 bg-white sm:w-full dark:bg-slate-900">
         <DialogHeader>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
             <AlertTriangle className="h-6 w-6" />

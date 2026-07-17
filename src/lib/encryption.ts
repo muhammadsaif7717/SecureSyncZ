@@ -5,9 +5,7 @@ const ALGORITHM = "aes-256-cbc";
 const IV_LENGTH = 16;
 
 if (!ENCRYPTION_KEY) {
-  console.warn(
-    "ENCRYPTION_KEY is not set. Encryption will not work correctly."
-  );
+  // console.warn("ENCRYPTION_KEY is not set. Encryption will not work correctly.");
 }
 
 export const encrypt = (text: string): string => {

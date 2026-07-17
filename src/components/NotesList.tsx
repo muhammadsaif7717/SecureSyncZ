@@ -36,46 +36,21 @@ const NotesList = () => {
   }
 
   const handleClick = (title: string) => {
-    router.push(`/notes/${encodeURIComponent(title.toLowerCase())}`);
+    router.push(
+      `/notes/${encodeURIComponent(title.toLowerCase().replace(/\s+/g, "-"))}`
+    );
   };
 
-  const groups = new Map<
-    string,
-    {
-      count: number;
-      item: NotesData;
-      matchesSearch: boolean;
-      hasFavorite: boolean;
-    }
-  >();
-
-  fetchedNotesData.forEach((item) => {
-    const key = item.title.toLowerCase();
-    const matches =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.content.toLowerCase().includes(searchQuery.toLowerCase());
-
-    if (!groups.has(key)) {
-      groups.set(key, {
-        count: 1,
-        item: { ...item },
-        matchesSearch: !!matches,
-        hasFavorite: !!item.isFavorite,
-      });
-    } else {
-      const existing = groups.get(key)!;
-      existing.count += 1;
-      if (matches) existing.matchesSearch = true;
-      if (item.isFavorite) existing.hasFavorite = true;
-    }
-  });
-
-  const displayGroups = Array.from(groups.values())
-    .filter((g) => g.matchesSearch)
+  const filteredNotes = fetchedNotesData
+    .filter(
+      (item) =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.content.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     .sort((a, b) => {
-      if (a.hasFavorite && !b.hasFavorite) return -1;
-      if (!a.hasFavorite && b.hasFavorite) return 1;
-      return a.item.title.localeCompare(b.item.title);
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      return a.title.localeCompare(b.title);
     });
 
   return (
@@ -100,14 +75,14 @@ const NotesList = () => {
           />
         </div>
 
-        {displayGroups.length === 0 ? (
+        {filteredNotes.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
             No notes found.
           </p>
         ) : (
           <Table>
             <TableBody>
-              {displayGroups.map(({ item, count, hasFavorite }) => (
+              {filteredNotes.map((item) => (
                 <TableRow
                   onClick={() => handleClick(item.title)}
                   key={item._id}
@@ -117,7 +92,7 @@ const NotesList = () => {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5">
                         <span>{item.title}</span>
-                        {hasFavorite && (
+                        {item.isFavorite && (
                           <svg
                             className="h-3.5 w-3.5 fill-current text-yellow-500"
                             viewBox="0 0 24 24"
@@ -126,11 +101,6 @@ const NotesList = () => {
                           </svg>
                         )}
                       </div>
-                      {count > 1 && (
-                        <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
-                          {count}
-                        </span>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell className="hidden text-sm text-slate-500 sm:table-cell dark:text-slate-400">

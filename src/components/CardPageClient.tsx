@@ -34,6 +34,7 @@ import getURL from "@/lib/getURL";
 import axios from "axios";
 import getCards from "@/lib/getCards";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { extractRootDomain } from "@/lib/utils";
 
 import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
@@ -118,10 +119,19 @@ export default function CardPageClient({ name }: { name: string }) {
     }, 30000);
   };
 
+  const decodedSlug = decodeURIComponent(name)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
   const filteredPassData = fetchedPasswordsData.filter((item) => {
     const groupName = item.serviceName || item.name;
-    return groupName.toLowerCase() === name.toLowerCase();
+    return groupName.toLowerCase().replace(/\s+/g, "-") === decodedSlug;
   });
+
+  const actualName =
+    filteredPassData.length > 0
+      ? filteredPassData[0].serviceName || filteredPassData[0].name
+      : decodeURIComponent(name);
 
   const displayCards = filteredPassData.filter(
     (item) =>
@@ -261,11 +271,11 @@ export default function CardPageClient({ name }: { name: string }) {
   }
 
   return (
-    <section className="flex min-h-[calc(100vh-56px)] flex-col items-center bg-slate-50 px-4 py-6 sm:min-h-[calc(100vh-60px)] sm:py-10 dark:bg-[#0a0e1a]">
+    <section className="flex min-h-[calc(100vh-56px)] flex-col items-center bg-slate-50 px-4 pt-6 pb-28 sm:min-h-[calc(100vh-60px)] sm:pt-10 sm:pb-28 dark:bg-[#0a0e1a]">
       <div className="w-full max-w-md">
         <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-slate-900 sm:mb-6 sm:text-2xl dark:text-white">
           <CreditCard className="h-5 w-5 text-teal-500 sm:h-6 sm:w-6" />
-          <span className="capitalize">{name}</span>&apos;s Cards
+          <span className="capitalize">{actualName}</span>&apos;s Cards
         </h2>
 
         <div className="relative mb-5 sm:mb-6">
@@ -325,11 +335,13 @@ export default function CardPageClient({ name }: { name: string }) {
                             }
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center gap-1 text-xs text-emerald-600 transition-colors hover:text-emerald-700 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
+                            className="flex max-w-full items-center gap-1 truncate text-xs text-emerald-600 transition-colors hover:text-emerald-700 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
                             title="Visit Bank Website"
                           >
-                            <Globe className="h-3.5 w-3.5" />
-                            Website
+                            <Globe className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">
+                              {extractRootDomain(card.website)}
+                            </span>
                           </a>
                         )}
                       </div>
@@ -377,16 +389,11 @@ export default function CardPageClient({ name }: { name: string }) {
                       Card Number
                     </Label>
                     <div className="relative flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={
-                          visible[card._id as string]
-                            ? card.cardNumber.replace(/(\d{4})(?=\d)/g, "$1 ")
-                            : `•••• •••• •••• ${card.cardNumber.slice(-4)}`
-                        }
-                        readOnly
-                        className="h-10 flex-1 border-slate-200 bg-white/50 pr-20 font-mono text-sm tracking-widest text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200"
-                      />
+                      <div className="h-auto min-h-[40px] flex-1 rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm tracking-widest break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                        {visible[card._id as string]
+                          ? card.cardNumber.replace(/(\d{4})(?=\d)/g, "$1 ")
+                          : `•••• •••• •••• ${card.cardNumber.slice(-4)}`}
+                      </div>
                       <button
                         type="button"
                         aria-label={
@@ -429,14 +436,9 @@ export default function CardPageClient({ name }: { name: string }) {
                         CVV
                       </Label>
                       <div className="relative">
-                        <Input
-                          type={
-                            visible[`${card._id}-cvv`] ? "text" : "password"
-                          }
-                          value={card.cvv}
-                          readOnly
-                          className="h-10 border-slate-200 bg-white/50 pr-20 font-mono text-sm text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200"
-                        />
+                        <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                          {visible[`${card._id}-cvv`] ? card.cvv : "•••"}
+                        </div>
                         <button
                           type="button"
                           aria-label={
@@ -469,7 +471,7 @@ export default function CardPageClient({ name }: { name: string }) {
                       <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         Note
                       </Label>
-                      <p className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm text-slate-700 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-300">
+                      <p className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm break-words break-all whitespace-pre-wrap text-slate-700 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-300">
                         {card.note}
                       </p>
                     </div>
@@ -509,7 +511,7 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Card
@@ -680,7 +682,7 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Confirm Deletion

@@ -36,7 +36,9 @@ const CardsList = () => {
   }
 
   const handleClick = (name: string) => {
-    router.push(`/cards/${name.toLowerCase()}`);
+    router.push(
+      `/cards/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`
+    );
   };
 
   const groups = new Map<

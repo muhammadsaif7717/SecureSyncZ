@@ -174,7 +174,7 @@ export default function HealthDashboard() {
         {/* Details Grid */}
         <div className="grid gap-4 sm:grid-cols-3 sm:gap-6">
           {/* Weak Passwords */}
-          <div className="glass rounded-2xl p-5 shadow-lg shadow-black/5 dark:shadow-black/20">
+          <div className="glass min-w-0 rounded-2xl p-5 shadow-lg shadow-black/5 dark:shadow-black/20">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400">
                 <ShieldAlert className="h-5 w-5" />
@@ -189,7 +189,7 @@ export default function HealthDashboard() {
               </div>
             </div>
             {weakPasswords.length > 0 ? (
-              <div className="custom-scrollbar max-h-[60vh] space-y-2 overflow-y-auto pr-2 sm:max-h-[500px]">
+              <div className="custom-scrollbar max-h-[60vh] space-y-2 overflow-auto pr-2 pb-24 sm:max-h-[500px] sm:pb-0">
                 {weakPasswords.map((p) => (
                   <Link
                     key={p._id}
@@ -223,7 +223,7 @@ export default function HealthDashboard() {
           </div>
 
           {/* Reused Passwords */}
-          <div className="glass rounded-2xl p-5 shadow-lg shadow-black/5 dark:shadow-black/20">
+          <div className="glass min-w-0 rounded-2xl p-5 shadow-lg shadow-black/5 dark:shadow-black/20">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400">
                 <AlertTriangle className="h-5 w-5" />
@@ -238,7 +238,7 @@ export default function HealthDashboard() {
               </div>
             </div>
             {reusedPasswords.length > 0 ? (
-              <div className="custom-scrollbar max-h-[60vh] space-y-4 overflow-y-auto pr-2 sm:max-h-[500px]">
+              <div className="custom-scrollbar max-h-[60vh] space-y-4 overflow-auto pr-2 pb-24 sm:max-h-[500px] sm:pb-0">
                 {reusedPasswords.map((group, idx) => (
                   <div key={idx} className="space-y-1">
                     <p className="text-xs font-semibold text-slate-500">
@@ -248,9 +248,9 @@ export default function HealthDashboard() {
                       <Link
                         key={p._id}
                         href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
-                        className="flex items-center justify-between rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-yellow-50 dark:bg-white/5 dark:hover:bg-yellow-500/10"
+                        className="flex min-w-max items-center justify-between gap-4 rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-yellow-50 dark:bg-white/5 dark:hover:bg-yellow-500/10"
                       >
-                        <div className="flex min-w-0 items-center gap-2.5">
+                        <div className="flex items-center gap-2.5 whitespace-nowrap">
                           <img
                             src={`https://www.google.com/s2/favicons?domain=${extractRootDomain(p.website)}&sz=64`}
                             alt={`${extractRootDomain(p.website)} icon`}
@@ -260,7 +260,7 @@ export default function HealthDashboard() {
                                 "none";
                             }}
                           />
-                          <span className="truncate font-medium text-slate-700 dark:text-slate-300">
+                          <span className="font-medium text-slate-700 dark:text-slate-300">
                             {extractRootDomain(p.website)}
                           </span>
                         </div>
@@ -280,7 +280,7 @@ export default function HealthDashboard() {
           </div>
 
           {/* Old Passwords */}
-          <div className="glass rounded-2xl p-5 shadow-lg shadow-black/5 dark:shadow-black/20">
+          <div className="glass min-w-0 rounded-2xl p-5 shadow-lg shadow-black/5 dark:shadow-black/20">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
                 <Clock className="h-5 w-5" />
@@ -295,14 +295,14 @@ export default function HealthDashboard() {
               </div>
             </div>
             {oldPasswords.length > 0 ? (
-              <div className="custom-scrollbar max-h-[60vh] space-y-2 overflow-y-auto pr-2 sm:max-h-[500px]">
+              <div className="custom-scrollbar max-h-[60vh] space-y-2 overflow-auto pr-2 pb-24 sm:max-h-[500px] sm:pb-0">
                 {oldPasswords.map((p) => (
                   <Link
                     key={p._id}
                     href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
-                    className="flex items-center justify-between rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/10"
+                    className="flex min-w-max items-center justify-between gap-4 rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/10"
                   >
-                    <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 whitespace-nowrap">
                       <img
                         src={`https://www.google.com/s2/favicons?domain=${extractRootDomain(p.website)}&sz=64`}
                         alt={`${extractRootDomain(p.website)} icon`}
@@ -311,8 +311,8 @@ export default function HealthDashboard() {
                           (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
-                      <div className="flex min-w-0 flex-col overflow-hidden">
-                        <span className="truncate font-medium text-slate-700 dark:text-slate-300">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-slate-700 dark:text-slate-300">
                           {extractRootDomain(p.website)}
                         </span>
                         <span className="text-[10px] text-slate-400">

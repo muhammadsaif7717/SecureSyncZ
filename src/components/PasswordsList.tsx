@@ -39,7 +39,9 @@ const PasswordsList = () => {
   }
 
   const handleClick = (website: string) => {
-    router.push(`/passwords/${encodeURIComponent(website.toLowerCase())}`);
+    router.push(
+      `/passwords/${encodeURIComponent(website.toLowerCase().replace(/\s+/g, "-"))}`
+    );
   };
 
   const groups = new Map<

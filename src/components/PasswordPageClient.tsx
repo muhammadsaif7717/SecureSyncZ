@@ -104,11 +104,19 @@ export default function PasswordPageClient({ name }: { name: string }) {
     }, 30000);
   };
 
-  const decodedName = decodeURIComponent(name).toLowerCase();
+  const decodedSlug = decodeURIComponent(name)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
 
-  const filteredPassData = fetchedPasswordsData.filter(
-    (item) => extractRootDomain(item.website).toLowerCase() === decodedName
-  );
+  const filteredPassData = fetchedPasswordsData.filter((item) => {
+    const rootDomain = extractRootDomain(item.website);
+    return rootDomain.toLowerCase().replace(/\s+/g, "-") === decodedSlug;
+  });
+
+  const actualName =
+    filteredPassData.length > 0
+      ? extractRootDomain(filteredPassData[0].website)
+      : decodeURIComponent(name);
 
   const displayPassData = filteredPassData.filter((item) =>
     item.username.toLowerCase().includes(searchQuery.toLowerCase())
@@ -270,7 +278,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
   }
 
   return (
-    <section>
+    <section className="pb-28">
       <div className="mx-auto max-w-xl px-4 py-6 sm:p-6">
         <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-slate-900 sm:mb-6 sm:text-2xl dark:text-white">
           <img
@@ -281,7 +289,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
               (e.target as HTMLImageElement).style.display = "none";
             }}
           />
-          <span className="capitalize">{name}</span> Passwords
+          <span className="capitalize">{actualName}</span> Passwords
         </h2>
 
         <div className="relative mb-5 sm:mb-6">
@@ -352,11 +360,9 @@ export default function PasswordPageClient({ name }: { name: string }) {
                       Username
                     </Label>
                     <div className="relative">
-                      <Input
-                        value={item.username}
-                        readOnly
-                        className="h-10 border-slate-200 bg-white/50 pr-10 text-sm dark:border-white/[0.08] dark:bg-white/5"
-                      />
+                      <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-10 text-sm break-words break-all whitespace-pre-wrap dark:border-white/[0.08] dark:bg-white/5">
+                        {item.username}
+                      </div>
                       <button
                         type="button"
                         aria-label="Copy username"
@@ -382,10 +388,12 @@ export default function PasswordPageClient({ name }: { name: string }) {
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-emerald-600 transition-colors hover:text-emerald-700 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
+                        className="inline-flex max-w-full items-center gap-1.5 truncate text-sm text-emerald-600 transition-colors hover:text-emerald-700 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
                       >
-                        <Globe className="h-4 w-4" />
-                        {item.website}
+                        <Globe className="h-4 w-4 shrink-0" />
+                        <span className="truncate">
+                          {extractRootDomain(item.website)}
+                        </span>
                       </a>
                     </div>
                   </div>
@@ -397,12 +405,11 @@ export default function PasswordPageClient({ name }: { name: string }) {
                       Password
                     </Label>
                     <div className="relative">
-                      <Input
-                        type={visible[item._id as string] ? "text" : "password"}
-                        value={item.password}
-                        readOnly
-                        className="h-10 border-slate-200 bg-white/50 pr-20 text-sm dark:border-white/[0.08] dark:bg-white/5"
-                      />
+                      <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 text-sm break-words break-all whitespace-pre-wrap dark:border-white/[0.08] dark:bg-white/5">
+                        {visible[item._id as string]
+                          ? item.password
+                          : "•".repeat(Math.min(item.password.length, 64))}
+                      </div>
                       <button
                         type="button"
                         aria-label={
@@ -435,19 +442,17 @@ export default function PasswordPageClient({ name }: { name: string }) {
                     <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       Note
                     </Label>
-                    <Input
-                      placeholder={item.note || "No note available"}
-                      readOnly
-                      className="h-10 border-slate-200 bg-white/50 text-sm dark:border-white/[0.08] dark:bg-white/5"
-                    />
+                    <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 text-sm break-words break-all whitespace-pre-wrap text-slate-500 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-400">
+                      {item.note || "No note available"}
+                    </div>
                   </div>
                 </div>
 
                 {/* Action buttons — stack on mobile */}
-                <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:justify-between sm:gap-4 sm:pt-4">
+                <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:justify-end sm:gap-4 sm:pt-4">
                   <Button
                     variant="outline"
-                    className="h-10 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:w-1/4 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                    className="h-10 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:w-28 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                     onClick={() => {
                       setEditableData(item);
                       setIsDialogOpen(true);
@@ -461,12 +466,9 @@ export default function PasswordPageClient({ name }: { name: string }) {
                       setIsDeleteDialogOpen(true);
                     }}
                     variant="destructive"
-                    className="h-10 text-sm sm:w-1/4"
+                    className="h-10 text-sm sm:w-28"
                   >
                     Delete
-                  </Button>
-                  <Button variant="secondary" className="h-10 text-sm sm:w-1/4">
-                    Share
                   </Button>
                 </div>
               </div>
@@ -477,7 +479,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Password
@@ -586,7 +588,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Confirm Deletion

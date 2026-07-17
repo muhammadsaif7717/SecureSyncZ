@@ -72,7 +72,7 @@ export default function VerifyPasskey({ reasonText }: VerifyPasskeyProps) {
                     <InputOTPSlot
                       key={i}
                       index={i}
-                      className="h-12 w-12 rounded-md border-slate-200 bg-white/60 text-lg sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
+                      className="h-10 w-10 rounded-md border-slate-200 bg-white/60 text-base sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
                     />
                   ))}
                 </InputOTPGroup>
