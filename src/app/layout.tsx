@@ -8,6 +8,7 @@ import QueryProvider from "@/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 import PasskeyModal from "@/components/PasskeyModal";
+import { EncryptionProvider } from "@/providers/EncryptionProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geistMono = Geist_Mono({
@@ -102,14 +103,16 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              <Navbar />
-              <main className="safe-bottom">{children}</main>
-              <Toaster
-                toastOptions={{
-                  className: "glass !border-emerald-500/20 !text-foreground",
-                }}
-              />
-              <PasskeyModal />
+              <EncryptionProvider>
+                <Navbar />
+                <main className="safe-bottom">{children}</main>
+                <Toaster
+                  toastOptions={{
+                    className: "glass !border-emerald-500/20 !text-foreground",
+                  }}
+                />
+                <PasskeyModal />
+              </EncryptionProvider>
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

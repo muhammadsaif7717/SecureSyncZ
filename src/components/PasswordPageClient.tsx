@@ -37,9 +37,12 @@ import getURL from "@/lib/getURL";
 import axios from "axios";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { extractRootDomain } from "@/lib/utils";
+import { useEncryption } from "@/providers/EncryptionProvider";
+import { encryptData } from "@/lib/clientCrypto";
+import VerifyPasskey from "@/components/VerifyPasskey";
 
-const loadPasswordsData = async () => {
-  const data = await getPasswords();
+const loadPasswordsData = async (cryptoKey: CryptoKey | null) => {
+  const data = await getPasswords(cryptoKey);
   return data;
 };
 
@@ -49,47 +52,17 @@ export default function PasswordPageClient({ name }: { name: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editableData, setEditableData] = useState<PasswordsData | null>(null);
 
-  const [isVerified, setIsVerified] = useState(false);
-  const [passkey, setPasskey] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const { cryptoKey, isUnlocked } = useEncryption();
+
   const { data, isLoading, refetch } = useQuery<PasswordsData[]>({
-    queryKey: ["passwords"],
-    queryFn: loadPasswordsData,
+    queryKey: ["passwords", !!cryptoKey],
+    queryFn: () => loadPasswordsData(cryptoKey),
   });
 
   const fetchedPasswordsData = data ?? [];
-
-  const handleVerify = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (passkey.length !== 6) return;
-
-    setIsVerifying(true);
-    try {
-      const response = await axios.post("/api/v1/auth/passkey/verify", {
-        passkey,
-      });
-      if (response.data.success) {
-        setIsVerified(true);
-        showToast({ title: "Success", description: "Passkey verified!" });
-      }
-    } catch (err) {
-      showToast({ title: "Error", description: "Invalid passkey. Try again." });
-      setPasskey("");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  useEffect(() => {
-    if (passkey.length === 6 && !isVerifying) {
-      handleVerify();
-    }
-  }, [passkey]);
-
   if (isLoading) {
     return (
       <div className="mt-10 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
@@ -109,8 +82,26 @@ export default function PasswordPageClient({ name }: { name: string }) {
     navigator.clipboard.writeText(text);
     showToast({
       title: "✅ Copied to clipboard",
-      description: `${type === "password" ? "Password" : "Username"} has been copied successfully.`,
+      description: `${type === "password" ? "Password" : "Username"} has been copied successfully. It will be cleared from your clipboard in 30 seconds.`,
     });
+
+    // Auto-clear clipboard after 30 seconds
+    setTimeout(async () => {
+      try {
+        const currentClipboard = await navigator.clipboard.readText();
+        // Only clear if the clipboard still contains the text we copied
+        if (currentClipboard === text) {
+          await navigator.clipboard.writeText("");
+          showToast({
+            title: "🛡️ Clipboard Cleared",
+            description:
+              "Your copied data has been removed from the clipboard for security.",
+          });
+        }
+      } catch (e) {
+        // Ignore clipboard read errors (e.g. if document lost focus)
+      }
+    }, 30000);
   };
 
   const decodedName = decodeURIComponent(name).toLowerCase();
@@ -160,16 +151,24 @@ export default function PasswordPageClient({ name }: { name: string }) {
     e.preventDefault();
     if (!editableData) return;
 
+    const encryptedPassword = await encryptData(
+      editableData.password,
+      cryptoKey!
+    );
+    const encryptedNote = editableData.note
+      ? await encryptData(editableData.note, cryptoKey!)
+      : "";
+
     const EditedData = {
       username: editableData.username,
-      password: editableData.password,
-      note: editableData.note,
+      password: encryptedPassword,
+      note: encryptedNote,
       website: editableData.website,
     };
 
     const id = editableData._id;
     const url = await getURL();
-    console.log(url);
+    // console.log(url);
 
     try {
       const response = await axios.put(
@@ -199,10 +198,16 @@ export default function PasswordPageClient({ name }: { name: string }) {
   const handleToggleFavorite = async (item: PasswordsData) => {
     try {
       const url = await getURL();
+      // Need to re-encrypt password/note because they are currently decrypted in `item`
+      const encryptedPassword = await encryptData(item.password, cryptoKey!);
+      const encryptedNote = item.note
+        ? await encryptData(item.note, cryptoKey!)
+        : "";
+
       await axios.put(`${url}/passwords/update/${item._id}`, {
         username: item.username,
-        password: item.password,
-        note: item.note,
+        password: encryptedPassword,
+        note: encryptedNote,
         website: item.website,
         isFavorite: !item.isFavorite,
         tags: item.tags,
@@ -251,60 +256,16 @@ export default function PasswordPageClient({ name }: { name: string }) {
     );
   }
 
-  if (!isVerified) {
+  if (!isUnlocked) {
     return (
-      <section className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center bg-slate-50 px-4 py-6 sm:min-h-[calc(100vh-60px)] dark:bg-[#0a0e1a]">
-        <div className="w-full max-w-md">
-          <Card className="glass overflow-hidden rounded-2xl border border-emerald-500/20 p-6 shadow-xl dark:shadow-emerald-500/5">
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                <KeyRound className="h-6 w-6" />
-              </div>
-              <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-white">
-                Verify Passkey
-              </h2>
-              <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-                Please enter your 6-digit passkey to access passwords for{" "}
-                <span className="font-semibold capitalize">{name}</span>.
-              </p>
-
-              <form
-                onSubmit={handleVerify}
-                className="flex w-full flex-col items-center space-y-6"
-              >
-                <InputOTP
-                  maxLength={6}
-                  pattern={REGEXP_ONLY_DIGITS}
-                  value={passkey}
-                  onChange={(value) => setPasskey(value)}
-                  autoFocus
-                >
-                  <InputOTPGroup className="gap-2">
-                    {[...Array(6)].map((_, i) => (
-                      <InputOTPSlot
-                        key={i}
-                        index={i}
-                        className="h-12 w-12 rounded-md border-slate-200 bg-white/60 text-lg sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
-                      />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
-
-                <Button
-                  type="submit"
-                  disabled={passkey.length !== 6 || isVerifying}
-                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-emerald-500/25 active:scale-[0.99] dark:from-emerald-500 dark:to-teal-500"
-                >
-                  {isVerifying ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Verify Access
-                </Button>
-              </form>
-            </div>
-          </Card>
-        </div>
-      </section>
+      <VerifyPasskey
+        reasonText={
+          <>
+            Please enter your 6-digit passkey to access passwords for{" "}
+            <span className="font-semibold capitalize">{name}</span>.
+          </>
+        }
+      />
     );
   }
 
@@ -516,7 +477,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
+        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Password
@@ -625,7 +586,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] rounded-2xl sm:mx-auto sm:max-w-md">
+        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] rounded-2xl bg-white sm:mx-auto sm:max-w-md dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Confirm Deletion

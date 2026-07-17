@@ -103,7 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Logged In Successfully",
           description: `Welcome back, ${response.data.user.username}!`,
         });
-        router.push("/passwords");
       }
     } catch (error) {
       let errorMsg = "Login failed. Please check credentials.";
@@ -134,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Registration Successful",
           description: `Welcome to SecureSyncZ, ${response.data.user.username}!`,
         });
-        router.push("/passwords");
+        // Redirect is handled by the caller (SignUpPage) after EmergencyKitModal
       }
     } catch (error) {
       let errorMsg = "Registration failed. Please try again.";

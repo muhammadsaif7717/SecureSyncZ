@@ -5,14 +5,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, EyeOff, Key, CreditCard, RefreshCw } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Key,
+  CreditCard,
+  RefreshCw,
+  FileText,
+  KeyRound,
+  Loader2,
+} from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
-import { CardsData, PasswordsData } from "@/types";
+import { useEncryption } from "@/providers/EncryptionProvider";
+import { encryptData } from "@/lib/clientCrypto";
+import { CardsData, PasswordsData, NotesData } from "@/types";
 import axios from "axios";
 import getURL from "@/lib/getURL";
 import { showToast } from "@/lib/toast";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import VerifyPasskey from "@/components/VerifyPasskey";
 
 const formatExpiry = (value: string) => {
   const digits = value.replace(/\D/g, "");
@@ -27,6 +45,7 @@ const formatExpiry = (value: string) => {
 
 export default function PostPage() {
   const { user, isLoading } = useAuth();
+  const { isUnlocked, cryptoKey } = useEncryption();
 
   const [newPassword, setNewPassword] = useState<PasswordsData>({
     user: {
@@ -55,6 +74,17 @@ export default function PostPage() {
     expiry: "",
     cvv: "",
     note: "",
+    tags: [],
+  });
+
+  const [newNote, setNewNote] = useState<NotesData>({
+    user: {
+      email: user?.email || "",
+      username: user?.username || "",
+    },
+    createdAt: new Date().toISOString(),
+    title: "",
+    content: "",
     tags: [],
   });
 
@@ -112,6 +142,10 @@ export default function PostPage() {
         ...prev,
         user: { email: user.email, username: user.username },
       }));
+      setNewNote((prev) => ({
+        ...prev,
+        user: { email: user.email, username: user.username },
+      }));
     }
   }, [user]);
 
@@ -121,20 +155,30 @@ export default function PostPage() {
         Loading...
       </div>
     );
-  if (!user)
+  if (!user) return null;
+  if (!isUnlocked) {
     return (
-      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-        Sign in to view this page
-      </div>
+      <VerifyPasskey reasonText="Please enter your 6-digit passkey to add items." />
     );
+  }
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const url = await getURL();
 
-    // Ensure user credentials are explicitly set
+    // Encrypt sensitive fields locally
+    const encryptedPassword = await encryptData(
+      newPassword.password,
+      cryptoKey!
+    );
+    const encryptedNote = newPassword.note
+      ? await encryptData(newPassword.note, cryptoKey!)
+      : "";
+
     const passwordPayload = {
       ...newPassword,
+      password: encryptedPassword,
+      note: encryptedNote,
       user: {
         email: user.email,
         username: user.username,
@@ -173,9 +217,23 @@ export default function PostPage() {
     e.preventDefault();
     const url = await getURL();
 
-    // Ensure user credentials are explicitly set
+    // Encrypt sensitive card fields locally
+    const encryptedCardNumber = await encryptData(
+      newCard.cardNumber,
+      cryptoKey!
+    );
+    const encryptedExpiry = await encryptData(newCard.expiry, cryptoKey!);
+    const encryptedCvv = await encryptData(newCard.cvv, cryptoKey!);
+    const encryptedNote = newCard.note
+      ? await encryptData(newCard.note, cryptoKey!)
+      : "";
+
     const cardPayload = {
       ...newCard,
+      cardNumber: encryptedCardNumber,
+      expiry: encryptedExpiry,
+      cvv: encryptedCvv,
+      note: encryptedNote,
       user: {
         email: user.email,
         username: user.username,
@@ -214,6 +272,47 @@ export default function PostPage() {
     });
   };
 
+  const handleNoteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const url = await getURL();
+
+    const encryptedContent = await encryptData(newNote.content, cryptoKey!);
+
+    const notePayload = {
+      ...newNote,
+      content: encryptedContent,
+      user: {
+        email: user.email,
+        username: user.username,
+      },
+    };
+
+    try {
+      await axios.post(`${url}/notes/post`, notePayload);
+      showToast({
+        title: "Note Saved Successfully",
+        description: "Your secure note has been stored.",
+      });
+    } catch (error) {
+      console.error("Error saving note:", error);
+      showToast({
+        title: "Error Saving Note",
+        description: "Please try again.",
+      });
+    }
+
+    setNewNote({
+      user: {
+        email: user.email,
+        username: user.username,
+      },
+      createdAt: new Date().toISOString(),
+      title: "",
+      content: "",
+      tags: [],
+    });
+  };
+
   const inputClasses =
     "h-11 sm:h-10 text-sm border-slate-200 bg-white/60 transition-colors focus:border-emerald-300 focus:bg-white dark:border-white/10 dark:bg-white/5 dark:placeholder-slate-500 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]";
 
@@ -246,6 +345,13 @@ export default function PostPage() {
               >
                 <CreditCard className="h-4 w-4" />
                 Credit Cards
+              </TabsTrigger>
+              <TabsTrigger
+                value="note"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-slate-500 transition-all duration-300 hover:text-slate-700 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border dark:data-[state=active]:border-white/5 dark:data-[state=active]:bg-gradient-to-br dark:data-[state=active]:from-[#1e293b] dark:data-[state=active]:to-[#0f172a] dark:data-[state=active]:text-emerald-400 dark:data-[state=active]:shadow-black/50"
+              >
+                <FileText className="h-4 w-4" />
+                Secure Notes
               </TabsTrigger>
             </TabsList>
 
@@ -485,6 +591,60 @@ export default function PostPage() {
                       className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.99] sm:h-10 dark:from-emerald-500 dark:to-teal-500"
                     >
                       Save Secure Card
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="note">
+              <Card className="border-0 bg-transparent shadow-none">
+                <CardHeader className="px-0 pt-0">
+                  <CardTitle className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
+                    Add Secure Note
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3.5 px-0 pb-0 sm:space-y-4">
+                  <form
+                    onSubmit={handleNoteSubmit}
+                    className="space-y-3.5 sm:space-y-4"
+                  >
+                    <Input
+                      placeholder="Note Title"
+                      value={newNote.title}
+                      onChange={(e) =>
+                        setNewNote({ ...newNote, title: e.target.value })
+                      }
+                      required
+                      className={inputClasses}
+                    />
+                    <Textarea
+                      placeholder="Write your secure note here..."
+                      value={newNote.content}
+                      onChange={(e) =>
+                        setNewNote({ ...newNote, content: e.target.value })
+                      }
+                      required
+                      className={`${textareaClasses} min-h-[150px]`}
+                    />
+                    <Input
+                      placeholder="Tags (comma separated, e.g. Personal, Work)"
+                      value={newNote.tags?.join(", ") || ""}
+                      onChange={(e) =>
+                        setNewNote({
+                          ...newNote,
+                          tags: e.target.value
+                            .split(",")
+                            .map((t) => t.trimStart()),
+                        })
+                      }
+                      className={inputClasses}
+                    />
+                    <Button
+                      type="submit"
+                      className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.99] sm:h-10 dark:from-emerald-500 dark:to-teal-500"
+                    >
+                      Save Secure Note
                     </Button>
                   </form>
                 </CardContent>

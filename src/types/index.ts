@@ -31,3 +31,13 @@ export type CardsData = {
   isFavorite?: boolean;
   tags?: string[];
 };
+
+export type NotesData = {
+  _id?: string;
+  createdAt: string;
+  user: UserData;
+  title: string;
+  content: string;
+  isFavorite?: boolean;
+  tags?: string[];
+};

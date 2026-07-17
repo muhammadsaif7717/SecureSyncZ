@@ -28,6 +28,8 @@ import {
   Upload,
   Search,
   ShieldCheck,
+  FileText,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -37,11 +39,14 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/AuthProvider";
 import { GlobalSearchModal } from "@/components/GlobalSearchModal";
 import { BackupModal } from "@/components/BackupModal";
-import { useState } from "react";
+import { EmergencyKitModal } from "@/components/EmergencyKitModal";
+import { useState, useEffect } from "react";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const navLinks = [
   { href: "/cards", label: "Cards", icon: CreditCard },
   { href: "/passwords", label: "Passwords", icon: Key },
+  { href: "/notes", label: "Notes", icon: FileText },
   { href: "/add", label: "Add", icon: PlusCircle },
   { href: "/health", label: "Health", icon: ShieldCheck },
 ];
@@ -57,6 +62,25 @@ export default function Navbar() {
   const [backupAction, setBackupAction] = useState<"export" | "import">(
     "export"
   );
+  const [showEmergencyKit, setShowEmergencyKit] = useState(false);
+  const [secretKey, setSecretKey] = useState("");
+  const isVisible = useScrollDirection();
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  useEffect(() => {
+    const index = navLinks.findIndex((link) => pathname === link.href);
+    setActiveIndex(index);
+  }, [pathname]);
+
+  const handleNavClick = () => {
+    if (
+      typeof window !== "undefined" &&
+      window.navigator &&
+      window.navigator.vibrate
+    ) {
+      window.navigator.vibrate(50);
+    }
+  };
 
   const openBackupModal = (
     type: "passwords" | "cards",
@@ -67,6 +91,18 @@ export default function Navbar() {
     setBackupModalOpen(true);
   };
 
+  const openEmergencyKit = () => {
+    const key = localStorage.getItem("secureSyncZ_secretKey");
+    if (key) {
+      setSecretKey(key);
+      setShowEmergencyKit(true);
+    } else {
+      toast.error(
+        "No Emergency Kit found. Please enter your passkey on the Passwords page to upgrade your vault first."
+      );
+    }
+  };
+
   return (
     <>
       <BackupModal
@@ -74,6 +110,11 @@ export default function Navbar() {
         onClose={() => setBackupModalOpen(false)}
         type={backupType}
         action={backupAction}
+      />
+      <EmergencyKitModal
+        isOpen={showEmergencyKit}
+        secretKey={secretKey}
+        onConfirm={() => setShowEmergencyKit(false)}
       />
       <header className="sticky top-0 z-50 w-full border-b border-black/[0.06] bg-white/70 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#0a0e1a]/80">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-[60px] sm:px-6">
@@ -213,6 +254,16 @@ export default function Navbar() {
                         </div>
 
                         <button
+                          onClick={openEmergencyKit}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
+                            <ShieldAlert className="h-4 w-4" />
+                          </div>
+                          Emergency Kit (PDF)
+                        </button>
+
+                        <button
                           onClick={() => openBackupModal("passwords", "export")}
                           className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
                         >
@@ -300,34 +351,44 @@ export default function Navbar() {
 
       {/* Floating Bottom Nav (Only shown when logged in) */}
       {user && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center justify-center rounded-full border border-black/5 bg-white/80 px-2 py-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#0a0e1a]/80">
-          <nav className="flex gap-2 sm:gap-4">
-            {navLinks.map((link) => {
+        <div
+          className={cn(
+            "fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center justify-center rounded-[20px] border border-black/5 bg-white/80 px-2 py-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-in-out dark:border-white/10 dark:bg-[#0a0e1a]/80",
+            isVisible ? "translate-y-0" : "translate-y-[150%]"
+          )}
+        >
+          <nav className="relative flex gap-2 sm:gap-4">
+            {navLinks.map((link, idx) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  onClick={handleNavClick}
                   className={cn(
-                    "group relative flex w-16 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 sm:w-20 sm:text-xs",
+                    "group relative z-10 flex w-16 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:text-xs",
                     isActive
-                      ? "bg-emerald-50/50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
-                      : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                   )}
                 >
+                  {/* Active background pill */}
+                  <div
+                    className={cn(
+                      "absolute inset-0 -z-10 rounded-2xl bg-emerald-50/80 transition-all duration-500 ease-out dark:bg-emerald-500/15",
+                      isActive ? "scale-100 opacity-100" : "scale-50 opacity-0"
+                    )}
+                  />
                   <Icon
                     className={cn(
                       "mb-0.5 transition-all duration-300",
                       isActive
                         ? "h-6 w-6 scale-110"
-                        : "h-5 w-5 group-hover:scale-110"
+                        : "h-5 w-5 group-hover:-translate-y-0.5 group-hover:scale-110"
                     )}
                   />
                   <span className="tracking-wide">{link.label}</span>
-                  {isActive && (
-                    <span className="animate-fade-in-up absolute -bottom-2 h-1 w-8 rounded-full bg-emerald-500 shadow-[0_0_8px_0_rgba(16,185,129,0.5)]" />
-                  )}
                 </Link>
               );
             })}

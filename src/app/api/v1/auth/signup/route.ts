@@ -2,9 +2,20 @@ import { connectDB } from "@/lib/connectDB";
 import { signToken } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const isAllowed = checkRateLimit(`signup_${ip}`, 5, 15 * 60 * 1000); // 5 attempts per 15 mins
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: "Too many signup attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const { username, email, password } = await req.json();
 
     if (!username || !email || !password) {

@@ -8,18 +8,20 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import getCards from "@/lib/getCards";
 import { CardsData } from "@/types";
+import { useEncryption } from "@/providers/EncryptionProvider";
 
-const loadCardsData = async () => {
-  const data = await getCards();
+const loadCardsData = async (cryptoKey: CryptoKey | null) => {
+  const data = await getCards(cryptoKey);
   return data;
 };
 
 const CardsList = () => {
   const router = useRouter();
+  const { cryptoKey } = useEncryption();
 
   const { data = [], isLoading } = useQuery<CardsData[]>({
-    queryKey: ["cards"],
-    queryFn: loadCardsData,
+    queryKey: ["cards", !!cryptoKey],
+    queryFn: () => loadCardsData(cryptoKey),
   });
   const fetchedCardsData = data ?? [];
 

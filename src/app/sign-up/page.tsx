@@ -14,8 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Shield, Mail, User } from "lucide-react";
-import Link from "next/link";
 import { showToast } from "@/lib/toast";
+import { generateSecretKey } from "@/lib/clientCrypto";
+import { EmergencyKitModal } from "@/components/EmergencyKitModal";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignUpPage() {
   const { signup, isLoading } = useAuth();
@@ -25,6 +28,9 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [secretKey, setSecretKey] = useState("");
+  const [showEmergencyKit, setShowEmergencyKit] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,12 +54,32 @@ export default function SignUpPage() {
 
     setIsSubmitting(true);
     try {
+      // Create user
       await signup(username, email, password);
+
+      // Immediately generate Secret Key
+      const newSecretKey = generateSecretKey();
+
+      // Save it securely to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("secureSyncZ_secretKey", newSecretKey);
+      }
+
+      setSecretKey(newSecretKey);
+      setShowEmergencyKit(true);
+
+      // Note: We no longer automatically redirect to /passwords here.
+      // We wait for the user to confirm the Emergency Kit modal.
     } catch (error) {
-      console.error("Signup page error:", error);
+      // Error is handled and toasted by AuthProvider
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEmergencyKitConfirm = () => {
+    setShowEmergencyKit(false);
+    router.push("/passwords");
   };
 
   return (
@@ -194,6 +220,13 @@ export default function SignUpPage() {
           </p>
         </CardFooter>
       </Card>
+
+      {/* Zero Knowledge Emergency Kit Modal */}
+      <EmergencyKitModal
+        isOpen={showEmergencyKit}
+        secretKey={secretKey}
+        onConfirm={handleEmergencyKitConfirm}
+      />
     </div>
   );
 }

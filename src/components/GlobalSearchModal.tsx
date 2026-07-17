@@ -14,13 +14,16 @@ import { useQuery } from "@tanstack/react-query";
 import getPasswords from "@/lib/getPasswords";
 import getCards from "@/lib/getCards";
 import { useAuth } from "@/providers/AuthProvider";
+import { useEncryption } from "@/providers/EncryptionProvider";
 import { extractRootDomain } from "@/lib/utils";
+import { PasswordsData, CardsData } from "@/types";
 
 export function GlobalSearchModal() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const router = useRouter();
   const { user } = useAuth();
+  const { cryptoKey } = useEncryption();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -36,30 +39,31 @@ export function GlobalSearchModal() {
   }, [user]);
 
   const { data: passwords = [], isLoading: pLoading } = useQuery({
-    queryKey: ["passwords"],
-    queryFn: getPasswords,
+    queryKey: ["passwords", !!cryptoKey],
+    queryFn: () => getPasswords(cryptoKey),
     enabled: open && !!user,
   });
 
   const { data: cards = [], isLoading: cLoading } = useQuery({
-    queryKey: ["cards"],
-    queryFn: getCards,
+    queryKey: ["cards", !!cryptoKey],
+    queryFn: () => getCards(cryptoKey),
     enabled: open && !!user,
   });
 
   const isLoading = pLoading || cLoading;
 
   const filteredPasswords = passwords.filter(
-    (p: any) =>
+    (p: PasswordsData) =>
       p.website.toLowerCase().includes(query.toLowerCase()) ||
       p.username.toLowerCase().includes(query.toLowerCase()) ||
       (p.note && p.note.toLowerCase().includes(query.toLowerCase()))
   );
 
   const filteredCards = cards.filter(
-    (c: any) =>
+    (c: CardsData) =>
       c.name.toLowerCase().includes(query.toLowerCase()) ||
-      c.serviceName.toLowerCase().includes(query.toLowerCase()) ||
+      (c.serviceName &&
+        c.serviceName.toLowerCase().includes(query.toLowerCase())) ||
       c.cardNumber.includes(query) ||
       (c.note && c.note.toLowerCase().includes(query.toLowerCase()))
   );
@@ -78,7 +82,7 @@ export function GlobalSearchModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="glass mx-4 max-w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-2xl p-0 sm:mx-auto sm:max-w-xl">
+      <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-2xl bg-white p-0 sm:mx-auto sm:max-w-xl dark:bg-slate-900">
         <DialogTitle className="sr-only">Global Search</DialogTitle>
         <DialogDescription className="sr-only">
           Search across all your passwords and credit cards
@@ -112,18 +116,27 @@ export function GlobalSearchModal() {
                   <h3 className="px-3 py-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
                     Passwords
                   </h3>
-                  {filteredPasswords.map((p: any) => (
+                  {filteredPasswords.map((p: PasswordsData) => (
                     <button
                       key={p._id}
                       onClick={() => handleSelectPassword(p.website)}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                        <Key className="h-4 w-4" />
+                        <img
+                          src={`https://www.google.com/s2/favicons?domain=${extractRootDomain(p.website)}&sz=64`}
+                          alt={`${extractRootDomain(p.website)} icon`}
+                          className="h-5 w-5 rounded-sm bg-white p-0.5 shadow-sm"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                            // Fallback could be a key icon but hiding is fine as it falls back to the div background
+                          }}
+                        />
                       </div>
                       <div className="flex flex-col overflow-hidden">
-                        <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                          {p.website}
+                        <span className="truncate text-sm font-medium text-slate-900 capitalize dark:text-slate-100">
+                          {extractRootDomain(p.website)}
                         </span>
                         <span className="truncate text-xs text-slate-500">
                           {p.username}
@@ -139,7 +152,7 @@ export function GlobalSearchModal() {
                   <h3 className="px-3 py-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
                     Credit Cards
                   </h3>
-                  {filteredCards.map((c: any) => (
+                  {filteredCards.map((c: CardsData) => (
                     <button
                       key={c._id}
                       onClick={() => handleSelectCard(c.name)}

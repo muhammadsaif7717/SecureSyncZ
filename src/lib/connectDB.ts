@@ -38,7 +38,7 @@ export const connectDB = async () => {
       .collection("cards")
       .createIndex({ "user.email": 1, "user.username": 1 });
 
-    console.log("Connected to MongoDB and verified indexes");
+    // console.log("Connected to MongoDB and verified indexes");
     return db;
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
