@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Shield, Key, CreditCard, ArrowRight, Clipboard } from "lucide-react";
+import { Shield, Key, CreditCard, ArrowRight, Database, FileText, Search } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
 export default function Home() {
@@ -22,13 +22,25 @@ export default function Home() {
         "Manage your credit cards, expiry dates, and CVVs securely with categories and global search.",
     },
     {
+      icon: <FileText className="h-5 w-5 text-purple-500 sm:h-6 sm:w-6" />,
+      title: "Secure Notes",
+      description:
+        "Keep your sensitive information, API keys, and private texts encrypted and safely stored.",
+    },
+    {
       icon: <Shield className="h-5 w-5 text-cyan-500 sm:h-6 sm:w-6" />,
       title: "Password Health",
       description:
         "Built-in dashboard to instantly detect weak, reused, or outdated passwords in your vault.",
     },
     {
-      icon: <Clipboard className="h-5 w-5 text-green-500 sm:h-6 sm:w-6" />,
+      icon: <Search className="h-5 w-5 text-blue-500 sm:h-6 sm:w-6" />,
+      title: "Global Search",
+      description:
+        "Instantly find any credential from anywhere using the Cmd+K Command Palette.",
+    },
+    {
+      icon: <Database className="h-5 w-5 text-green-500 sm:h-6 sm:w-6" />,
       title: "Encrypted Backups",
       description:
         "Export and import your entire vault as an AES-256 encrypted JSON file using a master password.",
@@ -55,14 +67,14 @@ export default function Home() {
             Securely Manage Your
           </span>
           <span className="gradient-text mt-1 block sm:mt-2">
-            Passwords & Credit Cards
+            Passwords, Cards & Notes
           </span>
         </h1>
 
         {/* Subtitle */}
         <p className="animate-fade-in-up stagger-1 mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mt-6 sm:max-w-2xl sm:text-base md:text-lg dark:text-slate-400">
           SecureSyncZ provides a premium, client-side verified vault to store
-          and access your sensitive data securely. Protected by custom JWT
+          and access your passwords, credit cards, and secure notes. Protected by custom JWT
           authentication and modern 6-digit Passkeys for lightning-fast access.
         </p>
 
@@ -102,7 +114,7 @@ export default function Home() {
 
         {/* Features Section */}
         <div className="animate-fade-in-up stagger-3 mx-auto mt-16 max-w-5xl sm:mt-24">
-          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {features.map((feature, idx) => (
               <div
                 key={idx}
