@@ -39,6 +39,24 @@ export async function POST(req: Request) {
     }
 
     const { newEmail } = body;
+
+    if (newEmail && newEmail.toLowerCase() !== user.email.toLowerCase()) {
+      const existingUser = await db.collection("users").findOne({
+        email: newEmail.toLowerCase(),
+        _id: { $ne: new ObjectId(userPayload.id) },
+      });
+
+      if (existingUser) {
+        return NextResponse.json(
+          {
+            error:
+              "This email is already in use by another account. Please try a different email.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     const targetEmail = newEmail ? newEmail.toLowerCase() : user.email;
 
     // Generate 6-digit OTP

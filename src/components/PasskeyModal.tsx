@@ -21,7 +21,7 @@ import axios from "axios";
 import { showToast } from "@/lib/toast";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
-const protectedPaths = ["/passwords", "/cards", "/post", "/edit-profile"];
+const protectedPaths = ["/passwords", "/cards", "/post", "/profile"];
 
 export default function PasskeyModal() {
   const { user, updateUser, isLoading: authLoading } = useAuth();

@@ -238,13 +238,13 @@ export default function Navbar() {
                         </div>
                         <SheetClose asChild>
                           <Link
-                            href="/edit-profile"
+                            href="/profile"
                             className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
                           >
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
                               <UserIcon className="h-4 w-4" />
                             </div>
-                            Edit Profile
+                            Profile
                           </Link>
                         </SheetClose>
 

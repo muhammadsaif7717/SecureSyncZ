@@ -1,15 +1,7 @@
-* [ ] 
-
 <div align="center">
   <img src="public/logo.png" alt="SecureSyncZ Logo" width="120" height="120" />
   <h1>SecureSyncZ</h1>
   <p><strong>Secure Password & Credit Card Vault</strong></p>
-  <p>
-    <a href="#features">Features</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#getting-started">Getting Started</a> •
-    <a href="#contributing">Contributing</a>
-  </p>
 </div>
 
 ---
@@ -20,32 +12,37 @@
 
 ## ✨ Features
 
-- **🔐 Zero-Knowledge Encryption:** Your data is encrypted locally on your device _before_ it reaches the server using AES-GCM 256-bit encryption derived via PBKDF2. We never see your data.
-- **🛡️ Two-Secret Security Model:** Your vault is protected by a combination of your Master Password and an unrecoverable 64-character device-level Secret Key.
-- **✅ Secret Key Validation System:** Automatically verifies your 64-character Secret Key on new devices to prevent accidental lockouts or garbage data decryption using a secure validation challenge.
-- **🚀 Advanced Passkeys:** Skip traditional passwords with secure, lightning-fast 6-digit passkey authentication.
-- **📧 Email Verification:** Added layer of security requiring users to verify their email via OTP before accessing the vault.
-- **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with scalable bottom navigation, touch-friendly swipeable alerts, scrollable modals for keyboard accessibility, and intelligent layout adjustments.
-- **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, smooth micro-animations, and clean iOS Settings-inspired forms for effortless data entry.
-- **🌐 Progressive Web App (PWA):** Install SecureSyncZ on your home screen for offline access and native app feel.
-- **💳 Comprehensive Vault:** Safely manage Passwords, Credit Cards, and Secure Notes.
-- **🛡️ Password Health Dashboard:** Built-in dashboard to detect weak, reused, and old passwords to keep your vault secure.
-- **📁 Organization & Quality of Life:** Add Tags/Categories to credentials, and pin your favorites to the top of your lists.
-- **🔍 Global Search:** Instantly find your credentials from anywhere using the Cmd+K Command Palette, with deep search into notes and titles.
-- **🔒 Zero-Knowledge Backups:** Export your entire vault (Passwords, Cards, Notes) as a single JSON file. The exported data remains encrypted, ensuring it can only be unlocked with your secret key. Import via Drag-and-Drop (JSON/CSV supported).
-- **🗑️ Delete All Data (Danger Zone):** Instantly wipe all your data from the server with a single confirmation, giving you complete control over your digital footprint.
-- **⏱️ Auto-Lock:** Automatically secures your vault after 3 minutes of inactivity.
-- **🖼️ Profile Customization:** Custom avatars with quick file-size validation and ImgBB integration.
+- **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with scalable bottom navigation, touch-friendly swipeable alerts, and scrollable modals.
+- **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, and clean iOS-inspired forms.
+- **🌐 Progressive Web App (PWA):** Install SecureSyncZ on your home screen for offline access and a native app feel.
+- **💳 Comprehensive Vault:** Safely manage Passwords, Credit Cards, and Secure Notes with Tag/Category organization and Favorites.
+- **🛡️ Password Health Dashboard:** Built-in dashboard to detect weak, reused, and old passwords.
+- **🔍 Global Search:** Instantly find your credentials from anywhere using the Cmd+K Command Palette.
+- **🔒 Zero-Knowledge Backups:** Export your entire vault as a single encrypted JSON file. Import via Drag-and-Drop.
+- **🖼️ Profile Customization:** Custom avatars with automatic client-side image compression.
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js 16](https://nextjs.org/) (App Router & Turbopack)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
-- **Database:** [MongoDB](https://www.mongodb.com/)
-- **State/Fetching:** [React Query (@tanstack/react-query)](https://tanstack.com/query/latest)
+- **Framework:** Next.js 16 (App Router & Turbopack)
+- **Styling:** Tailwind CSS v4
+- **Database:** MongoDB
+- **State/Fetching:** React Query (@tanstack/react-query)
 - **Authentication:** Custom JWT-based Auth
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
+- **Icons:** Lucide React
+- **UI Components:** shadcn/ui
+
+## 🚀 Why Use SecureSyncZ?
+
+SecureSyncZ is built for users who want complete control over their digital life without sacrificing user experience. Traditional password managers can be clunky or expensive. SecureSyncZ provides a free, incredibly smooth, and aesthetically pleasing interface that feels like a premium native application, while giving you the peace of mind that nobody—not even the server administrators—can access your data.
+
+## 🔐 Why It Is Secure (Security Architecture)
+
+- **Zero-Knowledge Encryption:** Your data is encrypted locally on your device _before_ it reaches the server using AES-GCM 256-bit encryption. The keys are derived using PBKDF2. We never see your raw data.
+- **Two-Secret Security Model:** Your vault is protected by a combination of your Master Password and an unrecoverable 64-character device-level Secret Key. Both are required to decrypt your data.
+- **Secret Key Validation System:** Automatically verifies your 64-character Secret Key on new devices to prevent accidental lockouts or garbage data decryption using a secure validation challenge.
+- **Advanced Passkeys:** Access your vault quickly and securely with a lightning-fast 6-digit passkey PIN that is verified on the server via bcrypt hashing.
+- **Email Verification & OTP:** Requires users to verify their identity via Email OTP before performing sensitive actions like account deletion.
+- **Auto-Lock:** Automatically secures your vault and clears the decryption keys from memory after 3 minutes of inactivity.
 
 ## 👨‍💻 Author / Credits
 

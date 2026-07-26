@@ -62,6 +62,21 @@ export async function POST(req: Request) {
 
     if (username) updateData.username = username;
     if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const existingUser = await usersCollection.findOne({
+        email: email.toLowerCase(),
+        _id: { $ne: new ObjectId(userPayload.id) },
+      });
+
+      if (existingUser) {
+        return NextResponse.json(
+          {
+            error:
+              "This email is already in use by another account. Please try a different email.",
+          },
+          { status: 400 }
+        );
+      }
+
       const oldEmail = user.email.toLowerCase();
       updateData.email = email.toLowerCase();
       updateData.isVerified = false; // The automatic system will prompt for verification

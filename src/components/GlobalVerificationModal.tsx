@@ -133,12 +133,12 @@ export function GlobalVerificationModal() {
                 onChange={(value) => setOtp(value)}
                 autoFocus
               >
-                <InputOTPGroup className="gap-2">
+                <InputOTPGroup className="gap-1 sm:gap-2">
                   {[...Array(6)].map((_, i) => (
                     <InputOTPSlot
                       key={i}
                       index={i}
-                      className="h-10 w-10 text-lg sm:h-12 sm:w-12"
+                      className="h-9 w-9 text-base sm:h-12 sm:w-12 sm:text-lg"
                     />
                   ))}
                 </InputOTPGroup>

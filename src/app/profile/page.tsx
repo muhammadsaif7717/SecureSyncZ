@@ -31,6 +31,7 @@ import axios from "axios";
 import { showToast } from "@/lib/toast";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { DeleteDataModal } from "@/components/DeleteDataModal";
+import { compressImage } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { user, updateUser, isLoading } = useAuth();
@@ -88,23 +89,37 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setIsUploading(true);
+
+    // Compress the image
+    let imageToUpload: Blob = file;
+    try {
+      imageToUpload = await compressImage(file);
+    } catch (error) {
+      // console.warn("Image compression failed, using original file");
+    }
+
     const MAX_FILE_SIZE = 2 * 1024 * 1024;
-    if (file.size > MAX_FILE_SIZE) {
+    if (imageToUpload.size > MAX_FILE_SIZE) {
+      setIsUploading(false);
       showToast({
         title: "File Too Large",
-        description: "Profile picture must be less than 2MB.",
+        description:
+          "Profile picture must be less than 2MB even after compression.",
       });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
-    if (!apiKey) return;
+    if (!apiKey) {
+      setIsUploading(false);
+      return;
+    }
 
-    setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("image", imageToUpload, file.name);
       const imgbbRes = await axios.post(
         `https://api.imgbb.com/1/upload?key=${apiKey}`,
         formData
@@ -298,12 +313,12 @@ export default function ProfilePage() {
               onChange={(value) => setOtp(value)}
               autoFocus
             >
-              <InputOTPGroup className="gap-2">
+              <InputOTPGroup className="gap-1 sm:gap-2">
                 {[...Array(6)].map((_, i) => (
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="h-10 w-10 rounded-md border-slate-200 bg-white/60 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
+                    className="h-9 w-9 rounded-md border-slate-200 bg-white/60 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
                   />
                 ))}
               </InputOTPGroup>
@@ -649,13 +664,13 @@ export default function ProfilePage() {
                   value={newPasskey}
                   onChange={setNewPasskey}
                 >
-                  <InputOTPGroup className="gap-2">
+                  <InputOTPGroup className="gap-1 sm:gap-2">
                     {[...Array(6)].map((_, i) => (
                       <InputOTPSlot
                         key={i}
                         index={i}
                         showChar={showPasskey}
-                        className="h-10 w-10 border-slate-200 sm:h-12 sm:w-12 dark:border-white/10 dark:bg-white/5"
+                        className="h-9 w-9 border-slate-200 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
                       />
                     ))}
                   </InputOTPGroup>
