@@ -193,7 +193,7 @@ export default function HealthDashboard() {
                 {weakPasswords.map((p) => (
                   <Link
                     key={p._id}
-                    href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
+                    href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
                     className="flex items-center justify-between rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-red-50 dark:bg-white/5 dark:hover:bg-red-500/10"
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
@@ -247,7 +247,7 @@ export default function HealthDashboard() {
                     {group.map((p) => (
                       <Link
                         key={p._id}
-                        href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
+                        href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
                         className="flex min-w-max items-center justify-between gap-4 rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-yellow-50 dark:bg-white/5 dark:hover:bg-yellow-500/10"
                       >
                         <div className="flex items-center gap-2.5 whitespace-nowrap">
@@ -299,7 +299,7 @@ export default function HealthDashboard() {
                 {oldPasswords.map((p) => (
                   <Link
                     key={p._id}
-                    href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}`}
+                    href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
                     className="flex min-w-max items-center justify-between gap-4 rounded-lg bg-white/50 p-2.5 text-sm transition-colors hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/10"
                   >
                     <div className="flex items-center gap-2.5 whitespace-nowrap">

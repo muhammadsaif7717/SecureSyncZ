@@ -60,50 +60,51 @@ export function GlobalSearchModal() {
 
   const isLoading = pLoading || cLoading || nLoading;
 
+  const normalizedQuery = query.trim().toLowerCase();
+
   const filteredPasswords = passwords.filter(
     (p: PasswordsData) =>
-      p.website.toLowerCase().includes(query.toLowerCase()) ||
-      p.username.toLowerCase().includes(query.toLowerCase()) ||
-      (p.note && p.note.toLowerCase().includes(query.toLowerCase()))
+      p.website?.toLowerCase().includes(normalizedQuery) ||
+      p.username?.toLowerCase().includes(normalizedQuery) ||
+      (p.note && p.note.toLowerCase().includes(normalizedQuery))
   );
 
   const filteredCards = cards.filter(
     (c: CardsData) =>
-      c.name.toLowerCase().includes(query.toLowerCase()) ||
+      c.name?.toLowerCase().includes(normalizedQuery) ||
       (c.serviceName &&
-        c.serviceName.toLowerCase().includes(query.toLowerCase())) ||
-      c.cardNumber.includes(query) ||
-      (c.cardType && c.cardType.toLowerCase().includes(query.toLowerCase())) ||
-      (c.note && c.note.toLowerCase().includes(query.toLowerCase()))
+        c.serviceName.toLowerCase().includes(normalizedQuery)) ||
+      c.cardNumber?.includes(normalizedQuery) ||
+      (c.cardType && c.cardType.toLowerCase().includes(normalizedQuery)) ||
+      (c.note && c.note.toLowerCase().includes(normalizedQuery))
   );
 
   const filteredNotes = notes.filter(
     (n: NotesData) =>
-      n.title.toLowerCase().includes(query.toLowerCase()) ||
-      n.content.toLowerCase().includes(query.toLowerCase()) ||
+      n.title?.toLowerCase().includes(normalizedQuery) ||
+      n.content?.toLowerCase().includes(normalizedQuery) ||
       (n.tags &&
-        n.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase())))
+        n.tags.some((tag) => tag.toLowerCase().includes(normalizedQuery)))
   );
 
-  const handleSelectPassword = (website: string) => {
+  const handleSelectPassword = (p: PasswordsData) => {
     setOpen(false);
     router.push(
-      `/passwords/${encodeURIComponent(extractRootDomain(website).toLowerCase().replace(/\s+/g, "-"))}`
+      `/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase().replace(/\s+/g, "-"))}?search=${encodeURIComponent(p.username)}`
     );
   };
 
-  const handleSelectCard = (cardType: string) => {
+  const handleSelectCard = (c: CardsData) => {
     setOpen(false);
+    const searchQuery = c.serviceName || c.name || "";
     router.push(
-      `/cards/${encodeURIComponent((cardType || "others").toLowerCase().replace(/\s+/g, "-"))}`
+      `/cards/${encodeURIComponent((c.cardType || "others").toLowerCase().replace(/\s+/g, "-"))}?search=${encodeURIComponent(searchQuery)}`
     );
   };
 
-  const handleSelectNote = (title: string) => {
+  const handleSelectNote = (n: NotesData) => {
     setOpen(false);
-    router.push(
-      `/notes/${encodeURIComponent(title.toLowerCase().replace(/\s+/g, "-"))}`
-    );
+    router.push(`/notes?search=${encodeURIComponent(n.title)}`);
   };
 
   return (
@@ -133,11 +134,13 @@ export function GlobalSearchModal() {
             <div className="flex items-center justify-center p-8 text-slate-500">
               <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
             </div>
-          ) : query === "" ? (
+          ) : query.trim() === "" ? (
             <div className="p-8 text-center text-sm text-slate-500">
               Type to start searching your vault...
             </div>
-          ) : filteredPasswords.length === 0 && filteredCards.length === 0 ? (
+          ) : filteredPasswords.length === 0 &&
+            filteredCards.length === 0 &&
+            filteredNotes.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500">
               No results found for "{query}"
             </div>
@@ -151,7 +154,7 @@ export function GlobalSearchModal() {
                   {filteredPasswords.map((p: PasswordsData) => (
                     <button
                       key={p._id}
-                      onClick={() => handleSelectPassword(p.website)}
+                      onClick={() => handleSelectPassword(p)}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
@@ -187,7 +190,7 @@ export function GlobalSearchModal() {
                   {filteredCards.map((c: CardsData) => (
                     <button
                       key={c._id}
-                      onClick={() => handleSelectCard(c.cardType || "Others")}
+                      onClick={() => handleSelectCard(c)}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
@@ -214,7 +217,7 @@ export function GlobalSearchModal() {
                   {filteredNotes.map((n: NotesData) => (
                     <button
                       key={n._id}
-                      onClick={() => handleSelectNote(n.title)}
+                      onClick={() => handleSelectNote(n)}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">

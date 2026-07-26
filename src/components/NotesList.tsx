@@ -4,7 +4,7 @@ import React from "react";
 import { ChevronRight, FileText, Search } from "lucide-react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import getNotes from "@/lib/getNotes";
 import { useQuery } from "@tanstack/react-query";
 import { NotesData } from "@/types";
@@ -25,7 +25,16 @@ const NotesList = () => {
   });
   const fetchedNotesData = data ?? [];
 
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = React.useState(initialSearch);
+
+  React.useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
 
   if (isLoading) {
     return (

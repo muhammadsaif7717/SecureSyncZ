@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Copy, FileText, KeyRound, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -37,7 +38,16 @@ const loadNotesData = async (cryptoKey: CryptoKey | null) => {
 };
 
 export default function NotePageClient({ name }: { name: string }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editableData, setEditableData] = useState<NotesData | null>(null);
 
@@ -96,8 +106,10 @@ export default function NotePageClient({ name }: { name: string }) {
       ? filteredNotes[0].title
       : decodeURIComponent(name);
 
-  const displayNotes = filteredNotes.filter((item) =>
-    item.content.toLowerCase().includes(searchQuery.toLowerCase())
+  const displayNotes = filteredNotes.filter(
+    (item) =>
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleEdit = async (e: React.FormEvent) => {

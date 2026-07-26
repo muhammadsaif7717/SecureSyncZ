@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Eye,
   EyeOff,
@@ -47,7 +48,16 @@ const loadPasswordsData = async (cryptoKey: CryptoKey | null) => {
 };
 
 export default function PasswordPageClient({ name }: { name: string }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
   const [visible, setVisible] = useState<Record<string, boolean>>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editableData, setEditableData] = useState<PasswordsData | null>(null);

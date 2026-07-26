@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Copy,
   CreditCard,
@@ -59,7 +60,16 @@ const formatExpiry = (value: string) => {
 };
 
 export default function CardPageClient({ name }: { name: string }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editableData, setEditableData] = useState<CardsData | null>(null);
   const [visible, setVisible] = useState<Record<string, boolean>>({});
