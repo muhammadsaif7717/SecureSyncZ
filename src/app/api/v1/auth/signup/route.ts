@@ -16,7 +16,8 @@ export async function POST(req: Request) {
       );
     }
 
-    let { username, email, password } = await req.json();
+    let { username, email, password, encryptedValidationStr } =
+      await req.json();
 
     if (!username || !email || !password) {
       return NextResponse.json(
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
       email: email.toLowerCase(),
       password: hashedPassword,
       isVerified: false,
+      encryptedValidationStr: encryptedValidationStr || null,
       createdAt: new Date().toISOString(),
     };
 
@@ -84,6 +86,7 @@ export async function POST(req: Request) {
           username: newUser.username,
           hasPasskey: false,
           isVerified: false,
+          encryptedValidationStr: newUser.encryptedValidationStr,
         },
       },
       { status: 201 }

@@ -1,3 +1,5 @@
+* [ ] 
+
 <div align="center">
   <img src="public/logo.png" alt="SecureSyncZ Logo" width="120" height="120" />
   <h1>SecureSyncZ</h1>
@@ -14,20 +16,22 @@
 
 ## 🛡️ Overview
 
-**SecureSyncZ** is a premium, beautifully designed digital vault for securely storing and managing your passwords and credit cards. Built with modern web technologies and a mobile-first approach, it features a glassmorphism UI, smooth micro-animations, and PWA capabilities—ensuring your sensitive data is always accessible and secured with military-grade encryption.
+**SecureSyncZ** is a premium, beautifully designed digital vault for securely storing and managing your passwords, credit cards, and notes. Built with modern web technologies and a mobile-first approach, it features a glassmorphism UI, smooth micro-animations, and PWA capabilities—ensuring your sensitive data is always accessible and secured with military-grade encryption.
 
 ## ✨ Features
 
-- **🔐 Zero-Knowledge Encryption:** Your data is encrypted locally on your device _before_ it reaches the server. We never see your data.
+- **🔐 Zero-Knowledge Encryption:** Your data is encrypted locally on your device _before_ it reaches the server using AES-GCM 256-bit encryption derived via PBKDF2. We never see your data.
 - **🛡️ Two-Secret Security Model:** Your vault is protected by a combination of your Master Password and an unrecoverable 64-character device-level Secret Key.
+- **✅ Secret Key Validation System:** Automatically verifies your 64-character Secret Key on new devices to prevent accidental lockouts or garbage data decryption using a secure validation challenge.
 - **🚀 Advanced Passkeys:** Skip traditional passwords with secure, lightning-fast 6-digit passkey authentication.
-- **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with scalable bottom navigation, touch-friendly swipeable alerts, and intelligent layout adjustments.
+- **📧 Email Verification:** Added layer of security requiring users to verify their email via OTP before accessing the vault.
+- **📱 Mobile-First Design:** Fully responsive, native-like mobile experience with scalable bottom navigation, touch-friendly swipeable alerts, scrollable modals for keyboard accessibility, and intelligent layout adjustments.
 - **🎨 Premium UI/UX:** Dark mode by default, glassmorphism elements, dynamic glowing effects, smooth micro-animations, and clean iOS Settings-inspired forms for effortless data entry.
 - **🌐 Progressive Web App (PWA):** Install SecureSyncZ on your home screen for offline access and native app feel.
 - **💳 Comprehensive Vault:** Safely manage Passwords, Credit Cards, and Secure Notes.
 - **🛡️ Password Health Dashboard:** Built-in dashboard to detect weak, reused, and old passwords to keep your vault secure.
 - **📁 Organization & Quality of Life:** Add Tags/Categories to credentials, and pin your favorites to the top of your lists.
-- **🔍 Global Search:** Instantly find your credentials from anywhere using the Cmd+K Command Palette.
+- **🔍 Global Search:** Instantly find your credentials from anywhere using the Cmd+K Command Palette, with deep search into notes and titles.
 - **🔒 Zero-Knowledge Backups:** Export your entire vault (Passwords, Cards, Notes) as a single JSON file. The exported data remains encrypted, ensuring it can only be unlocked with your secret key. Import via Drag-and-Drop (JSON/CSV supported).
 - **🗑️ Delete All Data (Danger Zone):** Instantly wipe all your data from the server with a single confirmation, giving you complete control over your digital footprint.
 - **⏱️ Auto-Lock:** Automatically secures your vault after 3 minutes of inactivity.
@@ -35,8 +39,8 @@
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router & Turbopack)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
 - **Database:** [MongoDB](https://www.mongodb.com/)
 - **State/Fetching:** [React Query (@tanstack/react-query)](https://tanstack.com/query/latest)
 - **Authentication:** Custom JWT-based Auth

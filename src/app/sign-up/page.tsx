@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Shield, Mail, User, ArrowLeft } from "lucide-react";
 import { showToast } from "@/lib/toast";
-import { generateSecretKey } from "@/lib/clientCrypto";
+import { generateSecretKey, deriveKey, encryptData } from "@/lib/clientCrypto";
 import { EmergencyKitModal } from "@/components/EmergencyKitModal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -55,11 +55,15 @@ export default function SignUpPage() {
 
     setIsSubmitting(true);
     try {
-      // Create user
-      await signup(username, email, password);
-
-      // Immediately generate Secret Key
+      // Generate Secret Key first
       const newSecretKey = generateSecretKey();
+
+      // Derive a temporary CryptoKey just for the validation string
+      const tempKey = await deriveKey(password, newSecretKey);
+      const encryptedValidationStr = await encryptData("VALID-KEY", tempKey);
+
+      // Create user with the encrypted validation string
+      await signup(username, email, password, encryptedValidationStr);
 
       // Save it securely to localStorage
       if (typeof window !== "undefined") {

@@ -13,13 +13,19 @@ interface User {
   profilePicture?: string;
   hasPasskey?: boolean;
   isVerified?: boolean;
+  encryptedValidationStr?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (username: string, email: string, password: string) => Promise<void>;
+  signup: (
+    username: string,
+    email: string,
+    password: string,
+    encryptedValidationStr?: string
+  ) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
 }
@@ -128,13 +134,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signup = async (username: string, email: string, password: string) => {
+  const signup = async (
+    username: string,
+    email: string,
+    password: string,
+    encryptedValidationStr?: string
+  ) => {
     setIsLoading(true);
     try {
       const response = await axios.post("/api/v1/auth/signup", {
         username,
         email,
         password,
+        encryptedValidationStr,
       });
       if (response.data && response.data.user) {
         setUser(response.data.user);

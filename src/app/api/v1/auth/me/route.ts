@@ -27,6 +27,7 @@ export async function GET(req: Request) {
       profilePicture: user.profilePicture,
       hasPasskey: !!user.passkey,
       isVerified: user.isVerified || false,
+      encryptedValidationStr: user.encryptedValidationStr,
     };
 
     return NextResponse.json({ user: returnUser }, { status: 200 });

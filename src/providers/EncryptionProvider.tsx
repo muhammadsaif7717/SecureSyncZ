@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { deriveKey } from "@/lib/clientCrypto";
+import axios from "axios";
 import { showToast } from "@/lib/toast";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
@@ -93,6 +94,17 @@ export function EncryptionProvider({
       }
 
       const derivedKey = await deriveKey(pin, secretKeyHex);
+
+      // Verify the passkey with the backend if they have one set
+      if (user?.hasPasskey) {
+        try {
+          await axios.post("/api/v1/auth/passkey/verify", { passkey: pin });
+        } catch (error) {
+          // If the server rejects the passkey, validation fails
+          return false;
+        }
+      }
+
       setCryptoKey(derivedKey);
       return true;
     } catch (error) {

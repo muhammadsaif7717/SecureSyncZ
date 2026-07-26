@@ -27,9 +27,10 @@ import {
 } from "@/components/ui/dialog";
 import { ModeToggle } from "@/components/mode-toggle";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
+import { deriveKey, decryptData } from "@/lib/clientCrypto";
 
 export default function SignInPage() {
-  const { login, isLoading } = useAuth();
+  const { user, login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -60,10 +61,35 @@ export default function SignInPage() {
     }
   };
 
-  const handleSecretKeySubmit = (e: React.FormEvent) => {
+  const handleSecretKeySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const key = secretKeyInput.trim();
+
     if (/^[0-9a-fA-F]{64}$/.test(key)) {
+      if (user?.encryptedValidationStr) {
+        setIsSubmitting(true);
+        try {
+          const cryptoKey = await deriveKey(password, key);
+          const decrypted = await decryptData(
+            user.encryptedValidationStr,
+            cryptoKey
+          );
+
+          if (decrypted !== "VALID-KEY") {
+            throw new Error("Invalid key");
+          }
+        } catch (error) {
+          showToast({
+            title: "Invalid Key",
+            description:
+              "The Secret Key you entered is incorrect. Please try again.",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        setIsSubmitting(false);
+      }
+
       localStorage.setItem("secureSyncZ_secretKey", key);
       setShowSecretKeyModal(false);
       router.push("/passwords");
@@ -212,8 +238,9 @@ export default function SignInPage() {
               <Button
                 type="submit"
                 className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+                disabled={isSubmitting}
               >
-                Restore Key & Continue
+                {isSubmitting ? "Verifying..." : "Restore Key & Continue"}
               </Button>
             </DialogFooter>
           </form>
