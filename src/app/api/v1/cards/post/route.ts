@@ -54,7 +54,7 @@ export const POST = async (req: Request) => {
       id: result.insertedId,
     });
   } catch (error) {
-    console.error("POST /api/cards/post error:", error);
+    // console.error("POST /api/cards/post error:", error);
     return NextResponse.json({ error: "Failed to save card" }, { status: 500 });
   }
 };

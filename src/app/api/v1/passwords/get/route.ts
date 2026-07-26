@@ -41,7 +41,7 @@ export const GET = async (req: Request) => {
     // Return user's filtered password data
     return NextResponse.json(decryptedPasswords, { status: 200 });
   } catch (error) {
-    console.error("Error fetching secure passwords data:", error);
+    // console.error("Error fetching secure passwords data:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

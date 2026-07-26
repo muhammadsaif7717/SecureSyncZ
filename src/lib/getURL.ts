@@ -11,7 +11,7 @@ export default async function getURL() {
     }
     return url;
   } catch (error) {
-    console.error("Error fetching URL:", error);
+    // console.error("Error fetching URL:", error);
     return "/api/v1";
   }
 }

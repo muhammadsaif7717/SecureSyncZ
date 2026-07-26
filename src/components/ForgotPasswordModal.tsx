@@ -73,10 +73,28 @@ export function ForgotPasswordModal({
     }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length !== 6) return;
-    setStep("NEW_PASSWORD");
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/v1/auth/verify-reset-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to verify code");
+
+      toast.success("Code verified successfully.");
+      setStep("NEW_PASSWORD");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -179,8 +197,11 @@ export function ForgotPasswordModal({
               <Button
                 type="submit"
                 className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
-                disabled={otp.length !== 6}
+                disabled={otp.length !== 6 || isLoading}
               >
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
                 Verify Code
               </Button>
               <div className="text-center">

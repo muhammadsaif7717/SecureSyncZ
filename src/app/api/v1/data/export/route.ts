@@ -38,7 +38,7 @@ export const GET = async (req: Request) => {
       },
     });
   } catch (error) {
-    console.error("Error exporting data:", error);
+    // console.error("Error exporting data:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

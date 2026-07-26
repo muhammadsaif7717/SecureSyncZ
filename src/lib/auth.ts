@@ -26,7 +26,7 @@ export async function verifyToken(token: string) {
     const { payload } = await jose.jwtVerify(token, secret);
     return payload as { id: string; email: string; username: string };
   } catch (error) {
-    console.error("JWT verification failed:", error);
+    // console.error("JWT verification failed:", error);
     return null;
   }
 }
@@ -40,7 +40,7 @@ export async function getUserFromRequest(req: Request) {
       return await verifyToken(token);
     }
   } catch (error) {
-    console.error("Error reading token from cookies:", error);
+    // console.error("Error reading token from cookies:", error);
   }
 
   try {
@@ -51,7 +51,7 @@ export async function getUserFromRequest(req: Request) {
       return await verifyToken(token);
     }
   } catch (error) {
-    console.error("Error reading token from headers:", error);
+    // console.error("Error reading token from headers:", error);
   }
 
   return null;

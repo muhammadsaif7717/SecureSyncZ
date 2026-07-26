@@ -67,6 +67,7 @@ export async function POST(req: Request) {
           username: user.username,
           profilePicture: user.profilePicture,
           hasPasskey: !!user.passkey,
+          isVerified: user.isVerified || false,
         },
       },
       { status: 200 }
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("Login error:", error);
+    // console.error("Login error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

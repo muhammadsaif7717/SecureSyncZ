@@ -79,7 +79,7 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Passkey setup error:", error);
+    // console.error("Passkey setup error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

@@ -41,7 +41,7 @@ export const DELETE = async (
       { status: 200 }
     );
   } catch (error) {
-    console.error("DELETE Error:", error);
+    // console.error("DELETE Error:", error);
     return NextResponse.json(
       { error: "Failed to delete note" },
       { status: 500 }

@@ -1,8 +1,9 @@
 import { connectDB } from "@/lib/connectDB";
-import { getUserFromRequest } from "@/lib/auth";
+import { getUserFromRequest, signToken } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcryptjs";
+import { sendMail } from "@/lib/mailer";
 
 export async function POST(req: Request) {
   try {
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
       profilePicture,
       passkey,
       currentPassword,
+      otp,
     } = body;
 
     const isOnlyProfilePicture =
@@ -59,7 +61,29 @@ export async function POST(req: Request) {
     const updateData: Record<string, unknown> = {};
 
     if (username) updateData.username = username;
-    if (email) updateData.email = email.toLowerCase();
+    if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const oldEmail = user.email.toLowerCase();
+      updateData.email = email.toLowerCase();
+      updateData.isVerified = false; // The automatic system will prompt for verification
+
+      const alertHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+          <h2 style="color: #ef4444; text-align: center;">Security Alert - SecureSyncZ</h2>
+          <p>Hello,</p>
+          <p>We noticed a request to change the email address associated with your SecureSyncZ account to <strong>${updateData.email}</strong>.</p>
+          <p>If you authorized this change, you don't need to do anything. If you did not make this request, please log in immediately and secure your account.</p>
+          <br />
+          <p>Stay secure,</p>
+          <p><strong>The SecureSyncZ Team</strong></p>
+        </div>
+      `;
+
+      await sendMail({
+        to: oldEmail,
+        subject: "Security Alert: Email Change Requested - SecureSyncZ",
+        html: alertHtml,
+      });
+    }
     if (profilePicture !== undefined)
       updateData.profilePicture = profilePicture;
 
@@ -97,14 +121,33 @@ export async function POST(req: Request) {
       username: result.username,
       profilePicture: result.profilePicture,
       hasPasskey: !!result.passkey,
+      isVerified: result.isVerified || false,
     };
 
-    return NextResponse.json(
+    const token = await signToken({
+      id: returnUser.id,
+      email: returnUser.email,
+      username: returnUser.username,
+    });
+
+    const response = NextResponse.json(
       { message: "Profile updated successfully", user: returnUser },
       { status: 200 }
     );
+
+    response.cookies.set({
+      name: "token",
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
-    console.error("Profile update error:", error);
+    // console.error("Profile update error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

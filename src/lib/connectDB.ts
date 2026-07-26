@@ -41,7 +41,7 @@ export const connectDB = async () => {
     // console.log("Connected to MongoDB and verified indexes");
     return db;
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
+    // console.error("Error connecting to MongoDB:", error);
     throw new Error("Failed to connect to the database");
   }
 };

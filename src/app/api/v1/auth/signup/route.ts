@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { username, email, password } = await req.json();
+    let { username, email, password } = await req.json();
 
     if (!username || !email || !password) {
       return NextResponse.json(
@@ -24,6 +24,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    username = username.trim();
+    email = email.trim();
 
     const db = await connectDB();
     const usersCollection = db.collection("users");
@@ -37,8 +40,14 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
+      if (existingUser.email === email.toLowerCase()) {
+        return NextResponse.json(
+          { error: "User already exists with this email" },
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
-        { error: "Email or username already registered" },
+        { error: "Username already registered" },
         { status: 400 }
       );
     }
@@ -51,6 +60,7 @@ export async function POST(req: Request) {
       username: username,
       email: email.toLowerCase(),
       password: hashedPassword,
+      isVerified: false,
       createdAt: new Date().toISOString(),
     };
 
@@ -73,6 +83,7 @@ export async function POST(req: Request) {
           email: newUser.email,
           username: newUser.username,
           hasPasskey: false,
+          isVerified: false,
         },
       },
       { status: 201 }
@@ -90,7 +101,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("Signup error:", error);
+    // console.error("Signup error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

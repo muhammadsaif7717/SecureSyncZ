@@ -10,7 +10,7 @@ export const sendMail = async ({ to, subject, html }: SendMailOptions) => {
   const { EMAIL_USER, EMAIL_PASS } = process.env;
 
   if (!EMAIL_USER || !EMAIL_PASS) {
-    console.error("Missing EMAIL_USER or EMAIL_PASS in environment variables.");
+    // console.error("Missing EMAIL_USER or EMAIL_PASS in environment variables.");
     throw new Error("Email configuration error.");
   }
 

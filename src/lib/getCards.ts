@@ -43,7 +43,7 @@ export default async function getCards(
 
     return decrypted;
   } catch (error) {
-    console.error("Error fetching cards:", error);
+    // console.error("Error fetching cards:", error);
     throw new Error("Failed to fetch cards");
   }
 }

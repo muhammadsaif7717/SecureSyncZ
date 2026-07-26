@@ -33,7 +33,7 @@ export default async function getPasswords(
 
     return decrypted;
   } catch (error) {
-    console.error("Error fetching passwords:", error);
+    // console.error("Error fetching passwords:", error);
     throw new Error("Failed to fetch passwords");
   }
 }

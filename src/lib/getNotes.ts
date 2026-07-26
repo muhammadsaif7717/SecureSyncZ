@@ -29,7 +29,7 @@ export default async function getNotes(
 
     return decrypted;
   } catch (error) {
-    console.error("Error fetching notes:", error);
+    // console.error("Error fetching notes:", error);
     throw new Error("Failed to fetch notes");
   }
 }

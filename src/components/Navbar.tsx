@@ -41,7 +41,6 @@ import { useAuth } from "@/providers/AuthProvider";
 import { GlobalSearchModal } from "@/components/GlobalSearchModal";
 import { BackupModal } from "@/components/BackupModal";
 import { EmergencyKitModal } from "@/components/EmergencyKitModal";
-import { DeleteDataModal } from "@/components/DeleteDataModal";
 import { useState, useEffect } from "react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
@@ -61,7 +60,6 @@ export default function Navbar() {
   const [backupAction, setBackupAction] = useState<"export" | "import">(
     "export"
   );
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [showEmergencyKit, setShowEmergencyKit] = useState(false);
   const [secretKey, setSecretKey] = useState("");
   const isVisible = useScrollDirection();
@@ -130,10 +128,6 @@ export default function Navbar() {
         isOpen={showEmergencyKit}
         secretKey={secretKey}
         onConfirm={() => setShowEmergencyKit(false)}
-      />
-      <DeleteDataModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
       />
       <header className="sticky top-0 z-50 w-full border-b border-black/[0.06] bg-white/70 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#0a0e1a]/80">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-[60px] sm:px-6">
@@ -304,16 +298,6 @@ export default function Navbar() {
                       </div>
 
                       <div className="mt-auto space-y-2 pt-4">
-                        <button
-                          onClick={() => setDeleteModalOpen(true)}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
-                        >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400">
-                            <ShieldAlert className="h-4 w-4" />
-                          </div>
-                          Delete All Data
-                        </button>
-
                         <SheetClose asChild>
                           <Button
                             variant="ghost"

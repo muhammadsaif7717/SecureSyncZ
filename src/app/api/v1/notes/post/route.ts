@@ -49,7 +49,7 @@ export const POST = async (req: Request) => {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating note:", error);
+    // console.error("Error creating note:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

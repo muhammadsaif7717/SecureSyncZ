@@ -26,11 +26,12 @@ export async function GET(req: Request) {
       username: user.username,
       profilePicture: user.profilePicture,
       hasPasskey: !!user.passkey,
+      isVerified: user.isVerified || false,
     };
 
     return NextResponse.json({ user: returnUser }, { status: 200 });
   } catch (error) {
-    console.error("Auth me error:", error);
+    // console.error("Auth me error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

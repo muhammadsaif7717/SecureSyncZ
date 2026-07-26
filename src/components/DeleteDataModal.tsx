@@ -20,13 +20,13 @@ interface DeleteDataModalProps {
 }
 
 export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
-  const [confirmText, setConfirmText] = useState("");
+  const [password, setPassword] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const { logout } = useAuth();
 
   const resetState = () => {
-    setConfirmText("");
+    setPassword("");
   };
 
   const handleClose = () => {
@@ -59,8 +59,8 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
   };
 
   const handleDelete = async () => {
-    if (confirmText !== "DELETE") {
-      toast.error("Please type DELETE to confirm");
+    if (!password) {
+      toast.error("Please enter your password to confirm");
       return;
     }
 
@@ -68,6 +68,10 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
       setIsDeleting(true);
       const response = await fetch(`/api/v1/data/delete-all`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
       });
 
       if (!response.ok) {
@@ -124,17 +128,18 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
 
           <div className="space-y-3">
             <Label htmlFor="confirmDelete" className="text-sm font-semibold">
-              Type{" "}
+              Enter your{" "}
               <span className="font-bold text-red-600 dark:text-red-500">
-                DELETE
+                password
               </span>{" "}
               to confirm
             </Label>
             <Input
               id="confirmDelete"
-              value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
-              placeholder="DELETE"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your current password"
               className="border-red-200 focus-visible:ring-red-500 dark:border-red-900/50"
               disabled={isDeleting || isExporting}
             />
@@ -153,7 +158,7 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
           <Button
             variant="destructive"
             onClick={handleDelete}
-            disabled={confirmText !== "DELETE" || isDeleting || isExporting}
+            disabled={!password || isDeleting || isExporting}
             className="bg-red-600 hover:bg-red-700 sm:w-1/2"
           >
             {isDeleting ? (

@@ -116,7 +116,7 @@ export const POST = async (req: Request) => {
 
     return NextResponse.json({ message: "Import successful" }, { status: 200 });
   } catch (error: any) {
-    console.error("Error importing data:", error);
+    // console.error("Error importing data:", error);
     return NextResponse.json(
       { error: error.message || "Internal Server Error" },
       { status: 500 }

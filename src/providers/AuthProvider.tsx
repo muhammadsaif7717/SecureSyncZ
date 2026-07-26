@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
+import { GlobalVerificationModal } from "@/components/GlobalVerificationModal";
 
 interface User {
   id: string;
@@ -11,6 +12,7 @@ interface User {
   username: string;
   profilePicture?: string;
   hasPasskey?: boolean;
+  isVerified?: boolean;
 }
 
 interface AuthContextType {
@@ -48,6 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     loadUser();
+
+    // Polling interval to keep checking user status (e.g. verification)
+    const intervalId = setInterval(() => {
+      loadUser();
+    }, 60 * 1000); // 60 seconds
+
+    return () => clearInterval(intervalId);
   }, []);
 
   // Auto-lock inactivity timer (5 minutes)
@@ -180,6 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{ user, isLoading, login, signup, logout, updateUser }}
     >
       {children}
+      <GlobalVerificationModal />
     </AuthContext.Provider>
   );
 }

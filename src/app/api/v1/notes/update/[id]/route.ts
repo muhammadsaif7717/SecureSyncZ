@@ -61,7 +61,7 @@ export const PUT = async (
 
     return NextResponse.json({ message: "Note updated successfully" });
   } catch (error) {
-    console.error("PUT error:", error);
+    // console.error("PUT error:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }
