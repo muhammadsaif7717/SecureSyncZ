@@ -5,6 +5,10 @@ export function checkRateLimit(
   limit: number,
   windowMs: number
 ): boolean {
+  if (process.env.NODE_ENV === "development") {
+    return true; // Disable rate limiting in development mode
+  }
+
   const now = Date.now();
   const record = rateLimitMap.get(identifier);
 

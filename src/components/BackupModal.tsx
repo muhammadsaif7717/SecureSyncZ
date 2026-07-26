@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Download, Upload, UploadCloud } from "lucide-react";
+import { Download, Upload, UploadCloud, Loader2, KeyRound } from "lucide-react";
+import { useEncryption } from "@/providers/EncryptionProvider";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 interface BackupModalProps {
   isOpen: boolean;
@@ -23,9 +30,35 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { cryptoKey, isUnlocked, unlockVault } = useEncryption();
+  const [passkey, setPasskey] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const handleVerify = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (passkey.length !== 6) return;
+
+    setIsVerifying(true);
+    const success = await unlockVault(passkey);
+    if (success) {
+      toast.success("Vault Unlocked");
+    } else {
+      toast.error("Invalid passkey. Try again.");
+      setPasskey("");
+    }
+    setIsVerifying(false);
+  };
+
+  useEffect(() => {
+    if (passkey.length === 6 && !isVerifying) {
+      handleVerify();
+    }
+  }, [passkey]);
+
   const resetState = () => {
     setSelectedFile(null);
     setIsDragging(false);
+    setPasskey("");
   };
 
   const handleClose = () => {
@@ -34,24 +67,103 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
   };
 
   const handleExport = async () => {
+    if (!cryptoKey) {
+      toast.error(
+        "Encryption key not found. Please setup your passkey or secret key first."
+      );
+      return;
+    }
+
     try {
       setIsLoading(true);
+      toast.loading("Decrypting and exporting data...", { id: "export" });
       const response = await fetch(`/api/v1/data/export`);
 
       if (!response.ok) throw new Error("Export failed");
 
-      const blob = await response.blob();
+      const rawData = await response.json();
+      const { decryptData } = await import("@/lib/clientCrypto");
+
+      const decryptedData = {
+        passwords: [] as any[],
+        cards: [] as any[],
+        notes: [] as any[],
+      };
+
+      if (rawData.passwords && Array.isArray(rawData.passwords)) {
+        for (const p of rawData.passwords) {
+          try {
+            const decryptedPassword = p.password
+              ? await decryptData(p.password, cryptoKey)
+              : "";
+            const decryptedNote = p.note
+              ? await decryptData(p.note, cryptoKey)
+              : "";
+            decryptedData.passwords.push({
+              ...p,
+              password: decryptedPassword,
+              note: decryptedNote,
+            });
+          } catch (e) {
+            decryptedData.passwords.push({ ...p });
+          }
+        }
+      }
+
+      if (rawData.cards && Array.isArray(rawData.cards)) {
+        for (const c of rawData.cards) {
+          try {
+            const decryptedCardNumber = c.cardNumber
+              ? await decryptData(c.cardNumber, cryptoKey)
+              : "";
+            const decryptedExpiry = c.expiry
+              ? await decryptData(c.expiry, cryptoKey)
+              : "";
+            const decryptedCvv = c.cvv
+              ? await decryptData(c.cvv, cryptoKey)
+              : "";
+            const decryptedNote = c.note
+              ? await decryptData(c.note, cryptoKey)
+              : "";
+            decryptedData.cards.push({
+              ...c,
+              cardNumber: decryptedCardNumber,
+              expiry: decryptedExpiry,
+              cvv: decryptedCvv,
+              note: decryptedNote,
+            });
+          } catch (e) {
+            decryptedData.cards.push({ ...c });
+          }
+        }
+      }
+
+      if (rawData.notes && Array.isArray(rawData.notes)) {
+        for (const n of rawData.notes) {
+          try {
+            const decryptedContent = n.content
+              ? await decryptData(n.content, cryptoKey)
+              : "";
+            decryptedData.notes.push({ ...n, content: decryptedContent });
+          } catch (e) {
+            decryptedData.notes.push({ ...n });
+          }
+        }
+      }
+
+      const jsonString = JSON.stringify(decryptedData, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "securesyncz-backup.json";
+      a.download = "securesyncz-backup-decrypted.json";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      toast.success("Successfully exported data");
+      toast.success("Successfully exported data", { id: "export" });
       handleClose();
     } catch (error) {
-      toast.error("Failed to export data");
+      toast.error("Failed to export data", { id: "export" });
     } finally {
       setIsLoading(false);
     }
@@ -63,17 +175,116 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
+    if (!cryptoKey) {
+      toast.error(
+        "Encryption key not found. Please setup your passkey or secret key first."
+      );
+      return;
+    }
 
     try {
       setIsLoading(true);
-      toast.loading("Importing data...", { id: "import" });
+      toast.loading("Encrypting and importing data...", { id: "import" });
+
+      const fileContent = await selectedFile.text();
+      const isCSV = selectedFile.name.toLowerCase().endsWith(".csv");
+
+      let payload = {
+        passwords: [] as any[],
+        cards: [] as any[],
+        notes: [] as any[],
+      };
+
+      const { encryptData } = await import("@/lib/clientCrypto");
+
+      if (isCSV) {
+        const Papa = await import("papaparse");
+        const results = Papa.parse(fileContent, {
+          header: true,
+          skipEmptyLines: true,
+        });
+
+        for (const record of results.data as any[]) {
+          const encryptedPassword = record.password
+            ? await encryptData(record.password, cryptoKey)
+            : "";
+          const encryptedNote = record.note
+            ? await encryptData(record.note, cryptoKey)
+            : "";
+
+          payload.passwords.push({
+            website: record.url || record.name || "Unknown",
+            username: record.username || "",
+            password: encryptedPassword,
+            note: encryptedNote,
+            isFavorite: false,
+            tags: [],
+          });
+        }
+      } else {
+        let data;
+        try {
+          data = JSON.parse(fileContent);
+        } catch (e) {
+          throw new Error("Invalid JSON file");
+        }
+
+        if (data.passwords && Array.isArray(data.passwords)) {
+          for (const p of data.passwords) {
+            const encryptedPassword = p.password
+              ? await encryptData(p.password, cryptoKey)
+              : "";
+            const encryptedNote = p.note
+              ? await encryptData(p.note, cryptoKey)
+              : "";
+            payload.passwords.push({
+              ...p,
+              password: encryptedPassword,
+              note: encryptedNote,
+            });
+          }
+        }
+        if (data.cards && Array.isArray(data.cards)) {
+          for (const c of data.cards) {
+            const encryptedCardNumber = c.cardNumber
+              ? await encryptData(c.cardNumber, cryptoKey)
+              : "";
+            const encryptedExpiry = c.expiry
+              ? await encryptData(c.expiry, cryptoKey)
+              : "";
+            const encryptedCvv = c.cvv
+              ? await encryptData(c.cvv, cryptoKey)
+              : "";
+            const encryptedNote = c.note
+              ? await encryptData(c.note, cryptoKey)
+              : "";
+            payload.cards.push({
+              ...c,
+              cardNumber: encryptedCardNumber,
+              expiry: encryptedExpiry,
+              cvv: encryptedCvv,
+              note: encryptedNote,
+            });
+          }
+        }
+        if (data.notes && Array.isArray(data.notes)) {
+          for (const n of data.notes) {
+            const encryptedContent = n.content
+              ? await encryptData(n.content, cryptoKey)
+              : "";
+            payload.notes.push({ ...n, content: encryptedContent });
+          }
+        }
+      }
+
       const endpoint = "/api/v1/data/import";
 
       const response = await fetch(endpoint, {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -109,6 +320,59 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
       setSelectedFile(e.dataTransfer.files[0]);
     }
   };
+
+  if (!isUnlocked) {
+    return (
+      <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
+          <DialogHeader>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+              <KeyRound className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center">Unlock Vault</DialogTitle>
+            <DialogDescription className="text-center">
+              Please enter your 6-digit passkey to unlock your vault before you
+              can import or export data.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={handleVerify}
+            className="flex flex-col items-center space-y-6 py-4"
+          >
+            <InputOTP
+              maxLength={6}
+              pattern={REGEXP_ONLY_DIGITS}
+              value={passkey}
+              onChange={(value) => setPasskey(value)}
+              autoFocus
+            >
+              <InputOTPGroup className="gap-2">
+                {[...Array(6)].map((_, i) => (
+                  <InputOTPSlot
+                    key={i}
+                    index={i}
+                    className="h-10 w-10 rounded-md border-slate-200 bg-white/60 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
+                  />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+
+            <Button
+              type="submit"
+              disabled={passkey.length !== 6 || isVerifying}
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 dark:from-emerald-500 dark:to-teal-500"
+            >
+              {isVerifying ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Unlock Vault
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>

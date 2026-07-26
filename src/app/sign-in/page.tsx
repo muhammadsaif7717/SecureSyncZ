@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ModeToggle } from "@/components/mode-toggle";
+import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 
 export default function SignInPage() {
   const { login, isLoading } = useAuth();
@@ -35,6 +36,7 @@ export default function SignInPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSecretKeyModal, setShowSecretKeyModal] = useState(false);
   const [secretKeyInput, setSecretKeyInput] = useState("");
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,6 +151,15 @@ export default function SignInPage() {
                   )}
                 </button>
               </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPasswordModal(true)}
+                  className="text-xs font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+                >
+                  Forgot password?
+                </button>
+              </div>
             </div>
 
             <Button
@@ -208,6 +219,11 @@ export default function SignInPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ForgotPasswordModal
+        isOpen={showForgotPasswordModal}
+        onClose={() => setShowForgotPasswordModal(false)}
+      />
     </div>
   );
 }

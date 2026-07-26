@@ -14,16 +14,7 @@ export const POST = async (req: Request) => {
       );
     }
 
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
-
-    if (!file) {
-      return NextResponse.json({ error: "File is required" }, { status: 400 });
-    }
-
-    const fileContent = await file.text();
-    const isCSV = file.name.toLowerCase().endsWith(".csv");
-
+    const contentType = req.headers.get("content-type") || "";
     const db = await connectDB();
 
     const processItem = async (collectionName: string, item: any) => {
@@ -54,36 +45,8 @@ export const POST = async (req: Request) => {
       }
     };
 
-    if (isCSV) {
-      // Parse CSV as passwords
-      const records = parse(fileContent, {
-        columns: true,
-        skip_empty_lines: true,
-      });
-
-      for (const record of records as any[]) {
-        // Chrome/Standard CSV usually has name, url, username, password, note
-        const passwordItem = {
-          website: record.url || record.name || "Unknown",
-          username: record.username || "",
-          password: record.password || "", // Note: For unencrypted import from Chrome, the password will be saved as plain text since it bypasses client encryption. This is standard behavior for CSV imports unless we enforce client-side encryption before uploading, but this is a server route.
-          note: record.note || "",
-          isFavorite: false,
-          tags: [],
-        };
-        await processItem("passwords", passwordItem);
-      }
-    } else {
-      // Parse JSON
-      let data;
-      try {
-        data = JSON.parse(fileContent);
-      } catch (e) {
-        return NextResponse.json(
-          { error: "Invalid JSON file" },
-          { status: 400 }
-        );
-      }
+    if (contentType.includes("application/json")) {
+      const data = await req.json();
 
       if (data.passwords && Array.isArray(data.passwords)) {
         for (const p of data.passwords) await processItem("passwords", p);
@@ -93,6 +56,61 @@ export const POST = async (req: Request) => {
       }
       if (data.notes && Array.isArray(data.notes)) {
         for (const n of data.notes) await processItem("notes", n);
+      }
+    } else {
+      // Legacy fallback for FormData
+      const formData = await req.formData();
+      const file = formData.get("file") as File | null;
+
+      if (!file) {
+        return NextResponse.json(
+          { error: "File is required" },
+          { status: 400 }
+        );
+      }
+
+      const fileContent = await file.text();
+      const isCSV = file.name.toLowerCase().endsWith(".csv");
+
+      if (isCSV) {
+        // Parse CSV as passwords
+        const records = parse(fileContent, {
+          columns: true,
+          skip_empty_lines: true,
+        });
+
+        for (const record of records as any[]) {
+          const passwordItem = {
+            website: record.url || record.name || "Unknown",
+            username: record.username || "",
+            password: record.password || "",
+            note: record.note || "",
+            isFavorite: false,
+            tags: [],
+          };
+          await processItem("passwords", passwordItem);
+        }
+      } else {
+        // Parse JSON
+        let data;
+        try {
+          data = JSON.parse(fileContent);
+        } catch (e) {
+          return NextResponse.json(
+            { error: "Invalid JSON file" },
+            { status: 400 }
+          );
+        }
+
+        if (data.passwords && Array.isArray(data.passwords)) {
+          for (const p of data.passwords) await processItem("passwords", p);
+        }
+        if (data.cards && Array.isArray(data.cards)) {
+          for (const c of data.cards) await processItem("cards", c);
+        }
+        if (data.notes && Array.isArray(data.notes)) {
+          for (const n of data.notes) await processItem("notes", n);
+        }
       }
     }
 

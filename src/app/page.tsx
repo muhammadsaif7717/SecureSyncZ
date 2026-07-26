@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Shield, Key, CreditCard, ArrowRight, Database, FileText, Search } from "lucide-react";
+import {
+  Shield,
+  Key,
+  CreditCard,
+  ArrowRight,
+  Database,
+  FileText,
+  Search,
+} from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
 export default function Home() {
@@ -74,8 +82,9 @@ export default function Home() {
         {/* Subtitle */}
         <p className="animate-fade-in-up stagger-1 mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mt-6 sm:max-w-2xl sm:text-base md:text-lg dark:text-slate-400">
           SecureSyncZ provides a premium, client-side verified vault to store
-          and access your passwords, credit cards, and secure notes. Protected by custom JWT
-          authentication and modern 6-digit Passkeys for lightning-fast access.
+          and access your passwords, credit cards, and secure notes. Protected
+          by custom JWT authentication and modern 6-digit Passkeys for
+          lightning-fast access.
         </p>
 
         {/* Buttons */}
