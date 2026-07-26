@@ -38,6 +38,7 @@ export const GET = async (req: Request) => {
       cardNumber: decrypt(item.cardNumber),
       expiry: decrypt(item.expiry),
       cvv: decrypt(item.cvv),
+      pin: item.pin ? decrypt(item.pin) : "",
     }));
 
     // Return user's filtered card data

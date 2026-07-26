@@ -21,13 +21,14 @@ export type CardsData = {
   createdAt: string;
   user: UserData;
   name: string;
-  serviceName?: string;
+  serviceName: string;
   cardType?: string;
   cardNumber: string;
   expiry: string;
   cvv: string;
   note?: string;
   website?: string;
+  pin?: string;
   isFavorite?: boolean;
   tags?: string[];
 };

@@ -74,6 +74,7 @@ export default function PostPage() {
     cardNumber: "",
     expiry: "",
     cvv: "",
+    pin: "",
     note: "",
     tags: [],
   });
@@ -227,6 +228,9 @@ export default function PostPage() {
     );
     const encryptedExpiry = await encryptData(newCard.expiry, cryptoKey!);
     const encryptedCvv = await encryptData(newCard.cvv, cryptoKey!);
+    const encryptedPin = newCard.pin
+      ? await encryptData(newCard.pin, cryptoKey!)
+      : "";
     const encryptedNote = newCard.note
       ? await encryptData(newCard.note, cryptoKey!)
       : "";
@@ -236,6 +240,7 @@ export default function PostPage() {
       cardNumber: encryptedCardNumber,
       expiry: encryptedExpiry,
       cvv: encryptedCvv,
+      pin: encryptedPin,
       note: encryptedNote,
       user: {
         email: user.email,
@@ -270,6 +275,7 @@ export default function PostPage() {
       cardNumber: "",
       expiry: "",
       cvv: "",
+      pin: "",
       note: "",
       tags: [],
     });
@@ -499,9 +505,9 @@ export default function PostPage() {
                   <div className={inputWrapperClasses}>
                     <Input
                       placeholder="e.g. My Chase Sapphire"
-                      value={newCard.name}
+                      value={newCard.serviceName}
                       onChange={(e) =>
-                        setNewCard({ ...newCard, name: e.target.value })
+                        setNewCard({ ...newCard, serviceName: e.target.value })
                       }
                       required
                       className={borderlessInputClasses}
@@ -595,6 +601,23 @@ export default function PostPage() {
                     />
                   </div>
                 </div>
+                <div className={rowClasses}>
+                  <Label className={labelClasses}>PIN</Label>
+                  <div className={inputWrapperClasses}>
+                    <Input
+                      type="password"
+                      placeholder="Optional"
+                      value={newCard.pin || ""}
+                      onChange={(e) =>
+                        setNewCard({
+                          ...newCard,
+                          pin: e.target.value.replace(/\D/g, "").slice(0, 4),
+                        })
+                      }
+                      className={borderlessInputClasses}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className={cardContainerClasses}>
@@ -602,11 +625,12 @@ export default function PostPage() {
                   <Label className={labelClasses}>Cardholder Name</Label>
                   <div className={inputWrapperClasses}>
                     <Input
-                      placeholder="Optional"
-                      value={newCard.serviceName}
+                      placeholder="e.g. John Doe"
+                      value={newCard.name}
                       onChange={(e) =>
-                        setNewCard({ ...newCard, serviceName: e.target.value })
+                        setNewCard({ ...newCard, name: e.target.value })
                       }
+                      required
                       className={borderlessInputClasses}
                     />
                   </div>

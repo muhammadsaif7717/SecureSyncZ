@@ -53,7 +53,7 @@ const CardsList = () => {
   >();
 
   fetchedCardsData.forEach((item) => {
-    const groupName = item.serviceName || item.name;
+    const groupName = item.cardType || "Others";
     const key = groupName.toLowerCase();
 
     const matches =

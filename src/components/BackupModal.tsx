@@ -122,6 +122,9 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
             const decryptedCvv = c.cvv
               ? await decryptData(c.cvv, cryptoKey)
               : "";
+            const decryptedPin = c.pin
+              ? await decryptData(c.pin, cryptoKey)
+              : "";
             const decryptedNote = c.note
               ? await decryptData(c.note, cryptoKey)
               : "";
@@ -130,6 +133,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
               cardNumber: decryptedCardNumber,
               expiry: decryptedExpiry,
               cvv: decryptedCvv,
+              pin: decryptedPin,
               note: decryptedNote,
             });
           } catch (e) {
@@ -255,6 +259,9 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
             const encryptedCvv = c.cvv
               ? await encryptData(c.cvv, cryptoKey)
               : "";
+            const encryptedPin = c.pin
+              ? await encryptData(c.pin, cryptoKey)
+              : "";
             const encryptedNote = c.note
               ? await encryptData(c.note, cryptoKey)
               : "";
@@ -263,6 +270,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
               cardNumber: encryptedCardNumber,
               expiry: encryptedExpiry,
               cvv: encryptedCvv,
+              pin: encryptedPin,
               note: encryptedNote,
             });
           }

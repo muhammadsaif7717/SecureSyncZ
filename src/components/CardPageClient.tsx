@@ -124,18 +124,19 @@ export default function CardPageClient({ name }: { name: string }) {
     .replace(/\s+/g, "-");
 
   const filteredPassData = fetchedPasswordsData.filter((item) => {
-    const groupName = item.serviceName || item.name;
+    const groupName = item.cardType || "Others";
     return groupName.toLowerCase().replace(/\s+/g, "-") === decodedSlug;
   });
 
   const actualName =
     filteredPassData.length > 0
-      ? filteredPassData[0].serviceName || filteredPassData[0].name
+      ? filteredPassData[0].cardType || "Others"
       : decodeURIComponent(name);
 
   const displayCards = filteredPassData.filter(
     (item) =>
       item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.serviceName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.cardNumber?.includes(searchQuery) ||
       item.note?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -150,6 +151,9 @@ export default function CardPageClient({ name }: { name: string }) {
     );
     const encryptedExpiry = await encryptData(editableData.expiry, cryptoKey!);
     const encryptedCvv = await encryptData(editableData.cvv, cryptoKey!);
+    const encryptedPin = editableData.pin
+      ? await encryptData(editableData.pin, cryptoKey!)
+      : "";
     const encryptedNote = editableData.note
       ? await encryptData(editableData.note, cryptoKey!)
       : "";
@@ -161,8 +165,10 @@ export default function CardPageClient({ name }: { name: string }) {
       cardNumber: encryptedCardNumber,
       expiry: encryptedExpiry,
       cvv: encryptedCvv,
+      pin: encryptedPin,
       note: encryptedNote,
       website: editableData.website,
+      tags: editableData.tags,
     };
 
     try {
@@ -201,6 +207,9 @@ export default function CardPageClient({ name }: { name: string }) {
       );
       const encryptedExpiry = await encryptData(item.expiry, cryptoKey!);
       const encryptedCvv = await encryptData(item.cvv, cryptoKey!);
+      const encryptedPin = item.pin
+        ? await encryptData(item.pin, cryptoKey!)
+        : "";
       const encryptedNote = item.note
         ? await encryptData(item.note, cryptoKey!)
         : "";
@@ -212,6 +221,7 @@ export default function CardPageClient({ name }: { name: string }) {
         cardNumber: encryptedCardNumber,
         expiry: encryptedExpiry,
         cvv: encryptedCvv,
+        pin: encryptedPin,
         note: encryptedNote,
         website: item.website,
         isFavorite: !item.isFavorite,
@@ -313,8 +323,13 @@ export default function CardPageClient({ name }: { name: string }) {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-base font-semibold text-slate-900 sm:text-lg dark:text-white">
-                        {card.name}
+                        {card.serviceName}
                       </h3>
+                      {card.name && (
+                        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                          Cardholder: {card.name}
+                        </p>
+                      )}
                       <div className="mt-1 flex items-center gap-2">
                         {card.cardType && (
                           <span
@@ -462,6 +477,42 @@ export default function CardPageClient({ name }: { name: string }) {
                     </div>
                   </div>
 
+                  {/* PIN */}
+                  {card.pin && (
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        PIN
+                      </Label>
+                      <div className="relative">
+                        <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                          {visible[`${card._id}-pin`] ? card.pin : "••••"}
+                        </div>
+                        <button
+                          type="button"
+                          aria-label={
+                            visible[`${card._id}-pin`] ? "Hide PIN" : "Show PIN"
+                          }
+                          onClick={() => toggleVisibility(`${card._id}-pin`)}
+                          className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                        >
+                          {visible[`${card._id}-pin`] ? (
+                            <EyeOff size={16} />
+                          ) : (
+                            <Eye size={16} />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Copy PIN"
+                          onClick={() => copyToClipboard(card.pin!)}
+                          className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                        >
+                          <Copy size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Note */}
                   {card.note && (
                     <div className="space-y-1.5">
@@ -522,17 +573,35 @@ export default function CardPageClient({ name }: { name: string }) {
             <form onSubmit={handleEdit} className="space-y-3.5 sm:space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="serviceName" className="text-xs sm:text-sm">
-                  Service / Bank Name
+                  Card Title
                 </Label>
                 <Input
                   id="serviceName"
-                  value={editableData.serviceName || ""}
+                  value={editableData.serviceName}
                   onChange={(e) =>
                     setEditableData({
                       ...editableData,
                       serviceName: e.target.value,
                     })
                   }
+                  required
+                  className="h-11 text-sm sm:h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-xs sm:text-sm">
+                  Cardholder Name
+                </Label>
+                <Input
+                  id="name"
+                  value={editableData.name || ""}
+                  onChange={(e) =>
+                    setEditableData({
+                      ...editableData,
+                      name: e.target.value,
+                    })
+                  }
+                  required
                   className="h-11 text-sm sm:h-10"
                 />
               </div>
@@ -553,16 +622,17 @@ export default function CardPageClient({ name }: { name: string }) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-xs sm:text-sm">
-                  Cardholder Name
+                <Label htmlFor="tags" className="text-xs sm:text-sm">
+                  Tags
                 </Label>
                 <Input
-                  id="name"
-                  value={editableData.name}
+                  id="tags"
+                  placeholder="e.g. Finance, Shopping"
+                  value={editableData.tags?.join(", ") || ""}
                   onChange={(e) =>
                     setEditableData({
                       ...editableData,
-                      name: e.target.value,
+                      tags: e.target.value.split(",").map((t) => t.trimStart()),
                     })
                   }
                   className="h-11 text-sm sm:h-10"
@@ -649,6 +719,23 @@ export default function CardPageClient({ name }: { name: string }) {
                     className="h-11 text-sm sm:h-10"
                   />
                 </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="pin" className="text-xs sm:text-sm">
+                  PIN
+                </Label>
+                <Input
+                  id="pin"
+                  type="password"
+                  value={editableData.pin || ""}
+                  onChange={(e) =>
+                    setEditableData({
+                      ...editableData,
+                      pin: e.target.value.replace(/\D/g, "").slice(0, 4),
+                    })
+                  }
+                  className="h-11 text-sm sm:h-10"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="note" className="text-xs sm:text-sm">

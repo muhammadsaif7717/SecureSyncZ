@@ -73,6 +73,7 @@ export function GlobalSearchModal() {
       (c.serviceName &&
         c.serviceName.toLowerCase().includes(query.toLowerCase())) ||
       c.cardNumber.includes(query) ||
+      (c.cardType && c.cardType.toLowerCase().includes(query.toLowerCase())) ||
       (c.note && c.note.toLowerCase().includes(query.toLowerCase()))
   );
 
@@ -91,10 +92,10 @@ export function GlobalSearchModal() {
     );
   };
 
-  const handleSelectCard = (name: string) => {
+  const handleSelectCard = (cardType: string) => {
     setOpen(false);
     router.push(
-      `/cards/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`
+      `/cards/${encodeURIComponent((cardType || "others").toLowerCase().replace(/\s+/g, "-"))}`
     );
   };
 
@@ -186,7 +187,7 @@ export function GlobalSearchModal() {
                   {filteredCards.map((c: CardsData) => (
                     <button
                       key={c._id}
-                      onClick={() => handleSelectCard(c.name)}
+                      onClick={() => handleSelectCard(c.cardType || "Others")}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
@@ -194,7 +195,7 @@ export function GlobalSearchModal() {
                       </div>
                       <div className="flex flex-col overflow-hidden">
                         <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                          {c.name}
+                          {c.serviceName}
                         </span>
                         <span className="truncate text-xs text-slate-500">
                           •••• •••• •••• {c.cardNumber.slice(-4)}

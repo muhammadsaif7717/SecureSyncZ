@@ -37,6 +37,7 @@ export const POST = async (req: Request) => {
       cardNumber: encrypt(body.cardNumber),
       expiry: encrypt(body.expiry),
       cvv: encrypt(body.cvv),
+      pin: body.pin ? encrypt(body.pin) : "",
       note: body.note || "",
       website: body.website || "",
       isFavorite: body.isFavorite || false,

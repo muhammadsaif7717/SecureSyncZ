@@ -24,6 +24,7 @@ export default async function getCards(
             ? await decryptData(c.expiry, cryptoKey)
             : "";
           const decryptedCvv = c.cvv ? await decryptData(c.cvv, cryptoKey) : "";
+          const decryptedPin = c.pin ? await decryptData(c.pin, cryptoKey) : "";
           const decryptedNote = c.note
             ? await decryptData(c.note, cryptoKey)
             : "";
@@ -33,6 +34,7 @@ export default async function getCards(
             cardNumber: decryptedCardNumber,
             expiry: decryptedExpiry,
             cvv: decryptedCvv,
+            pin: decryptedPin,
             note: decryptedNote,
           };
         } catch {

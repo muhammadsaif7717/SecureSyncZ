@@ -31,6 +31,7 @@ export const PUT = async (
       website,
       isFavorite,
       tags,
+      pin,
     } = body;
 
     if (!cardNumber || !expiry || !cvv) {
@@ -63,6 +64,7 @@ export const PUT = async (
           cardNumber: encrypt(cardNumber),
           expiry: encrypt(expiry),
           cvv: encrypt(cvv),
+          pin: pin ? encrypt(pin) : "",
           note,
           website,
           isFavorite,
