@@ -3,6 +3,11 @@ import { getUserFromRequest } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
 import { ObjectId } from "mongodb";
+import {
+  normalizePassword,
+  normalizeCard,
+  normalizeNote,
+} from "@/lib/validations";
 
 export const POST = async (req: Request) => {
   try {
@@ -18,10 +23,20 @@ export const POST = async (req: Request) => {
     const db = await connectDB();
 
     const processItem = async (collectionName: string, item: any) => {
-      // Ensure the item belongs to the authenticated user
-      item.user = { email: user.email, username: user.username };
+      let normalizedItem = item;
 
-      const { _id, ...updateData } = item;
+      if (collectionName === "passwords") {
+        normalizedItem = normalizePassword(item);
+      } else if (collectionName === "cards") {
+        normalizedItem = normalizeCard(item);
+      } else if (collectionName === "notes") {
+        normalizedItem = normalizeNote(item);
+      }
+
+      // Ensure the item belongs to the authenticated user
+      normalizedItem.user = { email: user.email, username: user.username };
+
+      const { _id, ...updateData } = normalizedItem;
 
       if (_id) {
         // Overwrite existing data if _id is provided
@@ -41,7 +56,7 @@ export const POST = async (req: Request) => {
           );
       } else {
         // Insert as new data
-        await db.collection(collectionName).insertOne(item);
+        await db.collection(collectionName).insertOne(normalizedItem);
       }
     };
 

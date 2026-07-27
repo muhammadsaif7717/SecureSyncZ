@@ -1,6 +1,11 @@
 import { connectDB } from "@/lib/connectDB";
 import { getUserFromRequest } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import {
+  normalizePassword,
+  normalizeCard,
+  normalizeNote,
+} from "@/lib/validations";
 
 export const GET = async (req: Request) => {
   try {
@@ -21,13 +26,11 @@ export const GET = async (req: Request) => {
       db.collection("notes").find(query).toArray(),
     ]);
 
-    // We do not decrypt or modify the data, just export it as it is in the database.
-    // The data might be zero-knowledge encrypted on the client side, so we just return it.
-    // We keep the _id so it can be overwritten on import.
+    // We normalize the exported data to ensure it follows strict validation rules.
     const exportData = {
-      passwords,
-      cards,
-      notes,
+      passwords: passwords.map((p) => normalizePassword(p)),
+      cards: cards.map((c) => normalizeCard(c)),
+      notes: notes.map((n) => normalizeNote(n)),
     };
 
     return new NextResponse(JSON.stringify(exportData, null, 2), {

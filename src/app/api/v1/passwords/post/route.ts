@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/connectDB";
 import { getUserFromRequest } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
+import { normalizePassword } from "@/lib/validations";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
@@ -25,20 +26,19 @@ export const POST = async (req: Request) => {
     }
 
     const db = await connectDB();
-    const result = await db.collection("passwords").insertOne({
-      website: body.website,
-      username: body.username,
-      password: encrypt(body.password),
-      note: body.note || "",
-      isFavorite: body.isFavorite || false,
-      tags: body.tags || [],
-      createdAt: new Date().toISOString(),
-      // Securely associate with the authenticated user
+
+    // Normalize data before saving
+    const normalizedPassword = normalizePassword({
+      ...body,
       user: {
         email: user.email,
         username: user.username,
       },
     });
+
+    const result = await db
+      .collection("passwords")
+      .insertOne(normalizedPassword);
 
     return NextResponse.json({
       message: "Password saved successfully",

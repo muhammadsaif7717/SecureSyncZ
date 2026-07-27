@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/connectDB";
 import { getUserFromRequest } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
+import { normalizeNote } from "@/lib/validations";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
@@ -36,6 +37,13 @@ export const PUT = async (
     }
 
     const db = await connectDB();
+
+    const normalizedData = normalizeNote(body);
+    delete (normalizedData as any)._id;
+    delete (normalizedData as any).user;
+    delete (normalizedData as any).createdAt;
+    normalizedData.updatedAt = new Date();
+
     const result = await db.collection("notes").updateOne(
       {
         _id: new ObjectId(id),
@@ -43,12 +51,7 @@ export const PUT = async (
         "user.username": user.username,
       },
       {
-        $set: {
-          title,
-          content: encrypt(content),
-          isFavorite,
-          tags,
-        },
+        $set: normalizedData,
       }
     );
 

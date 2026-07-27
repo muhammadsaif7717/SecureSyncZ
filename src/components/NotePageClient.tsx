@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Copy, FileText, KeyRound, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -39,6 +39,7 @@ const loadNotesData = async (cryptoKey: CryptoKey | null) => {
 
 export default function NotePageClient({ name }: { name: string }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearch);
 
@@ -188,7 +189,7 @@ export default function NotePageClient({ name }: { name: string }) {
 
       setIsDeleteDialogOpen(false);
       setDeleteId(null);
-      await refetch();
+      router.push("/notes");
     } catch (err) {
       showToast({
         title: err instanceof Error ? err.message : "Error",
@@ -239,7 +240,9 @@ export default function NotePageClient({ name }: { name: string }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500 dark:text-slate-400">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {new Date(
+                        item.updatedAt || item.createdAt
+                      ).toLocaleDateString()}
                     </span>
                     <button
                       onClick={() => handleToggleFavorite(item)}

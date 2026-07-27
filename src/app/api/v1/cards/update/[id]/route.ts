@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/connectDB";
 import { getUserFromRequest } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
+import { normalizeCard } from "@/lib/validations";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
@@ -49,6 +50,15 @@ export const PUT = async (
     }
 
     const db = await connectDB();
+
+    // Normalize data before updating
+    const normalizedData = normalizeCard(body);
+    // Remove _id, user, and createdAt from being overwritten, but ensure updatedAt is fresh
+    delete (normalizedData as any)._id;
+    delete (normalizedData as any).user;
+    delete (normalizedData as any).createdAt;
+    normalizedData.updatedAt = new Date();
+
     // Update only if user owns this card entry
     const result = await db.collection("cards").updateOne(
       {
@@ -57,19 +67,7 @@ export const PUT = async (
         "user.username": user.username,
       },
       {
-        $set: {
-          name,
-          serviceName,
-          cardType: cardType || "Others",
-          cardNumber: encrypt(cardNumber),
-          expiry: encrypt(expiry),
-          cvv: encrypt(cvv),
-          pin: pin ? encrypt(pin) : "",
-          note,
-          website,
-          isFavorite,
-          tags,
-        },
+        $set: normalizedData,
       }
     );
 

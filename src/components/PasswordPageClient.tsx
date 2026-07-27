@@ -327,7 +327,9 @@ export default function PasswordPageClient({ name }: { name: string }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500 dark:text-slate-400">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {new Date(
+                        item.updatedAt || item.createdAt
+                      ).toLocaleDateString()}
                     </span>
                     <button
                       onClick={() => handleToggleFavorite(item)}

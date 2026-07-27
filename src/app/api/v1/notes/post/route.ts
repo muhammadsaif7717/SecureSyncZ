@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/connectDB";
 import { getUserFromRequest } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
+import { normalizeNote } from "@/lib/validations";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
@@ -23,9 +24,8 @@ export const POST = async (req: Request) => {
       );
     }
 
-    const { title, content, tags, isFavorite } = await req.json();
-
-    if (!title || !content) {
+    const body = await req.json();
+    if (!body.title || !body.content) {
       return NextResponse.json(
         { error: "Title and content are required" },
         { status: 400 }
@@ -33,14 +33,10 @@ export const POST = async (req: Request) => {
     }
 
     const db = await connectDB();
-    const newNote = {
+    const newNote = normalizeNote({
+      ...body,
       user: { email, username },
-      title,
-      content: encrypt(content),
-      tags: tags || [],
-      isFavorite: isFavorite || false,
-      createdAt: new Date().toISOString(),
-    };
+    });
 
     const result = await db.collection("notes").insertOne(newNote);
 

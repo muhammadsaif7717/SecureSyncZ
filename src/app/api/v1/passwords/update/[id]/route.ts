@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/connectDB";
 import { getUserFromRequest } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
+import { normalizePassword } from "@/lib/validations";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
@@ -37,6 +38,15 @@ export const PUT = async (
     }
 
     const db = await connectDB();
+
+    // Normalize data before updating
+    const normalizedData = normalizePassword(body);
+    // Remove _id, user, and createdAt from being overwritten, but ensure updatedAt is fresh
+    delete (normalizedData as any)._id;
+    delete (normalizedData as any).user;
+    delete (normalizedData as any).createdAt;
+    normalizedData.updatedAt = new Date();
+
     // Update only if user owns this entry
     const result = await db.collection("passwords").updateOne(
       {
@@ -45,14 +55,7 @@ export const PUT = async (
         "user.username": user.username,
       },
       {
-        $set: {
-          username,
-          password: encrypt(password),
-          note,
-          website,
-          isFavorite,
-          tags,
-        },
+        $set: normalizedData,
       }
     );
 

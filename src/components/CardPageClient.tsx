@@ -369,7 +369,9 @@ export default function CardPageClient({ name }: { name: string }) {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-slate-500 dark:text-slate-400">
-                          {new Date(card.createdAt).toLocaleDateString()}
+                          {new Date(
+                            card.updatedAt || card.createdAt
+                          ).toLocaleDateString()}
                         </span>
                         <button
                           onClick={() => handleToggleFavorite(card)}

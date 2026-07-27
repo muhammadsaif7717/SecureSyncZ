@@ -14,6 +14,7 @@ export type PasswordsData = {
   note?: string;
   isFavorite?: boolean;
   tags?: string[];
+  updatedAt?: string | Date;
 };
 
 export type CardsData = {
@@ -31,6 +32,7 @@ export type CardsData = {
   pin?: string;
   isFavorite?: boolean;
   tags?: string[];
+  updatedAt?: string | Date;
 };
 
 export type NotesData = {
@@ -41,4 +43,5 @@ export type NotesData = {
   content: string;
   isFavorite?: boolean;
   tags?: string[];
+  updatedAt?: string | Date;
 };

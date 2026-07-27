@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/connectDB";
 import { getUserFromRequest } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
+import { normalizeCard } from "@/lib/validations";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
@@ -30,25 +31,16 @@ export const POST = async (req: Request) => {
     }
 
     const db = await connectDB();
-    const result = await db.collection("cards").insertOne({
-      name: body.name,
-      serviceName: body.serviceName,
-      cardType: body.cardType || "Others",
-      cardNumber: encrypt(body.cardNumber),
-      expiry: encrypt(body.expiry),
-      cvv: encrypt(body.cvv),
-      pin: body.pin ? encrypt(body.pin) : "",
-      note: body.note || "",
-      website: body.website || "",
-      isFavorite: body.isFavorite || false,
-      tags: body.tags || [],
-      createdAt: new Date().toISOString(),
-      // Securely associate with the authenticated user
+
+    const normalizedCard = normalizeCard({
+      ...body,
       user: {
         email: user.email,
         username: user.username,
       },
     });
+
+    const result = await db.collection("cards").insertOne(normalizedCard);
 
     return NextResponse.json({
       message: "Card saved successfully",
