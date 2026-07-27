@@ -121,6 +121,7 @@ export function GlobalSearchModal() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search passwords, cards, and notes..."
+              autoFocus
               className="h-12 flex-1 border-0 bg-transparent px-3 text-base shadow-none focus-visible:ring-0 dark:bg-transparent"
             />
             <DialogClose className="mr-1 shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:outline-none dark:hover:bg-slate-700 dark:hover:text-slate-300 dark:focus:ring-slate-600">
@@ -129,7 +130,7 @@ export function GlobalSearchModal() {
             </DialogClose>
           </div>
         </div>
-        <div className="max-h-[60vh] overflow-y-auto p-2">
+        <div className="max-h-[60vh] overflow-y-auto p-2 sm:max-h-[80vh]">
           {isLoading ? (
             <div className="flex items-center justify-center p-8 text-slate-500">
               <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />

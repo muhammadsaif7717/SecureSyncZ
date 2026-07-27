@@ -350,7 +350,7 @@ export default function Navbar() {
             isVisible ? "translate-y-0" : "translate-y-[150%]"
           )}
         >
-          <nav className="relative flex gap-1 sm:gap-4">
+          <nav className="relative flex w-[calc(100vw-2rem)] max-w-md gap-1 sm:gap-4">
             {navLinks.map((link, idx) => {
               const Icon = link.icon;
               const isActive =
@@ -361,7 +361,7 @@ export default function Navbar() {
                   href={link.href}
                   onClick={handleNavClick}
                   className={cn(
-                    "group relative z-10 flex w-[64px] flex-col items-center justify-center gap-1 rounded-2xl px-1.5 py-2 text-[10px] font-medium transition-all duration-300 ease-out active:scale-95 sm:w-20 sm:py-2 sm:text-xs",
+                    "group relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition-all duration-300 ease-out active:scale-95 sm:py-2 sm:text-xs",
                     isActive
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"

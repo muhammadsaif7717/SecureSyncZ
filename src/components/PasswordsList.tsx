@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import getPasswords from "@/lib/getPasswords";
 import { useQuery } from "@tanstack/react-query";
 import { PasswordsData } from "@/types";
+import { KeyRound } from "lucide-react";
 import { useCLG } from "@/lib/useCLG";
 import { extractRootDomain } from "@/lib/utils";
 import { useEncryption } from "@/providers/EncryptionProvider";
@@ -109,9 +110,18 @@ const PasswordsList = () => {
         </div>
 
         {displayGroups.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            No passwords found.
-          </p>
+          <div className="flex flex-col items-center justify-center space-y-4 px-4 py-12 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10">
+              <KeyRound className="h-8 w-8 text-emerald-500" />
+            </div>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+              No passwords found
+            </h3>
+            <p className="max-w-xs text-sm text-slate-500 dark:text-slate-400">
+              You haven't saved any passwords here yet. Add your first password
+              to keep it secure and synced.
+            </p>
+          </div>
         ) : (
           <Table>
             <TableBody>

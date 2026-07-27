@@ -85,9 +85,18 @@ const NotesList = () => {
         </div>
 
         {filteredNotes.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            No notes found.
-          </p>
+          <div className="flex flex-col items-center justify-center space-y-4 px-4 py-12 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-purple-50 dark:bg-purple-500/10">
+              <FileText className="h-8 w-8 text-purple-500" />
+            </div>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+              No notes found
+            </h3>
+            <p className="max-w-xs text-sm text-slate-500 dark:text-slate-400">
+              You haven't saved any secure notes here yet. Add your first note
+              to keep your private text safe.
+            </p>
+          </div>
         ) : (
           <Table>
             <TableBody>
