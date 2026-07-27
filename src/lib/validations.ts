@@ -17,6 +17,7 @@ export const normalizePassword = (item: any) => {
           _id: typeof item._id === "string" ? new ObjectId(item._id) : item._id,
         }
       : {}),
+    ...(item.user ? { user: item.user } : {}),
     website: String(item.website || item.url || item.name || "Unknown"),
     username: String(item.username || ""),
     password: item.password
@@ -45,6 +46,7 @@ export const normalizeCard = (item: any) => {
           _id: typeof item._id === "string" ? new ObjectId(item._id) : item._id,
         }
       : {}),
+    ...(item.user ? { user: item.user } : {}),
     name: String(item.name || "Unknown"),
     serviceName: String(item.serviceName || "Unknown"),
     cardType: String(item.cardType || "Others"),
@@ -90,6 +92,7 @@ export const normalizeNote = (item: any) => {
           _id: typeof item._id === "string" ? new ObjectId(item._id) : item._id,
         }
       : {}),
+    ...(item.user ? { user: item.user } : {}),
     title: String(item.title || "Untitled"),
     content: item.content
       ? item.content.startsWith("U2FsdGVkX1") || item.content.length > 50
