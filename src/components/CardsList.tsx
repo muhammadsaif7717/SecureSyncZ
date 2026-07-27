@@ -29,8 +29,26 @@ const CardsList = () => {
 
   if (isLoading) {
     return (
-      <div className="mt-10 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
-        Loading...
+      <div className="glass mx-auto w-full max-w-2xl overflow-hidden rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20">
+        <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+        <div className="space-y-6 p-4 sm:p-5 lg:p-6">
+          <div className="mx-auto h-6 w-40 animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+          <div className="h-10 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-white/[0.04]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-4 w-24 animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+                </div>
+                <div className="hidden h-4 w-32 animate-pulse rounded-md bg-slate-200 sm:block dark:bg-slate-800" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

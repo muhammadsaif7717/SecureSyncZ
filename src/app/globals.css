@@ -122,7 +122,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased transition-colors duration-300;
   }
   /* Smooth theme transitions */
   html {
@@ -209,6 +209,19 @@
   }
 }
 
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
 /* ── Animation Utilities ───────────────────────────────────── */
 .animate-glow-pulse {
   animation: glow-pulse 3s ease-in-out infinite;
@@ -225,6 +238,9 @@
 }
 .animate-border-glow {
   animation: border-glow 2s ease-in-out infinite;
+}
+.animate-shake {
+  animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 /* ── Staggered Animations ──────────────────────────────────── */

@@ -25,6 +25,8 @@ import {
   EyeOff,
   Edit2,
   Trash2,
+  Check,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import axios from "axios";
@@ -40,9 +42,14 @@ export default function ProfilePage() {
 
   // Modals state
   const [activeModal, setActiveModal] = useState<
-    "username" | "email" | "password" | "passkey" | "delete" | null
+    "password" | "passkey" | "delete" | null
   >(null);
   const [deleteDataModalOpen, setDeleteDataModalOpen] = useState(false);
+  const [editingField, setEditingField] = useState<"username" | "email" | null>(
+    null
+  );
+  const [formError, setFormError] = useState("");
+  const [errorShake, setErrorShake] = useState(false);
 
   // Form states
   const [newUsername, setNewUsername] = useState("");
@@ -79,9 +86,34 @@ export default function ProfilePage() {
     setNewPasskey("");
     setOtp("");
     setCodeSent(false);
-    if (user) {
-      setNewUsername(user.username);
-      setNewEmail(user.email);
+    setFormError("");
+  };
+
+  const handleInlineSave = async (field: "username" | "email") => {
+    setIsSaving(true);
+    try {
+      const payload: Record<string, string> = {};
+      if (field === "username") payload.username = newUsername;
+      if (field === "email") payload.email = newEmail;
+
+      const updateRes = await axios.post(
+        "/api/v1/auth/profile/update",
+        payload
+      );
+      updateUser(updateRes.data.user);
+
+      showToast({
+        title: "Success",
+        description: `${field === "username" ? "Username" : "Email"} updated successfully!`,
+      });
+      setEditingField(null);
+    } catch (err: any) {
+      showToast({
+        title: "Error",
+        description: err?.response?.data?.error || "Failed to update.",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -143,7 +175,7 @@ export default function ProfilePage() {
   const handleSendCode = async () => {
     setIsSendingCode(true);
     try {
-      const payload = activeModal === "email" ? { newEmail } : {};
+      const payload = { newEmail }; // Using newEmail just as dummy if needed
       await axios.post("/api/v1/auth/send-verification", payload);
       setCodeSent(true);
       showToast({
@@ -163,25 +195,26 @@ export default function ProfilePage() {
   const handleUpdate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
+    setFormError("");
     if (!currentPassword) {
-      showToast({
-        title: "Error",
-        description: "Please enter your current password.",
-      });
+      setFormError("Please enter your current password.");
+      setErrorShake(true);
+      setTimeout(() => setErrorShake(false), 500);
       return;
     }
 
     if (activeModal === "password" && newPassword !== confirmPassword) {
-      showToast({ title: "Error", description: "Passwords do not match." });
+      setFormError("Passwords do not match.");
+      setErrorShake(true);
+      setTimeout(() => setErrorShake(false), 500);
       return;
     }
 
     if (activeModal === "delete") {
       if (otp.length !== 6) {
-        showToast({
-          title: "Error",
-          description: "Please enter the 6-digit verification code.",
-        });
+        setFormError("Please enter the 6-digit verification code.");
+        setErrorShake(true);
+        setTimeout(() => setErrorShake(false), 500);
         return;
       }
     }
@@ -202,10 +235,6 @@ export default function ProfilePage() {
       }
 
       const payload: Record<string, string> = { currentPassword };
-      if (activeModal === "username") payload.username = newUsername;
-      if (activeModal === "email") {
-        payload.email = newEmail;
-      }
       if (activeModal === "password") payload.password = newPassword;
       if (activeModal === "passkey") payload.passkey = newPasskey;
 
@@ -216,27 +245,17 @@ export default function ProfilePage() {
 
       const updatedUser = updateRes.data.user;
 
-      if (activeModal === "email") {
-        updateUser({ ...updatedUser, isVerified: true });
-        setTimeout(() => {
-          updateUser(updatedUser);
-        }, 1000);
-      } else {
-        updateUser(updatedUser);
-      }
+      updateUser(updatedUser);
 
       showToast({
         title: "Success",
         description: "Profile updated successfully!",
       });
       closeModal();
-    } catch (err) {
-      showToast({
-        title: "Error",
-        description: axios.isAxiosError(err)
-          ? err.response?.data?.error || "Failed to update."
-          : "Failed to update.",
-      });
+    } catch (err: any) {
+      setFormError(err?.response?.data?.error || "Failed to update.");
+      setErrorShake(true);
+      setTimeout(() => setErrorShake(false), 500);
     } finally {
       setIsSaving(false);
     }
@@ -244,8 +263,27 @@ export default function ProfilePage() {
 
   if (isLoading || !user) {
     return (
-      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-        Loading profile...
+      <div className="flex min-h-[calc(100vh-56px)] items-start justify-center bg-slate-50 px-4 pt-6 pb-32 sm:min-h-[calc(100vh-60px)] sm:pt-10 sm:pb-36 dark:bg-[#0a0e1a]">
+        <div className="w-full max-w-2xl space-y-6">
+          <div className="h-8 w-48 animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+          <div className="glass flex flex-col items-center justify-center gap-4 rounded-2xl p-6 sm:p-8">
+            <div className="h-24 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+            <div className="h-4 w-48 animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+          </div>
+          <div className="glass overflow-hidden rounded-2xl">
+            <div className="bg-slate-50/50 px-6 py-4 dark:bg-slate-900/50">
+              <div className="h-6 w-32 animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+            </div>
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
+              <div className="px-6 py-4">
+                <div className="h-10 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+              </div>
+              <div className="px-6 py-4">
+                <div className="h-10 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-800" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -261,7 +299,9 @@ export default function ProfilePage() {
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
           required
-          className="h-11 border-slate-200 bg-white/60 pr-10 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+          className={`h-11 border-slate-200 bg-white/60 pr-10 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 ${
+            formError ? "border-red-500 focus:border-red-500" : ""
+          }`}
         />
         <button
           type="button"
@@ -284,8 +324,7 @@ export default function ProfilePage() {
         <div>
           <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
             For security, we need to verify it's you. A 6-digit code will be
-            sent to{" "}
-            <strong>{activeModal === "email" ? newEmail : user?.email}</strong>.
+            sent to <strong>{user?.email}</strong>.
           </p>
           <Button
             onClick={handleSendCode}
@@ -311,6 +350,11 @@ export default function ProfilePage() {
               pattern={REGEXP_ONLY_DIGITS}
               value={otp}
               onChange={(value) => setOtp(value)}
+              onComplete={() => {
+                setTimeout(() => {
+                  document.getElementById("modal-submit-btn")?.click();
+                }, 150);
+              }}
               autoFocus
             >
               <InputOTPGroup className="gap-1 sm:gap-2">
@@ -393,47 +437,116 @@ export default function ProfilePage() {
             </h2>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-white/5">
-            <div className="flex items-center justify-between gap-4 px-6 py-4">
+            <div className="flex items-center justify-between gap-4 px-6 py-4 transition-all">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                   Username
                 </p>
-                <p
-                  className="mt-1 truncate text-base font-medium text-slate-900 dark:text-white"
-                  title={user.username}
-                >
-                  {user.username}
-                </p>
+                {editingField === "username" ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    <Input
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      className="h-9 w-full max-w-[200px]"
+                      autoFocus
+                      disabled={isSaving}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleInlineSave("username");
+                        if (e.key === "Escape") setEditingField(null);
+                      }}
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
+                      onClick={() => handleInlineSave("username")}
+                      disabled={isSaving}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-slate-400"
+                      onClick={() => setEditingField(null)}
+                      disabled={isSaving}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center gap-2">
+                    <p
+                      className="truncate text-base font-medium text-slate-900 dark:text-white"
+                      title={user.username}
+                    >
+                      {user.username}
+                    </p>
+                    <button
+                      onClick={() => setEditingField("username")}
+                      className="p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => setActiveModal("username")}
-              >
-                <Edit2 className="mr-2 h-4 w-4" /> Edit
-              </Button>
             </div>
-            <div className="flex items-center justify-between gap-4 px-6 py-4">
+            <div className="flex items-center justify-between gap-4 px-6 py-4 transition-all">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                   Email Address
                 </p>
-                <p
-                  className="mt-1 truncate text-base font-medium text-slate-900 dark:text-white"
-                  title={user.email}
-                >
-                  {user.email}
-                </p>
+                {editingField === "email" ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    <Input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="h-9 w-full max-w-[240px]"
+                      autoFocus
+                      disabled={isSaving}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleInlineSave("email");
+                        if (e.key === "Escape") setEditingField(null);
+                      }}
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
+                      onClick={() => handleInlineSave("email")}
+                      disabled={isSaving}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-slate-400"
+                      onClick={() => setEditingField(null)}
+                      disabled={isSaving}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center gap-2">
+                    <p
+                      className="truncate text-base font-medium text-slate-900 dark:text-white"
+                      title={user.email}
+                    >
+                      {user.email}
+                    </p>
+                    <button
+                      onClick={() => setEditingField("email")}
+                      className="p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => setActiveModal("email")}
-              >
-                <Edit2 className="mr-2 h-4 w-4" /> Edit
-              </Button>
             </div>
           </div>
         </div>
@@ -547,8 +660,6 @@ export default function ProfilePage() {
                   : "text-slate-900 dark:text-white"
               }
             >
-              {activeModal === "username" && "Update Username"}
-              {activeModal === "email" && "Update Email Address"}
               {activeModal === "password" && "Change Password"}
               {activeModal === "passkey" &&
                 (user.hasPasskey ? "Update Passkey" : "Setup Passkey")}
@@ -561,36 +672,10 @@ export default function ProfilePage() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleUpdate} className="space-y-4 py-2">
-            {activeModal === "username" && (
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  New Username
-                </label>
-                <Input
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  required
-                  className="h-11"
-                />
-              </div>
-            )}
-
-            {activeModal === "email" && (
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  New Email Address
-                </label>
-                <Input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  required
-                  className="h-11"
-                />
-              </div>
-            )}
-
+          <form
+            onSubmit={handleUpdate}
+            className={`space-y-4 py-2 ${errorShake ? "animate-shake" : ""}`}
+          >
             {activeModal === "password" && (
               <>
                 <div className="relative">
@@ -682,6 +767,10 @@ export default function ProfilePage() {
 
             {activeModal === "delete" && renderOtpInput()}
 
+            {formError && (
+              <p className="mt-1 text-xs text-red-500">{formError}</p>
+            )}
+
             <DialogFooter className="flex-col gap-2 pt-4 sm:flex-row sm:space-x-2">
               <Button
                 type="button"
@@ -693,6 +782,7 @@ export default function ProfilePage() {
                 Cancel
               </Button>
               <Button
+                id="modal-submit-btn"
                 type="submit"
                 disabled={
                   isSaving ||

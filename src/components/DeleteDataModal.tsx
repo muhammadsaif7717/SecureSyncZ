@@ -21,12 +21,14 @@ interface DeleteDataModalProps {
 
 export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
   const [password, setPassword] = useState("");
+  const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const { logout } = useAuth();
 
   const resetState = () => {
     setPassword("");
+    setConfirmText("");
   };
 
   const handleClose = () => {
@@ -131,8 +133,7 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
               Enter your{" "}
               <span className="font-bold text-red-600 dark:text-red-500">
                 password
-              </span>{" "}
-              to confirm
+              </span>
             </Label>
             <Input
               id="confirmDelete"
@@ -140,6 +141,25 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your current password"
+              className="border-red-200 focus-visible:ring-red-500 dark:border-red-900/50"
+              disabled={isDeleting || isExporting}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label htmlFor="typeDelete" className="text-sm font-semibold">
+              Type{" "}
+              <span className="font-bold text-red-600 dark:text-red-500">
+                DELETE
+              </span>{" "}
+              to confirm
+            </Label>
+            <Input
+              id="typeDelete"
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="DELETE"
               className="border-red-200 focus-visible:ring-red-500 dark:border-red-900/50"
               disabled={isDeleting || isExporting}
             />
@@ -158,7 +178,9 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
           <Button
             variant="destructive"
             onClick={handleDelete}
-            disabled={!password || isDeleting || isExporting}
+            disabled={
+              !password || confirmText !== "DELETE" || isDeleting || isExporting
+            }
             className="bg-red-600 hover:bg-red-700 sm:w-1/2"
           >
             {isDeleting ? (

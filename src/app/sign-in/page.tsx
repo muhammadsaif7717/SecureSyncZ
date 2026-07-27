@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Shield, Mail, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Shield, Mail, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
@@ -38,12 +38,15 @@ export default function SignInPage() {
   const [showSecretKeyModal, setShowSecretKeyModal] = useState(false);
   const [secretKeyInput, setSecretKeyInput] = useState("");
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [errorShake, setErrorShake] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
+    setFormError("");
     setIsSubmitting(true);
     try {
       await login(email, password);
@@ -54,7 +57,10 @@ export default function SignInPage() {
       } else {
         setShowSecretKeyModal(true);
       }
-    } catch (error) {
+    } catch (error: any) {
+      setFormError(error?.response?.data?.error || "Invalid credentials");
+      setErrorShake(true);
+      setTimeout(() => setErrorShake(false), 500);
       // Error is handled and toasted by AuthProvider
     } finally {
       setIsSubmitting(false);
@@ -139,9 +145,16 @@ export default function SignInPage() {
                   type="email"
                   placeholder="name@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setFormError("");
+                  }}
                   required
-                  className="h-11 border-slate-200 bg-white/60 pl-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 sm:pl-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
+                  className={`h-11 bg-white/60 pl-10 text-sm transition-colors focus:bg-white sm:h-10 sm:pl-10 dark:bg-white/5 dark:focus:bg-white/[0.07] ${
+                    formError
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-slate-200 focus:border-emerald-300 dark:border-white/10 dark:focus:border-emerald-500/30"
+                  } ${errorShake ? "animate-shake" : ""}`}
                   disabled={isLoading || isSubmitting}
                 />
               </div>
@@ -160,9 +173,16 @@ export default function SignInPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setFormError("");
+                  }}
                   required
-                  className="h-11 border-slate-200 bg-white/60 pr-10 text-sm transition-colors focus:border-emerald-300 focus:bg-white sm:h-10 sm:pr-10 dark:border-white/10 dark:bg-white/5 dark:focus:border-emerald-500/30 dark:focus:bg-white/[0.07]"
+                  className={`h-11 bg-white/60 pr-10 text-sm transition-colors focus:bg-white sm:h-10 sm:pr-10 dark:bg-white/5 dark:focus:bg-white/[0.07] ${
+                    formError
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-slate-200 focus:border-emerald-300 dark:border-white/10 dark:focus:border-emerald-500/30"
+                  } ${errorShake ? "animate-shake" : ""}`}
                   disabled={isLoading || isSubmitting}
                 />
                 <button
@@ -177,6 +197,11 @@ export default function SignInPage() {
                   )}
                 </button>
               </div>
+              {formError && (
+                <p className="animate-fade-in-up mt-1 text-xs text-red-500">
+                  {formError}
+                </p>
+              )}
               <div className="flex justify-end pt-1">
                 <button
                   type="button"
@@ -190,10 +215,17 @@ export default function SignInPage() {
 
             <Button
               type="submit"
-              className="mt-2 h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.99] sm:h-10 dark:from-emerald-500 dark:to-teal-500"
+              className="mt-2 flex h-11 w-full items-center justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.99] sm:h-10 dark:from-emerald-500 dark:to-teal-500"
               disabled={isLoading || isSubmitting}
             >
-              {isLoading || isSubmitting ? "Signing In..." : "Sign In"}
+              {isLoading || isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
         </CardContent>
