@@ -10,7 +10,7 @@ import { useAuth } from "@/providers/AuthProvider";
 interface EncryptionContextType {
   cryptoKey: CryptoKey | null;
   isUnlocked: boolean;
-  unlockVault: (pin: string) => Promise<boolean>;
+  unlockVault: (pin: string) => Promise<{ success: boolean; error?: string }>;
   lockVault: () => void;
 }
 
@@ -84,13 +84,14 @@ export function EncryptionProvider({
     };
   }, [cryptoKey, router]);
 
-  const unlockVault = async (pin: string): Promise<boolean> => {
+  const unlockVault = async (
+    pin: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       let secretKeyHex = localStorage.getItem("secureSyncZ_secretKey");
 
       if (!secretKeyHex) {
-        // console.error("Missing secret key even after mount generation.");
-        return false;
+        return { success: false, error: "Missing secret key." };
       }
 
       const derivedKey = await deriveKey(pin, secretKeyHex);
@@ -99,17 +100,18 @@ export function EncryptionProvider({
       if (user?.hasPasskey) {
         try {
           await axios.post("/api/v1/auth/passkey/verify", { passkey: pin });
-        } catch (error) {
-          // If the server rejects the passkey, validation fails
-          return false;
+        } catch (error: any) {
+          return {
+            success: false,
+            error: error.response?.data?.error || "Invalid passkey. Try again.",
+          };
         }
       }
 
       setCryptoKey(derivedKey);
-      return true;
+      return { success: true };
     } catch (error) {
-      // console.error("Failed to unlock vault:", error);
-      return false;
+      return { success: false, error: "Failed to unlock vault." };
     }
   };
 

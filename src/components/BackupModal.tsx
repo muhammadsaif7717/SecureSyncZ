@@ -42,11 +42,11 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
     if (passkey.length !== 6) return;
 
     setIsVerifying(true);
-    const success = await unlockVault(passkey);
-    if (success) {
+    const result = await unlockVault(passkey);
+    if (result.success) {
       toast.success("Vault Unlocked");
     } else {
-      toast.error("Invalid passkey. Try again.");
+      toast.error(result.error || "Invalid passkey. Try again.");
       setPasskey("");
     }
     setIsVerifying(false);

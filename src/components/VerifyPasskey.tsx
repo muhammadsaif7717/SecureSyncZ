@@ -25,11 +25,14 @@ export default function VerifyPasskey({ reasonText }: VerifyPasskeyProps) {
     if (passkey.length !== 6) return;
 
     setIsVerifying(true);
-    const success = await unlockVault(passkey);
-    if (success) {
+    const result = await unlockVault(passkey);
+    if (result.success) {
       // Access granted (no toast needed)
     } else {
-      showToast({ title: "Error", description: "Invalid passkey. Try again." });
+      showToast({
+        title: "Error",
+        description: result.error || "Invalid passkey. Try again.",
+      });
       setPasskey("");
     }
     setIsVerifying(false);
