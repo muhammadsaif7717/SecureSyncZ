@@ -19,15 +19,19 @@
 - **🛡️ Password Health Dashboard:** Built-in dashboard to detect weak, reused, and old passwords.
 - **🔍 Global Search:** Instantly find your credentials from anywhere using the Cmd+K Command Palette.
 - **🔒 Zero-Knowledge Backups:** Export your entire vault as a single encrypted JSON file. Import via Drag-and-Drop.
-- **🖼️ Profile Customization:** Custom avatars with automatic client-side image compression.
-
+- **🖼️ Profile Customization:** Custom avatars with automatic client-side image compression and Cloudinary cloud storage.
+- **🛡️ Rate Limiting & Protection:** Built-in API rate limiting powered by Upstash Redis to prevent brute-force attacks.
+- **🔑 Google OAuth Integration:** Fast and secure alternative authentication using "Sign in with Google".
+- **💎 Premium Paywall:** Integrated Google Play Store Billing for secure handling of in-app purchases and premium subscriptions.
 ## 🛠️ Tech Stack
 
 - **Framework:** Next.js 16 (App Router & Turbopack)
 - **Styling:** Tailwind CSS v4
 - **Database:** MongoDB
+- **Caching & Rate Limiting:** Upstash Redis
+- **Media Storage:** Cloudinary
 - **State/Fetching:** React Query (@tanstack/react-query)
-- **Authentication:** Custom JWT-based Auth
+- **Authentication:** Custom JWT-based Auth & Google OAuth
 - **Icons:** Lucide React
 - **UI Components:** shadcn/ui
 
