@@ -109,7 +109,7 @@ export function GlobalSearchModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden rounded-2xl bg-white p-0 sm:w-full dark:bg-slate-900 [&>button]:hidden">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-xl gap-0 p-0 sm:w-full [&>button]:hidden">
         <DialogTitle className="sr-only">Global Search</DialogTitle>
         <DialogDescription className="sr-only">
           Search across all your passwords, credit cards, and notes

@@ -335,7 +335,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
   if (!isUnlocked) {
     return (
       <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
           <DialogHeader>
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
               <KeyRound className="h-6 w-6" />
@@ -397,7 +397,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
         <DialogHeader>
           <DialogTitle>
             {action === "export" ? "Export Backup (JSON)" : "Import Backup"}

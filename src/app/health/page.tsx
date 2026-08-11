@@ -322,7 +322,7 @@ export default function HealthDashboard() {
                   <Link
                     key={p._id}
                     href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
-                    className="flex items-center justify-between rounded-xl bg-white/60 p-3 text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:bg-purple-50 hover:shadow-md dark:bg-white/5 dark:hover:bg-purple-500/20"
+                    className="glass flex items-center justify-between rounded-xl border border-white/20 bg-white/40 p-3 text-sm shadow-sm backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/60 hover:shadow-md dark:border-white/10 dark:bg-black/20 dark:hover:bg-purple-500/20"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
@@ -347,14 +347,14 @@ export default function HealthDashboard() {
                 ))}
               </div>
             ) : !isCheckingPwned ? (
-              <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              <div className="glass flex h-24 items-center justify-center rounded-xl border border-dashed border-white/40 bg-white/20 backdrop-blur-md dark:border-white/10 dark:bg-black/20">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Zero breaches found. Super secure!
                 </p>
               </div>
             ) : (
-              <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-purple-200 bg-purple-50/50 dark:border-purple-900/30 dark:bg-purple-900/10">
-                <p className="animate-pulse text-sm font-medium text-purple-600 dark:text-purple-400">
+              <div className="glass flex h-24 items-center justify-center rounded-xl border border-dashed border-purple-300/50 bg-purple-50/30 backdrop-blur-md dark:border-purple-500/20 dark:bg-purple-900/20">
+                <p className="animate-pulse text-sm font-medium text-purple-700 dark:text-purple-300">
                   Analyzing against global data breaches...
                 </p>
               </div>
@@ -384,7 +384,7 @@ export default function HealthDashboard() {
                   <Link
                     key={p._id}
                     href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
-                    className="flex items-center justify-between rounded-xl bg-white/60 p-3 text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-md dark:bg-white/5 dark:hover:bg-red-500/20"
+                    className="glass flex items-center justify-between rounded-xl border border-white/20 bg-white/40 p-3 text-sm shadow-sm backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/60 hover:shadow-md dark:border-white/10 dark:bg-black/20 dark:hover:bg-red-500/20"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
@@ -409,8 +409,8 @@ export default function HealthDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              <div className="glass flex h-24 items-center justify-center rounded-xl border border-dashed border-white/40 bg-white/20 backdrop-blur-md dark:border-white/10 dark:bg-black/20">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   No weak passwords. Great job!
                 </p>
               </div>
@@ -438,7 +438,7 @@ export default function HealthDashboard() {
                 {reusedPasswords.map((group, idx) => (
                   <div
                     key={idx}
-                    className="space-y-2 rounded-xl bg-slate-50/50 p-4 dark:bg-slate-900/30"
+                    className="glass space-y-2 rounded-xl border border-white/20 bg-white/40 p-4 backdrop-blur-md dark:border-white/10 dark:bg-black/20"
                   >
                     <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                       Group {idx + 1}{" "}
@@ -450,7 +450,7 @@ export default function HealthDashboard() {
                       <Link
                         key={p._id}
                         href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
-                        className="flex min-w-max items-center justify-between gap-4 rounded-lg bg-white p-2.5 text-sm shadow-sm transition-all hover:bg-yellow-50 dark:bg-white/5 dark:hover:bg-yellow-500/20"
+                        className="glass flex min-w-max items-center justify-between gap-4 rounded-lg border border-white/20 bg-white/50 p-2.5 text-sm shadow-sm backdrop-blur-md transition-all hover:bg-white/70 dark:border-white/10 dark:bg-black/40 dark:hover:bg-yellow-500/20"
                       >
                         <div className="flex items-center gap-3 whitespace-nowrap">
                           <img
@@ -475,8 +475,8 @@ export default function HealthDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              <div className="glass flex h-24 items-center justify-center rounded-xl border border-dashed border-white/40 bg-white/20 backdrop-blur-md dark:border-white/10 dark:bg-black/20">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   No reused passwords. Excellent!
                 </p>
               </div>
@@ -505,7 +505,7 @@ export default function HealthDashboard() {
                   <Link
                     key={p._id}
                     href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
-                    className="flex min-w-max items-center justify-between gap-4 rounded-xl bg-white/60 p-3 text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md dark:bg-white/5 dark:hover:bg-blue-500/20"
+                    className="glass flex min-w-max items-center justify-between gap-4 rounded-xl border border-white/20 bg-white/40 p-3 text-sm shadow-sm backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/60 hover:shadow-md dark:border-white/10 dark:bg-black/20 dark:hover:bg-blue-500/20"
                   >
                     <div className="flex items-center gap-3 whitespace-nowrap">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
@@ -539,8 +539,8 @@ export default function HealthDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              <div className="glass flex h-24 items-center justify-center rounded-xl border border-dashed border-white/40 bg-white/20 backdrop-blur-md dark:border-white/10 dark:bg-black/20">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   All passwords are fresh and updated!
                 </p>
               </div>

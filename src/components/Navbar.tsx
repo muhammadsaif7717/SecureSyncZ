@@ -130,7 +130,7 @@ export default function Navbar() {
         secretKey={secretKey}
         onConfirm={() => setShowEmergencyKit(false)}
       />
-      <header className="sticky top-0 z-50 w-full border-b border-black/[0.06] bg-white/70 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#0a0e1a]/80">
+      <header className="glass sticky top-0 z-50 w-full border-b border-white/20 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-black/20">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-[60px] sm:px-6">
           {/* Logo */}
           <Link
@@ -195,7 +195,7 @@ export default function Navbar() {
                   </SheetTrigger>
                   <SheetContent
                     side="right"
-                    className="flex w-[85vw] max-w-[350px] flex-col border-l border-white/10 bg-white/80 p-0 backdrop-blur-2xl sm:w-[350px] dark:bg-[#0a0e1a]/90"
+                    className="w-[85vw] max-w-[350px] border-l p-0 sm:w-[350px]"
                   >
                     <div className="flex flex-col border-b border-black/5 bg-slate-50/50 p-6 dark:border-white/5 dark:bg-slate-900/30">
                       <SheetTitle className="mb-4 text-left text-lg font-bold tracking-tight text-slate-900 dark:text-white">
@@ -359,7 +359,7 @@ export default function Navbar() {
       {user && (
         <div
           className={cn(
-            "fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center justify-center rounded-[20px] border border-black/5 bg-white/80 px-2 py-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-in-out dark:border-white/10 dark:bg-[#0a0e1a]/80",
+            "glass fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center justify-center rounded-[2rem] border border-white/20 bg-white/70 px-2 py-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-in-out dark:border-white/5 dark:bg-black/20 dark:shadow-emerald-900/20",
             isVisible ? "translate-y-0" : "translate-y-[150%]"
           )}
         >

@@ -99,6 +99,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // If request is for root page ("/") and they are NOT logged in, redirect mobile users to /sign-in
+  if (pathname === "/" && !isValid) {
+    const userAgent = request.headers.get("user-agent") || "";
+    const isMobile = /mobile|android|iphone|ipad|phone/i.test(userAgent);
+    if (isMobile) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/sign-in";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return NextResponse.next();
 }
 

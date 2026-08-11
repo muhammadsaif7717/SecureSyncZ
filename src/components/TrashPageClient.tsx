@@ -164,148 +164,157 @@ export default function TrashPageClient() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-            Trash
-          </h1>
-          <p className="mt-1 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <AlertTriangle className="h-4 w-4 text-orange-500" />
-            Items in the trash will be permanently deleted after 30 days.
-          </p>
-        </div>
+    <div className="relative min-h-[calc(100vh-56px)] overflow-hidden bg-slate-50 sm:min-h-[calc(100vh-60px)] dark:bg-[#0a0e1a]">
+      {/* Background glow effects */}
+      <div className="animate-glow-pulse absolute top-1/4 left-1/4 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-emerald-500/[0.06]" />
+      <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-teal-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-teal-500/[0.05]" />
 
-        {items.length > 0 && (
-          <Button
-            variant="destructive"
-            onClick={handleEmptyTrash}
-            disabled={isActionLoading === "empty-trash"}
-            className="flex items-center gap-2"
-          >
-            {isActionLoading === "empty-trash" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-            Empty Trash
-          </Button>
-        )}
-      </div>
-
-      {items.length === 0 ? (
-        <Card className="glass border-dashed text-center">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Trash2 className="mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" />
-            <h3 className="text-lg font-medium text-slate-900 dark:text-white">
-              Your trash is empty
-            </h3>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              No items have been deleted recently.
+      <div className="relative z-10 mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+              Trash
+            </h1>
+            <p className="mt-1 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+              Items in the trash will be permanently deleted after 30 days.
             </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {items.map((item) => {
-            const daysLeft = getDaysRemaining(item.deletedAt);
+          </div>
 
-            return (
-              <Card
-                key={item._id}
-                className="glass group overflow-hidden transition-all hover:shadow-md"
-              >
-                <CardHeader className="p-4 pb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-slate-100 p-2.5 dark:bg-slate-800">
-                      {getIcon(item.type)}
-                    </div>
-                    <div className="flex-1 truncate">
-                      <CardTitle className="truncate text-base">
-                        {item.title}
-                      </CardTitle>
-                      <CardDescription className="capitalize">
-                        {item.type}
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 pt-2">
-                  <div className="mb-4 flex items-center text-xs text-orange-600 dark:text-orange-400">
-                    <AlertTriangle className="mr-1.5 h-3.5 w-3.5" />
-                    Deletes in {daysLeft} {daysLeft === 1 ? "day" : "days"}
-                  </div>
-                  <div className="flex w-full gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
-                      onClick={() => handleRestore(item)}
-                      disabled={isActionLoading !== null}
-                    >
-                      {isActionLoading === `restore-${item._id}` ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCcw className="mr-2 h-4 w-4" />
-                      )}
-                      Restore
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-red-200 text-red-700 hover:bg-red-50 dark:border-red-500/20 dark:text-red-400 dark:hover:bg-red-500/10"
-                      onClick={() => handlePermanentDelete(item)}
-                      disabled={isActionLoading !== null}
-                    >
-                      {isActionLoading === `delete-${item._id}` ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="mr-2 h-4 w-4" />
-                      )}
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      <Dialog open={isEmptyDialogOpen} onOpenChange={setIsEmptyDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
-          <DialogHeader>
-            <DialogTitle className="text-slate-900 dark:text-white">
-              Empty Trash?
-            </DialogTitle>
-            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
-              Are you sure you want to empty the trash? All items will be
-              permanently deleted and cannot be recovered.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-col gap-2 sm:flex-row sm:space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsEmptyDialogOpen(false)}
-              disabled={isActionLoading === "empty-trash"}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
+          {items.length > 0 && (
             <Button
               variant="destructive"
-              onClick={confirmEmptyTrash}
+              onClick={handleEmptyTrash}
               disabled={isActionLoading === "empty-trash"}
-              className="w-full sm:w-auto"
+              className="flex items-center gap-2"
             >
               {isActionLoading === "empty-trash" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
               )}
               Empty Trash
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          )}
+        </div>
+
+        {items.length === 0 ? (
+          <Card className="glass border-dashed text-center">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <Trash2 className="mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" />
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                Your trash is empty
+              </h3>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                No items have been deleted recently.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {items.map((item) => {
+              const daysLeft = getDaysRemaining(item.deletedAt);
+
+              return (
+                <Card
+                  key={item._id}
+                  className="animate-fade-in-up glass group relative overflow-hidden rounded-[2rem] border border-white/20 p-0 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20"
+                >
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+                  <div className="relative z-10">
+                    <CardHeader className="p-4 pb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-xl bg-slate-100 p-2.5 dark:bg-slate-800">
+                          {getIcon(item.type)}
+                        </div>
+                        <div className="flex-1 truncate">
+                          <CardTitle className="truncate text-base">
+                            {item.title}
+                          </CardTitle>
+                          <CardDescription className="capitalize">
+                            {item.type}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-2">
+                      <div className="mb-4 flex items-center text-xs text-orange-600 dark:text-orange-400">
+                        <AlertTriangle className="mr-1.5 h-3.5 w-3.5" />
+                        Deletes in {daysLeft} {daysLeft === 1 ? "day" : "days"}
+                      </div>
+                      <div className="flex w-full gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                          onClick={() => handleRestore(item)}
+                          disabled={isActionLoading !== null}
+                        >
+                          {isActionLoading === `restore-${item._id}` ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCcw className="mr-2 h-4 w-4" />
+                          )}
+                          Restore
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 border-red-200 text-red-700 hover:bg-red-50 dark:border-red-500/20 dark:text-red-400 dark:hover:bg-red-500/10"
+                          onClick={() => handlePermanentDelete(item)}
+                          disabled={isActionLoading !== null}
+                        >
+                          {isActionLoading === `delete-${item._id}` ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                          )}
+                          Delete
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        <Dialog open={isEmptyDialogOpen} onOpenChange={setIsEmptyDialogOpen}>
+          <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
+            <DialogHeader>
+              <DialogTitle className="text-slate-900 dark:text-white">
+                Empty Trash?
+              </DialogTitle>
+              <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+                Are you sure you want to empty the trash? All items will be
+                permanently deleted and cannot be recovered.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-col gap-2 sm:flex-row sm:space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsEmptyDialogOpen(false)}
+                disabled={isActionLoading === "empty-trash"}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmEmptyTrash}
+                disabled={isActionLoading === "empty-trash"}
+                className="w-full sm:w-auto"
+              >
+                {isActionLoading === "empty-trash" ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="mr-2 h-4 w-4" />
+                )}
+                Empty Trash
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

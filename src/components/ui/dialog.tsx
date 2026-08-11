@@ -58,11 +58,12 @@ function DialogContent({
         <DialogPrimitive.Content
           data-slot="dialog-content"
           className={cn(
-            "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 pointer-events-auto relative z-50 my-auto grid w-full max-w-[calc(100%-1rem)] gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-lg duration-200 sm:max-w-lg sm:p-6 dark:border-slate-800 dark:bg-slate-900",
+            "glass data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 pointer-events-auto relative z-50 my-auto grid w-full max-w-[calc(100%-1rem)] gap-4 overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 p-5 shadow-2xl backdrop-blur-xl duration-200 sm:max-w-lg sm:p-6 dark:border-white/5 dark:bg-black/20 dark:shadow-emerald-900/20",
             className
           )}
           {...props}
         >
+          <div className="pointer-events-none absolute inset-0 z-[-1] bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
           {children}
           <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
             <XIcon />

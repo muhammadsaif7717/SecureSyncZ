@@ -370,271 +370,289 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] items-start justify-center bg-slate-50 px-4 pt-6 pb-32 sm:min-h-[calc(100vh-60px)] sm:pt-10 sm:pb-36 dark:bg-[#0a0e1a]">
-      <div className="w-full max-w-2xl space-y-6">
+    <div className="relative min-h-[calc(100vh-56px)] overflow-hidden bg-slate-50 px-4 py-8 sm:py-12 dark:bg-[#0a0e1a]">
+      {/* Background glow effects */}
+      <div className="animate-glow-pulse absolute top-1/4 left-1/4 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-emerald-500/[0.06]" />
+      <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-teal-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-teal-500/[0.05]" />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center space-y-6 pt-6 pb-32 sm:pt-10 sm:pb-36">
         <h1 className="mb-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Profile Settings
         </h1>
 
         {/* Avatar Section */}
-        <div className="glass flex flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl p-6 shadow-sm sm:p-8 dark:shadow-black/20">
-          <div className="group relative h-24 w-24 overflow-hidden rounded-full shadow-lg ring-4 ring-emerald-500/20">
-            {user.profilePicture ? (
-              <Image
-                src={user.profilePicture}
-                alt="Profile"
-                fill
-                sizes="96px"
-                priority
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-                <Shield className="h-10 w-10" />
-              </div>
-            )}
-            <div
-              className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {isUploading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-white" />
+        <div className="animate-fade-in-up glass group relative flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[2rem] border border-white/20 p-6 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl sm:p-8 dark:border-white/5 dark:shadow-emerald-900/20">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="relative z-10 flex flex-col items-center gap-4">
+            <div className="group relative h-28 w-28 overflow-hidden rounded-full shadow-lg ring-4 ring-emerald-500/20">
+              {user.profilePicture ? (
+                <Image
+                  src={user.profilePicture}
+                  alt="Profile"
+                  fill
+                  sizes="96px"
+                  priority
+                  className="object-cover"
+                />
               ) : (
-                <Camera className="h-6 w-6 text-white" />
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                  <Shield className="h-10 w-10" />
+                </div>
               )}
+              <div
+                className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isUploading ? (
+                  <Loader2 className="h-6 w-6 animate-spin text-white" />
+                ) : (
+                  <Camera className="h-6 w-6 text-white" />
+                )}
+              </div>
             </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+            />
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Click the image to upload a new avatar
+            </p>
           </div>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-          />
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Click the image to upload a new avatar
-          </p>
         </div>
 
         {/* Profile Details Card */}
-        <div className="glass overflow-hidden rounded-2xl shadow-sm dark:shadow-black/20">
-          <div className="border-b border-slate-200/50 bg-slate-50/50 px-6 py-4 dark:border-white/5 dark:bg-slate-900/50">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Profile Details
-            </h2>
-          </div>
-          <div className="divide-y divide-slate-100 dark:divide-white/5">
-            <div className="flex items-center justify-between gap-4 px-6 py-4 transition-all">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                  Username
-                </p>
-                {editingField === "username" ? (
-                  <div className="mt-1 flex items-center gap-2">
-                    <Input
-                      value={newUsername}
-                      onChange={(e) => setNewUsername(e.target.value)}
-                      className="h-9 w-full max-w-[200px]"
-                      autoFocus
-                      disabled={isSaving}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") setActiveModal("inline_confirm");
-                        if (e.key === "Escape") setEditingField(null);
-                      }}
-                    />
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
-                      onClick={() => setActiveModal("inline_confirm")}
-                      disabled={isSaving}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-slate-400"
-                      onClick={() => setEditingField(null)}
-                      disabled={isSaving}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="mt-1 flex items-center gap-2">
-                    <p
-                      className="truncate text-base font-medium text-slate-900 dark:text-white"
-                      title={user.username}
-                    >
-                      {user.username}
-                    </p>
-                    <button
-                      onClick={() => setEditingField("username")}
-                      className="p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                )}
+        <div className="animate-fade-in-up stagger-1 glass group relative w-full overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="relative z-10">
+            <div className="border-b border-white/20 bg-white/40 px-6 py-5 dark:border-white/5 dark:bg-white/5">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                Profile Details
+              </h2>
+            </div>
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
+              <div className="flex items-center justify-between gap-4 px-6 py-4 transition-all">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    Username
+                  </p>
+                  {editingField === "username" ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <Input
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        className="h-9 w-full max-w-[200px]"
+                        autoFocus
+                        disabled={isSaving}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter")
+                            setActiveModal("inline_confirm");
+                          if (e.key === "Escape") setEditingField(null);
+                        }}
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
+                        onClick={() => setActiveModal("inline_confirm")}
+                        disabled={isSaving}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-slate-400"
+                        onClick={() => setEditingField(null)}
+                        disabled={isSaving}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mt-1 flex items-center gap-2">
+                      <p
+                        className="truncate text-base font-medium text-slate-900 dark:text-white"
+                        title={user.username}
+                      >
+                        {user.username}
+                      </p>
+                      <button
+                        onClick={() => setEditingField("username")}
+                        className="p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-4 px-6 py-4 transition-all">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    Email Address
+                  </p>
+                  {editingField === "email" ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <Input
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        className="h-9 w-full max-w-[240px]"
+                        autoFocus
+                        disabled={isSaving}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter")
+                            setActiveModal("inline_confirm");
+                          if (e.key === "Escape") setEditingField(null);
+                        }}
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
+                        onClick={() => setActiveModal("inline_confirm")}
+                        disabled={isSaving}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-slate-400"
+                        onClick={() => setEditingField(null)}
+                        disabled={isSaving}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mt-1 flex items-center gap-2">
+                      <p
+                        className="truncate text-base font-medium text-slate-900 dark:text-white"
+                        title={user.email}
+                      >
+                        {user.email}
+                      </p>
+                      <button
+                        onClick={() => setEditingField("email")}
+                        className="p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-4 px-6 py-4 transition-all">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                  Email Address
-                </p>
-                {editingField === "email" ? (
-                  <div className="mt-1 flex items-center gap-2">
-                    <Input
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      className="h-9 w-full max-w-[240px]"
-                      autoFocus
-                      disabled={isSaving}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") setActiveModal("inline_confirm");
-                        if (e.key === "Escape") setEditingField(null);
-                      }}
-                    />
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
-                      onClick={() => setActiveModal("inline_confirm")}
-                      disabled={isSaving}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-slate-400"
-                      onClick={() => setEditingField(null)}
-                      disabled={isSaving}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="mt-1 flex items-center gap-2">
-                    <p
-                      className="truncate text-base font-medium text-slate-900 dark:text-white"
-                      title={user.email}
-                    >
-                      {user.email}
-                    </p>
-                    <button
-                      onClick={() => setEditingField("email")}
-                      className="p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
-        </div>
 
-        {/* Security Card */}
-        <div className="glass overflow-hidden rounded-2xl shadow-sm dark:shadow-black/20">
-          <div className="border-b border-slate-200/50 bg-slate-50/50 px-6 py-4 dark:border-white/5 dark:bg-slate-900/50">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Security
-            </h2>
-          </div>
-          <div className="divide-y divide-slate-100 dark:divide-white/5">
-            <div className="flex items-center justify-between px-6 py-4">
-              <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                  Password
-                </p>
-                <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                  {user.hasPassword
-                    ? "Update your account password"
-                    : "You haven't set a password yet"}
-                </p>
+          {/* Security Card */}
+          <div className="animate-fade-in-up stagger-2 glass group relative w-full overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+            <div className="relative z-10">
+              <div className="border-b border-white/20 bg-white/40 px-6 py-5 dark:border-white/5 dark:bg-white/5">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  Security
+                </h2>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setActiveModal("password")}
-                className={
-                  !user.hasPassword
-                    ? "border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                    : ""
-                }
-              >
-                {user.hasPassword ? "Change Password" : "Set Password"}
-              </Button>
-            </div>
-            <div className="flex items-center justify-between px-6 py-4">
-              <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                  Passkey PIN
-                </p>
-                <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                  {user.hasPasskey
-                    ? "Update your 6-digit passkey"
-                    : "Set up a 6-digit passkey"}
-                </p>
+              <div className="divide-y divide-slate-100 dark:divide-white/5">
+                <div className="flex items-center justify-between px-6 py-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Password
+                    </p>
+                    <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                      {user.hasPassword
+                        ? "Update your account password"
+                        : "You haven't set a password yet"}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveModal("password")}
+                    className={
+                      !user.hasPassword
+                        ? "border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                        : ""
+                    }
+                  >
+                    {user.hasPassword ? "Change Password" : "Set Password"}
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between px-6 py-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Passkey PIN
+                    </p>
+                    <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                      {user.hasPasskey
+                        ? "Update your 6-digit passkey"
+                        : "Set up a 6-digit passkey"}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveModal("passkey")}
+                  >
+                    {user.hasPasskey ? "Update Passkey" : "Setup Passkey"}
+                  </Button>
+                </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setActiveModal("passkey")}
-              >
-                {user.hasPasskey ? "Update Passkey" : "Setup Passkey"}
-              </Button>
             </div>
           </div>
         </div>
 
         {/* Danger Zone Card */}
-        <div className="glass overflow-hidden rounded-2xl border border-red-200/50 shadow-sm dark:border-red-900/50 dark:shadow-black/20">
-          <div className="bg-red-50/50 px-6 py-4 dark:bg-red-950/20">
-            <h2 className="text-lg font-semibold text-red-600 dark:text-red-500">
-              Danger Zone
-            </h2>
-          </div>
-          <div className="divide-y divide-red-100 dark:divide-red-950/50">
-            <div className="flex flex-col justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
-              <div>
-                <p className="font-medium text-red-600 dark:text-red-500">
-                  Delete All Data
-                </p>
-                <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                  Erase all your saved passwords, cards, and secure notes
-                  without deleting your account.
-                </p>
-              </div>
-              <Button
-                onClick={() => setDeleteDataModalOpen(true)}
-                variant="outline"
-                className="shrink-0 border-red-200 font-semibold text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-500 dark:hover:bg-red-950/20"
-              >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete All Data
-              </Button>
+        <div className="animate-fade-in-up stagger-3 glass group relative w-full overflow-hidden rounded-[2rem] border border-red-200/50 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-red-900/50 dark:shadow-red-900/20">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-red-500/5 via-orange-500/5 to-red-500/5 dark:from-red-500/10 dark:via-orange-500/10 dark:to-red-500/10" />
+          <div className="relative z-10">
+            <div className="border-b border-red-200/50 bg-red-50/50 px-6 py-5 dark:border-red-900/50 dark:bg-red-950/20">
+              <h2 className="text-xl font-bold text-red-600 dark:text-red-500">
+                Danger Zone
+              </h2>
             </div>
-
-            <div className="flex flex-col justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
-              <div>
-                <p className="font-medium text-red-600 dark:text-red-500">
-                  Delete Account
-                </p>
-                <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                  Permanently delete your account and all associated data.
-                </p>
+            <div className="divide-y divide-red-100 dark:divide-red-950/50">
+              <div className="flex flex-col justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
+                <div>
+                  <p className="font-medium text-red-600 dark:text-red-500">
+                    Delete All Data
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                    Erase all your saved passwords, cards, and secure notes
+                    without deleting your account.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setDeleteDataModalOpen(true)}
+                  variant="outline"
+                  className="shrink-0 border-red-200 font-semibold text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-500 dark:hover:bg-red-950/20"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete All Data
+                </Button>
               </div>
-              <Button
-                onClick={() => setActiveModal("delete")}
-                variant="destructive"
-                className="shrink-0 font-semibold"
-              >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete Account
-              </Button>
+
+              <div className="flex flex-col justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
+                <div>
+                  <p className="font-medium text-red-600 dark:text-red-500">
+                    Delete Account
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                    Permanently delete your account and all associated data.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setActiveModal("delete")}
+                  variant="destructive"
+                  className="shrink-0 font-semibold"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Account
+                </Button>
+              </div>
             </div>
           </div>
         </div>

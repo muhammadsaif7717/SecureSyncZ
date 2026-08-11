@@ -90,7 +90,7 @@ export function EmergencyKitModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="printable-emergency-kit w-[calc(100vw-2rem)] max-w-md scale-95 rounded-2xl bg-white transition-transform sm:w-full sm:scale-100 dark:bg-slate-900 [&>button]:hidden">
+      <DialogContent className="printable-emergency-kit w-[calc(100vw-2rem)] scale-95 transition-transform sm:w-full sm:scale-100 [&>button]:hidden">
         <div className="no-print absolute top-4 right-4">
           <button
             onClick={onConfirm}

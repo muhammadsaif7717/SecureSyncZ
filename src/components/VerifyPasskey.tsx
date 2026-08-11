@@ -45,10 +45,15 @@ export default function VerifyPasskey({ reasonText }: VerifyPasskeyProps) {
   }, [passkey]);
 
   return (
-    <section className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center bg-slate-50 px-4 py-6 sm:min-h-[calc(100vh-60px)] dark:bg-[#0a0e1a]">
-      <div className="w-full max-w-md">
-        <Card className="glass overflow-hidden rounded-2xl border border-emerald-500/20 p-6 shadow-xl dark:shadow-emerald-500/5">
-          <div className="flex flex-col items-center text-center">
+    <section className="relative flex min-h-[calc(100vh-56px)] flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 py-6 sm:min-h-[calc(100vh-60px)] dark:bg-[#0a0e1a]">
+      {/* Background glow effects */}
+      <div className="animate-glow-pulse absolute top-1/4 left-1/4 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-emerald-500/[0.06]" />
+      <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-teal-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-teal-500/[0.05]" />
+
+      <div className="relative z-10 w-full max-w-md">
+        <Card className="glass relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 p-0 shadow-2xl backdrop-blur-xl dark:border-white/5 dark:bg-black/20 dark:shadow-emerald-900/20">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="relative z-10 flex flex-col items-center p-6 text-center">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
               <KeyRound className="h-6 w-6" />
             </div>

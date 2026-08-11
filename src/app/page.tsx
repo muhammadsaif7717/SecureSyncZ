@@ -127,17 +127,20 @@ export default function Home() {
             {features.map((feature, idx) => (
               <div
                 key={idx}
-                className="glass group relative rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 sm:p-6"
+                className="glass group relative overflow-hidden rounded-[2rem] border border-white/20 p-6 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl sm:p-8 dark:border-white/5 dark:shadow-emerald-900/20"
               >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 transition-transform group-hover:scale-110 sm:mb-4 dark:bg-white/5">
-                  {feature.icon}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+                <div className="relative z-10">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-white shadow-inner transition-transform group-hover:scale-110 sm:mb-6 dark:from-white/10 dark:to-white/5">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:mt-3 sm:text-base dark:text-slate-400">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-base font-bold text-slate-900 sm:text-lg dark:text-white">
-                  {feature.title}
-                </h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-500 sm:mt-2 sm:text-sm dark:text-slate-400">
-                  {feature.description}
-                </p>
               </div>
             ))}
           </div>

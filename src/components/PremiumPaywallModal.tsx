@@ -29,7 +29,7 @@ export default function PremiumPaywallModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-background/95 overflow-hidden border-none p-0 backdrop-blur-md sm:max-w-md">
+      <DialogContent className="overflow-hidden p-0 sm:max-w-md">
         <div className="from-primary/20 via-primary/5 to-background bg-gradient-to-br p-6">
           <div className="mt-4 mb-6 flex justify-center">
             <div className="relative">

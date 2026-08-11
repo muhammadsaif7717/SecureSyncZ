@@ -362,167 +362,114 @@ export default function CardPageClient({ name }: { name: string }) {
               return (
                 <div
                   key={card._id}
-                  className="glass group h-full overflow-hidden rounded-2xl shadow-lg shadow-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 dark:shadow-black/20"
+                  className="animate-fade-in-up glass group relative h-full overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20"
                 >
-                  {/* Gradient top accent */}
-                  <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+                  <div className="relative z-10 flex h-full flex-col">
+                    {/* Gradient top accent */}
+                    <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 
-                  <div className="space-y-4 p-4 sm:p-6">
-                    {/* Card name & date */}
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-base font-semibold text-slate-900 sm:text-lg dark:text-white">
-                          {card.serviceName}
-                        </h3>
-                        {card.name && (
-                          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                            Cardholder: {card.name}
-                          </p>
-                        )}
-                        <div className="mt-1 flex items-center gap-2">
-                          {card.cardType && (
-                            <span
-                              className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${badgeColors}`}
-                            >
-                              {card.cardType}
-                            </span>
+                    <div className="space-y-4 p-4 sm:p-6">
+                      {/* Card name & date */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-base font-semibold text-slate-900 sm:text-lg dark:text-white">
+                            {card.serviceName}
+                          </h3>
+                          {card.name && (
+                            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                              Cardholder: {card.name}
+                            </p>
                           )}
-                          {card.website && (
-                            <a
-                              href={
-                                card.website.startsWith("http")
-                                  ? card.website
-                                  : `https://${card.website}`
-                              }
-                              target="_blank"
-                              rel="noreferrer"
-                              className="flex max-w-full items-center gap-1 truncate text-xs text-emerald-600 transition-colors hover:text-emerald-700 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
-                              title="Visit Bank Website"
-                            >
-                              <Globe className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate">
-                                {extractRootDomain(card.website)}
-                              </span>
-                            </a>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {new Date(
-                              card.updatedAt || card.createdAt
-                            ).toLocaleDateString()}
-                          </span>
-                          <button
-                            onClick={() => handleToggleFavorite(card)}
-                            className="rounded-full p-1 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-                            title="Toggle Favorite"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill={card.isFavorite ? "currentColor" : "none"}
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className={`h-4 w-4 ${card.isFavorite ? "text-yellow-500" : "text-slate-400"}`}
-                            >
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                          </button>
-                        </div>
-                        {card.tags && card.tags.length > 0 && (
-                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                            {card.tags.map((tag, idx) => (
+                          <div className="mt-1 flex items-center gap-2">
+                            {card.cardType && (
                               <span
-                                key={idx}
-                                className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                                className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${badgeColors}`}
                               >
-                                {tag}
+                                {card.cardType}
                               </span>
-                            ))}
+                            )}
+                            {card.website && (
+                              <a
+                                href={
+                                  card.website.startsWith("http")
+                                    ? card.website
+                                    : `https://${card.website}`
+                                }
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex max-w-full items-center gap-1 truncate text-xs text-emerald-600 transition-colors hover:text-emerald-700 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
+                                title="Visit Bank Website"
+                              >
+                                <Globe className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">
+                                  {extractRootDomain(card.website)}
+                                </span>
+                              </a>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Card number */}
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                        Card Number
-                      </Label>
-                      <div className="relative flex items-center gap-2">
-                        <div className="h-auto min-h-[40px] flex-1 rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm tracking-widest break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
-                          {visible[card._id as string]
-                            ? card.cardNumber.replace(/(\d{4})(?=\d)/g, "$1 ")
-                            : `•••• •••• •••• ${card.cardNumber.slice(-4)}`}
-                        </div>
-                        <button
-                          type="button"
-                          aria-label={
-                            visible[card._id as string]
-                              ? "Hide card number"
-                              : "Show card number"
-                          }
-                          onClick={() => toggleVisibility(card._id as string)}
-                          className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-                        >
-                          {visible[card._id as string] ? (
-                            <EyeOff size={16} />
-                          ) : (
-                            <Eye size={16} />
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              {new Date(
+                                card.updatedAt || card.createdAt
+                              ).toLocaleDateString()}
+                            </span>
+                            <button
+                              onClick={() => handleToggleFavorite(card)}
+                              className="rounded-full p-1 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                              title="Toggle Favorite"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill={card.isFavorite ? "currentColor" : "none"}
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className={`h-4 w-4 ${card.isFavorite ? "text-yellow-500" : "text-slate-400"}`}
+                              >
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            </button>
+                          </div>
+                          {card.tags && card.tags.length > 0 && (
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                              {card.tags.map((tag, idx) => (
+                                <span
+                                  key={idx}
+                                  className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
                           )}
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Copy card number"
-                          onClick={() =>
-                            copyToClipboard(
-                              card.cardNumber,
-                              card._id as string,
-                              "card"
-                            )
-                          }
-                          className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-                        >
-                          {copiedId === `${card._id}-card` ? (
-                            <Check className="text-emerald-500" size={16} />
-                          ) : (
-                            <Copy size={16} />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Expiry + CVV row */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      <div className="space-y-1.5">
-                        <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          Expiry
-                        </Label>
-                        <div className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
-                          {card.expiry}
                         </div>
                       </div>
+
+                      {/* Card number */}
                       <div className="space-y-1.5">
                         <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          CVV
+                          Card Number
                         </Label>
-                        <div className="relative">
-                          <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
-                            {visible[`${card._id}-cvv`] ? card.cvv : "•••"}
+                        <div className="relative flex items-center gap-2">
+                          <div className="h-auto min-h-[40px] flex-1 rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm tracking-widest break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                            {visible[card._id as string]
+                              ? card.cardNumber.replace(/(\d{4})(?=\d)/g, "$1 ")
+                              : `•••• •••• •••• ${card.cardNumber.slice(-4)}`}
                           </div>
                           <button
                             type="button"
                             aria-label={
-                              visible[`${card._id}-cvv`]
-                                ? "Hide CVV"
-                                : "Show CVV"
+                              visible[card._id as string]
+                                ? "Hide card number"
+                                : "Show card number"
                             }
-                            onClick={() => toggleVisibility(`${card._id}-cvv`)}
+                            onClick={() => toggleVisibility(card._id as string)}
                             className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
                           >
-                            {visible[`${card._id}-cvv`] ? (
+                            {visible[card._id as string] ? (
                               <EyeOff size={16} />
                             ) : (
                               <Eye size={16} />
@@ -530,17 +477,17 @@ export default function CardPageClient({ name }: { name: string }) {
                           </button>
                           <button
                             type="button"
-                            aria-label="Copy CVV"
+                            aria-label="Copy card number"
                             onClick={() =>
                               copyToClipboard(
-                                card.cvv,
+                                card.cardNumber,
                                 card._id as string,
-                                "cvv"
+                                "card"
                               )
                             }
                             className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
                           >
-                            {copiedId === `${card._id}-cvv` ? (
+                            {copiedId === `${card._id}-card` ? (
                               <Check className="text-emerald-500" size={16} />
                             ) : (
                               <Copy size={16} />
@@ -548,96 +495,156 @@ export default function CardPageClient({ name }: { name: string }) {
                           </button>
                         </div>
                       </div>
-                    </div>
 
-                    {/* PIN */}
-                    {card.pin && (
-                      <div className="space-y-1.5">
-                        <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          PIN
-                        </Label>
-                        <div className="relative">
-                          <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
-                            {visible[`${card._id}-pin`] ? card.pin : "••••"}
+                      {/* Expiry + CVV row */}
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            Expiry
+                          </Label>
+                          <div className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                            {card.expiry}
                           </div>
-                          <button
-                            type="button"
-                            aria-label={
-                              visible[`${card._id}-pin`]
-                                ? "Hide PIN"
-                                : "Show PIN"
-                            }
-                            onClick={() => toggleVisibility(`${card._id}-pin`)}
-                            className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-                          >
-                            {visible[`${card._id}-pin`] ? (
-                              <EyeOff size={16} />
-                            ) : (
-                              <Eye size={16} />
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            aria-label="Copy PIN"
-                            onClick={() =>
-                              copyToClipboard(
-                                card.pin!,
-                                card._id as string,
-                                "pin"
-                              )
-                            }
-                            className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-                          >
-                            {copiedId === `${card._id}-pin` ? (
-                              <Check className="text-emerald-500" size={16} />
-                            ) : (
-                              <Copy size={16} />
-                            )}
-                          </button>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            CVV
+                          </Label>
+                          <div className="relative">
+                            <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                              {visible[`${card._id}-cvv`] ? card.cvv : "•••"}
+                            </div>
+                            <button
+                              type="button"
+                              aria-label={
+                                visible[`${card._id}-cvv`]
+                                  ? "Hide CVV"
+                                  : "Show CVV"
+                              }
+                              onClick={() =>
+                                toggleVisibility(`${card._id}-cvv`)
+                              }
+                              className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                            >
+                              {visible[`${card._id}-cvv`] ? (
+                                <EyeOff size={16} />
+                              ) : (
+                                <Eye size={16} />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Copy CVV"
+                              onClick={() =>
+                                copyToClipboard(
+                                  card.cvv,
+                                  card._id as string,
+                                  "cvv"
+                                )
+                              }
+                              className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                            >
+                              {copiedId === `${card._id}-cvv` ? (
+                                <Check className="text-emerald-500" size={16} />
+                              ) : (
+                                <Copy size={16} />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    )}
 
-                    {/* Note */}
-                    {card.note && (
-                      <div className="space-y-1.5">
-                        <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          Note
-                        </Label>
-                        <p className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm break-words break-all whitespace-pre-wrap text-slate-700 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-300">
-                          {card.note}
-                        </p>
+                      {/* PIN */}
+                      {card.pin && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            PIN
+                          </Label>
+                          <div className="relative">
+                            <div className="h-auto min-h-[40px] w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 pr-20 font-mono text-sm break-words break-all whitespace-pre-wrap text-slate-800 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-200">
+                              {visible[`${card._id}-pin`] ? card.pin : "••••"}
+                            </div>
+                            <button
+                              type="button"
+                              aria-label={
+                                visible[`${card._id}-pin`]
+                                  ? "Hide PIN"
+                                  : "Show PIN"
+                              }
+                              onClick={() =>
+                                toggleVisibility(`${card._id}-pin`)
+                              }
+                              className="absolute top-1/2 right-10 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                            >
+                              {visible[`${card._id}-pin`] ? (
+                                <EyeOff size={16} />
+                              ) : (
+                                <Eye size={16} />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Copy PIN"
+                              onClick={() =>
+                                copyToClipboard(
+                                  card.pin!,
+                                  card._id as string,
+                                  "pin"
+                                )
+                              }
+                              className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                            >
+                              {copiedId === `${card._id}-pin` ? (
+                                <Check className="text-emerald-500" size={16} />
+                              ) : (
+                                <Copy size={16} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Note */}
+                      {card.note && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            Note
+                          </Label>
+                          <p className="rounded-lg border border-slate-200 bg-white/50 px-3 py-2 text-sm break-words break-all whitespace-pre-wrap text-slate-700 dark:border-white/[0.08] dark:bg-white/5 dark:text-slate-300">
+                            {card.note}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2 pt-2 sm:justify-end sm:gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-10 flex-1 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:flex-none dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                          onClick={() => {
+                            if (user && !user.isPremium) {
+                              setShowPaywall(true);
+                              return;
+                            }
+                            setEditableData(card);
+                            setIsDialogOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="h-10 flex-1 text-sm sm:flex-none"
+                          onClick={() => {
+                            setDeleteId(card._id as string);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          Move to Trash
+                        </Button>
                       </div>
-                    )}
-
-                    {/* Action buttons */}
-                    <div className="flex gap-2 pt-2 sm:justify-end sm:gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-10 flex-1 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:flex-none dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
-                        onClick={() => {
-                          if (user && !user.isPremium) {
-                            setShowPaywall(true);
-                            return;
-                          }
-                          setEditableData(card);
-                          setIsDialogOpen(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="h-10 flex-1 text-sm sm:flex-none"
-                        onClick={() => {
-                          setDeleteId(card._id as string);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        Move to Trash
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -649,7 +656,7 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Card
@@ -858,7 +865,7 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Move to Trash
