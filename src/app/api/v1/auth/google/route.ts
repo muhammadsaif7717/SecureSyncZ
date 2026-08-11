@@ -56,6 +56,13 @@ export async function POST(req: Request) {
 
       const result = await usersCollection.insertOne(newUser);
       user = { ...newUser, _id: result.insertedId };
+    } else if (!user.profilePicture && picture) {
+      // If user exists but doesn't have a profile picture, sync it from Google
+      await usersCollection.updateOne(
+        { _id: user._id },
+        { $set: { profilePicture: picture } }
+      );
+      user.profilePicture = picture;
     }
 
     // Generate JWT Token
