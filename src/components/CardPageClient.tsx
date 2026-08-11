@@ -656,7 +656,7 @@ export default function CardPageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-y-auto sm:w-full">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Card

@@ -32,6 +32,7 @@ import {
   ShieldAlert,
   ArrowLeft,
   Trash2,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -207,7 +208,14 @@ export default function Navbar() {
 
                       <div className="flex items-center gap-4">
                         {user.profilePicture ? (
-                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-emerald-500/20 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0d1224]">
+                          <div
+                            className={cn(
+                              "relative h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0d1224]",
+                              user.isPremium
+                                ? "shadow-[0_0_15px_rgba(251,191,36,0.4)] ring-amber-400 dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] dark:ring-amber-500"
+                                : "ring-emerald-500/20"
+                            )}
+                          >
                             <Image
                               src={user.profilePicture}
                               alt={user.username}
@@ -217,13 +225,23 @@ export default function Navbar() {
                             />
                           </div>
                         ) : (
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md ring-2 ring-emerald-500/20 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0d1224]">
+                          <div
+                            className={cn(
+                              "flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md ring-2 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0d1224]",
+                              user.isPremium
+                                ? "shadow-[0_0_15px_rgba(251,191,36,0.4)] ring-amber-400 dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] dark:ring-amber-500"
+                                : "ring-emerald-500/20"
+                            )}
+                          >
                             <Shield className="h-7 w-7" />
                           </div>
                         )}
                         <div className="flex min-w-0 flex-col">
-                          <p className="truncate text-base font-semibold text-slate-900 capitalize dark:text-white">
+                          <p className="flex items-center gap-1.5 truncate text-base font-semibold text-slate-900 capitalize dark:text-white">
                             {user.username}
+                            {user.isPremium && (
+                              <Crown className="h-4 w-4 text-amber-500 drop-shadow-sm" />
+                            )}
                           </p>
                           <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
                             {user.email}

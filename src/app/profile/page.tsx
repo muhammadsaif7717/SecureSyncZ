@@ -27,13 +27,14 @@ import {
   Trash2,
   Check,
   X,
+  Crown,
 } from "lucide-react";
 import Image from "next/image";
 import axios from "axios";
 import { showToast } from "@/lib/toast";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { DeleteDataModal } from "@/components/DeleteDataModal";
-import { compressImage } from "@/lib/utils";
+import { compressImage, cn } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { user, updateUser, isLoading } = useAuth();
@@ -384,7 +385,14 @@ export default function ProfilePage() {
         <div className="animate-fade-in-up glass group relative flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[2rem] border border-white/20 p-6 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl sm:p-8 dark:border-white/5 dark:shadow-emerald-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
           <div className="relative z-10 flex flex-col items-center gap-4">
-            <div className="group relative h-28 w-28 overflow-hidden rounded-full shadow-lg ring-4 ring-emerald-500/20">
+            <div
+              className={cn(
+                "group relative h-28 w-28 overflow-hidden rounded-full shadow-lg ring-4",
+                user.isPremium
+                  ? "shadow-[0_0_20px_rgba(251,191,36,0.5)] ring-amber-400 dark:shadow-[0_0_20px_rgba(245,158,11,0.4)] dark:ring-amber-500"
+                  : "ring-emerald-500/20"
+              )}
+            >
               {user.profilePicture ? (
                 <Image
                   src={user.profilePicture}
@@ -474,10 +482,13 @@ export default function ProfilePage() {
                   ) : (
                     <div className="mt-1 flex items-center gap-2">
                       <p
-                        className="truncate text-base font-medium text-slate-900 dark:text-white"
+                        className="flex items-center gap-2 truncate text-base font-medium text-slate-900 dark:text-white"
                         title={user.username}
                       >
                         {user.username}
+                        {user.isPremium && (
+                          <Crown className="h-4 w-4 text-amber-500 drop-shadow-sm" />
+                        )}
                       </p>
                       <button
                         onClick={() => setEditingField("username")}

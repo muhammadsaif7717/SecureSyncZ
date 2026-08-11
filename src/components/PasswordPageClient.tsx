@@ -487,8 +487,8 @@ export default function PasswordPageClient({ name }: { name: string }) {
                       </div>
                     </div>
 
-                    {/* Action buttons — stack on mobile */}
-                    <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:justify-end sm:gap-4 sm:pt-4">
+                    {/* Action buttons */}
+                    <div className="flex gap-2 pt-2 sm:justify-end sm:gap-3">
                       <Button
                         variant="outline"
                         size="sm"
@@ -522,7 +522,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
 
       {/* Edit Modal */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-y-auto sm:w-full">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
               Edit Password

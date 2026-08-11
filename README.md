@@ -23,6 +23,7 @@
 - **🛡️ Rate Limiting & Protection:** Built-in API rate limiting powered by Upstash Redis to prevent brute-force attacks.
 - **🔑 Google OAuth Integration:** Fast and secure alternative authentication using "Sign in with Google".
 - **💎 Premium Paywall:** Integrated Google Play Store Billing for secure handling of in-app purchases and premium subscriptions.
+
 ## 🛠️ Tech Stack
 
 - **Framework:** Next.js 16 (App Router & Turbopack)
