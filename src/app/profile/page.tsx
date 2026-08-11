@@ -42,7 +42,7 @@ export default function ProfilePage() {
 
   // Modals state
   const [activeModal, setActiveModal] = useState<
-    "password" | "passkey" | "delete" | null
+    "password" | "passkey" | "delete" | "inline_confirm" | null
   >(null);
   const [deleteDataModalOpen, setDeleteDataModalOpen] = useState(false);
   const [editingField, setEditingField] = useState<"username" | "email" | null>(
@@ -89,34 +89,6 @@ export default function ProfilePage() {
     setFormError("");
   };
 
-  const handleInlineSave = async (field: "username" | "email") => {
-    setIsSaving(true);
-    try {
-      const payload: Record<string, string> = {};
-      if (field === "username") payload.username = newUsername;
-      if (field === "email") payload.email = newEmail;
-
-      const updateRes = await axios.post(
-        "/api/v1/auth/profile/update",
-        payload
-      );
-      updateUser(updateRes.data.user);
-
-      showToast({
-        title: "Success",
-        description: `${field === "username" ? "Username" : "Email"} updated successfully!`,
-      });
-      setEditingField(null);
-    } catch (err: any) {
-      showToast({
-        title: "Error",
-        description: err?.response?.data?.error || "Failed to update.",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -143,20 +115,12 @@ export default function ProfilePage() {
       return;
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
-    if (!apiKey) {
-      setIsUploading(false);
-      return;
-    }
-
     try {
       const formData = new FormData();
-      formData.append("image", imageToUpload, file.name);
-      const imgbbRes = await axios.post(
-        `https://api.imgbb.com/1/upload?key=${apiKey}`,
-        formData
-      );
-      const imageUrl = imgbbRes.data.data.url;
+      formData.append("file", imageToUpload);
+
+      const uploadRes = await axios.post("/api/v1/upload", formData);
+      const imageUrl = uploadRes.data.url;
       const updateRes = await axios.post("/api/v1/auth/profile/update", {
         profilePicture: imageUrl,
       });
@@ -165,7 +129,7 @@ export default function ProfilePage() {
     } catch (error) {
       showToast({
         title: "Upload Failed",
-        description: "Failed to upload image.",
+        description: "Failed to upload image to Cloudinary.",
       });
     } finally {
       setIsUploading(false);
@@ -221,6 +185,26 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
+      if (activeModal === "inline_confirm") {
+        const payload: Record<string, string> = { currentPassword };
+        if (editingField === "username") payload.username = newUsername;
+        if (editingField === "email") payload.email = newEmail;
+
+        const updateRes = await axios.post(
+          "/api/v1/auth/profile/update",
+          payload
+        );
+        updateUser(updateRes.data.user);
+
+        showToast({
+          title: "Success",
+          description: `${editingField === "username" ? "Username" : "Email"} updated successfully!`,
+        });
+        closeModal();
+        setEditingField(null);
+        return;
+      }
+
       if (activeModal === "delete") {
         await axios.post("/api/v1/auth/delete-account", {
           currentPassword,
@@ -451,7 +435,7 @@ export default function ProfilePage() {
                       autoFocus
                       disabled={isSaving}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") handleInlineSave("username");
+                        if (e.key === "Enter") setActiveModal("inline_confirm");
                         if (e.key === "Escape") setEditingField(null);
                       }}
                     />
@@ -459,7 +443,7 @@ export default function ProfilePage() {
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
-                      onClick={() => handleInlineSave("username")}
+                      onClick={() => setActiveModal("inline_confirm")}
                       disabled={isSaving}
                     >
                       <Check className="h-4 w-4" />
@@ -507,7 +491,7 @@ export default function ProfilePage() {
                       autoFocus
                       disabled={isSaving}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") handleInlineSave("email");
+                        if (e.key === "Enter") setActiveModal("inline_confirm");
                         if (e.key === "Escape") setEditingField(null);
                       }}
                     />
@@ -515,7 +499,7 @@ export default function ProfilePage() {
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
-                      onClick={() => handleInlineSave("email")}
+                      onClick={() => setActiveModal("inline_confirm")}
                       disabled={isSaving}
                     >
                       <Check className="h-4 w-4" />
@@ -664,11 +648,14 @@ export default function ProfilePage() {
               {activeModal === "passkey" &&
                 (user.hasPasskey ? "Update Passkey" : "Setup Passkey")}
               {activeModal === "delete" && "Delete Account"}
+              {activeModal === "inline_confirm" && "Confirm Changes"}
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
               {activeModal === "delete"
                 ? "Are you absolutely sure? This action is irreversible."
-                : "Enter your new details below."}
+                : activeModal === "inline_confirm"
+                  ? "Enter your current password to save changes."
+                  : "Enter your new details below."}
             </DialogDescription>
           </DialogHeader>
 

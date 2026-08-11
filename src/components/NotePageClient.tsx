@@ -101,11 +101,6 @@ export default function NotePageClient({ name }: { name: string }) {
         const currentClipboard = await navigator.clipboard.readText();
         if (currentClipboard === text) {
           await navigator.clipboard.writeText("");
-          showToast({
-            title: "🛡️ Clipboard Cleared",
-            description:
-              "Your copied data has been removed from the clipboard for security.",
-          });
         }
       } catch (e) {}
     }, 30000);

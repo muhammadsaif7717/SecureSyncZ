@@ -107,8 +107,10 @@ export default function RootLayout({
                 <Navbar />
                 <main className="safe-bottom">{children}</main>
                 <Toaster
+                  position="bottom-center"
                   toastOptions={{
                     className: "glass !border-emerald-500/20 !text-foreground",
+                    duration: 2000,
                   }}
                 />
                 <PasskeyModal />

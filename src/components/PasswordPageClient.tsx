@@ -107,11 +107,6 @@ export default function PasswordPageClient({ name }: { name: string }) {
         // Only clear if the clipboard still contains the text we copied
         if (currentClipboard === text) {
           await navigator.clipboard.writeText("");
-          showToast({
-            title: "🛡️ Clipboard Cleared",
-            description:
-              "Your copied data has been removed from the clipboard for security.",
-          });
         }
       } catch (e) {
         // Ignore clipboard read errors (e.g. if document lost focus)

@@ -27,7 +27,7 @@ export default function VerifyPasskey({ reasonText }: VerifyPasskeyProps) {
     setIsVerifying(true);
     const success = await unlockVault(passkey);
     if (success) {
-      showToast({ title: "Vault Unlocked", description: "Access granted." });
+      // Access granted (no toast needed)
     } else {
       showToast({ title: "Error", description: "Invalid passkey. Try again." });
       setPasskey("");
