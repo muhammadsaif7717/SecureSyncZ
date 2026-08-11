@@ -68,6 +68,7 @@ export async function POST(req: Request) {
           profilePicture: user.profilePicture,
           hasPasskey: !!user.passkey,
           isVerified: user.isVerified || false,
+          hasPassword: !!user.password,
           encryptedValidationStr: user.encryptedValidationStr,
         },
       },

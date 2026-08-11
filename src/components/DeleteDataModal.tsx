@@ -11,7 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Trash2, AlertTriangle, Download, Loader2 } from "lucide-react";
+import {
+  Trash2,
+  AlertTriangle,
+  Download,
+  Loader2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
 interface DeleteDataModalProps {
@@ -21,13 +28,15 @@ interface DeleteDataModalProps {
 
 export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const resetState = () => {
     setPassword("");
+    setShowPassword(false);
     setConfirmText("");
   };
 
@@ -128,23 +137,38 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
             </Button>
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="confirmDelete" className="text-sm font-semibold">
-              Enter your{" "}
-              <span className="font-bold text-red-600 dark:text-red-500">
-                password
-              </span>
-            </Label>
-            <Input
-              id="confirmDelete"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your current password"
-              className="border-red-200 focus-visible:ring-red-500 dark:border-red-900/50"
-              disabled={isDeleting || isExporting}
-            />
-          </div>
+          {user?.hasPassword && (
+            <div className="space-y-3">
+              <Label htmlFor="confirmDelete" className="text-sm font-semibold">
+                Enter your{" "}
+                <span className="font-bold text-red-600 dark:text-red-500">
+                  password
+                </span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="confirmDelete"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Your current password"
+                  className="border-red-200 pr-10 focus-visible:ring-red-500 dark:border-red-900/50"
+                  disabled={isDeleting || isExporting}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-3">
             <Label htmlFor="typeDelete" className="text-sm font-semibold">
@@ -179,7 +203,10 @@ export function DeleteDataModal({ isOpen, onClose }: DeleteDataModalProps) {
             variant="destructive"
             onClick={handleDelete}
             disabled={
-              !password || confirmText !== "DELETE" || isDeleting || isExporting
+              (user?.hasPassword && !password) ||
+              confirmText !== "DELETE" ||
+              isDeleting ||
+              isExporting
             }
             className="bg-red-600 hover:bg-red-700 sm:w-1/2"
           >

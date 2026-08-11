@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +28,12 @@ import { EmergencyKitModal } from "@/components/EmergencyKitModal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ModeToggle } from "@/components/mode-toggle";
+import { GoogleLogin } from "@react-oauth/google";
+import { useTheme } from "next-themes";
 
 export default function SignUpPage() {
-  const { signup, isLoading } = useAuth();
+  const userAuth = useAuth();
+  const { signup, isLoading } = userAuth;
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,7 +44,13 @@ export default function SignUpPage() {
   const [showEmergencyKit, setShowEmergencyKit] = useState(false);
   const [formError, setFormError] = useState("");
   const [errorShake, setErrorShake] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -261,6 +270,64 @@ export default function SignUpPage() {
                 "Create Account"
               )}
             </Button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200 dark:border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-slate-50 px-2 text-slate-500 dark:bg-slate-900/80 dark:text-slate-400">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    setIsSubmitting(true);
+                    try {
+                      await userAuth.googleLogin(credentialResponse.credential);
+                      const existingKey = localStorage.getItem(
+                        "secureSyncZ_secretKey"
+                      );
+                      if (
+                        existingKey &&
+                        /^[0-9a-fA-F]{64}$/.test(existingKey)
+                      ) {
+                        router.push("/passwords");
+                      } else {
+                        // Redirect to passkey/secret key setup (or show modal)
+                        // Wait, for new Google login users, we should show the passkey modal or emergency kit.
+                        // However, we don't know their secret key yet.
+                        // We will just send them to /passwords where the PasskeyModal will pop up automatically.
+                        router.push("/passwords");
+                      }
+                    } catch (error) {
+                      // Error handled by provider
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  }
+                }}
+                onError={() => {
+                  showToast({
+                    title: "Google Login Failed",
+                    description: "Could not authenticate with Google.",
+                  });
+                }}
+                theme={
+                  mounted && resolvedTheme === "dark"
+                    ? "filled_black"
+                    : "outline"
+                }
+                size="large"
+                width="100%"
+                text="continue_with"
+                shape="rectangular"
+              />
+            </div>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center border-t border-slate-100 px-5 py-4 sm:px-6 dark:border-white/[0.06]">

@@ -43,7 +43,7 @@ export const DELETE = async (req: Request) => {
       );
     }
 
-    const query = { "user.email": user.email, "user.username": user.username };
+    const query = { "user.email": user.email };
 
     // Delete all data associated with the user across collections
     await Promise.all([

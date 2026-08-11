@@ -85,6 +85,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -101,22 +103,27 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            <AuthProvider>
-              <EncryptionProvider>
-                <Navbar />
-                <main className="safe-bottom">{children}</main>
-                <Toaster
-                  position="bottom-center"
-                  toastOptions={{
-                    className: "glass !border-emerald-500/20 !text-foreground",
-                    duration: 2000,
-                  }}
-                />
-                <PasskeyModal />
-              </EncryptionProvider>
-            </AuthProvider>
-          </QueryProvider>
+          <GoogleOAuthProvider
+            clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
+          >
+            <QueryProvider>
+              <AuthProvider>
+                <EncryptionProvider>
+                  <Navbar />
+                  <main className="safe-bottom">{children}</main>
+                  <Toaster
+                    position="bottom-center"
+                    toastOptions={{
+                      className:
+                        "glass !border-emerald-500/20 !text-foreground",
+                      duration: 2000,
+                    }}
+                  />
+                  <PasskeyModal />
+                </EncryptionProvider>
+              </AuthProvider>
+            </QueryProvider>
+          </GoogleOAuthProvider>
         </ThemeProvider>
       </body>
     </html>

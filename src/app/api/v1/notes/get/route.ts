@@ -27,7 +27,7 @@ export const GET = async (req: Request) => {
 
     const userNotes = await db
       .collection("notes")
-      .find({ "user.email": email, "user.username": username })
+      .find({ "user.email": email })
       .toArray();
 
     const decryptedNotes = userNotes.map((item) => ({

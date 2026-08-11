@@ -31,13 +31,6 @@ export async function POST(req: Request) {
       !password &&
       !passkey;
 
-    if (!currentPassword && !isOnlyProfilePicture) {
-      return NextResponse.json(
-        { error: "Current password is required to save changes." },
-        { status: 400 }
-      );
-    }
-
     const db = await connectDB();
     const usersCollection = db.collection("users");
 
@@ -48,7 +41,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (currentPassword) {
+    const hasPassword = !!user.password && user.password !== "";
+
+    if (hasPassword && !currentPassword && !isOnlyProfilePicture) {
+      return NextResponse.json(
+        { error: "Current password is required to save changes." },
+        { status: 400 }
+      );
+    }
+
+    if (currentPassword && hasPassword) {
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
         return NextResponse.json(
@@ -128,6 +130,26 @@ export async function POST(req: Request) {
 
     if (!result) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Cascade update to child collections if email or username changed
+    if (updateData.email || updateData.username) {
+      const newEmail = updateData.email || user.email;
+      const newUsername = updateData.username || user.username;
+
+      const updateQuery = { "user.email": user.email };
+      const updatePayload = {
+        $set: {
+          "user.email": newEmail,
+          "user.username": newUsername,
+        },
+      };
+
+      await Promise.all([
+        db.collection("passwords").updateMany(updateQuery, updatePayload),
+        db.collection("cards").updateMany(updateQuery, updatePayload),
+        db.collection("notes").updateMany(updateQuery, updatePayload),
+      ]);
     }
 
     const returnUser = {

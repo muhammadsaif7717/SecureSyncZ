@@ -12,6 +12,7 @@ interface User {
   username: string;
   profilePicture?: string;
   hasPasskey?: boolean;
+  hasPassword?: boolean;
   isVerified?: boolean;
   encryptedValidationStr?: string;
   isPremium?: boolean;
@@ -21,6 +22,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
   signup: (
     username: string,
     email: string,
@@ -135,6 +137,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const googleLogin = async (credential: string) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post("/api/v1/auth/google", { credential });
+      if (response.data && response.data.user) {
+        setUser(response.data.user);
+        showToast({
+          title: "Logged In Successfully",
+          description: `Welcome, ${response.data.user.username}!`,
+        });
+      }
+    } catch (error) {
+      let errorMsg = "Google Login failed.";
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.error || errorMsg;
+      }
+      showToast({
+        title: "Login Failed",
+        description: errorMsg,
+      });
+      throw new Error(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signup = async (
     username: string,
     email: string,
@@ -199,7 +227,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, signup, logout, updateUser }}
+      value={{
+        user,
+        isLoading,
+        login,
+        googleLogin,
+        signup,
+        logout,
+        updateUser,
+      }}
     >
       {children}
       <GlobalVerificationModal />

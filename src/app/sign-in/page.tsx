@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +28,12 @@ import {
 import { ModeToggle } from "@/components/mode-toggle";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { deriveKey, decryptData } from "@/lib/clientCrypto";
+import { GoogleLogin } from "@react-oauth/google";
+import { useTheme } from "next-themes";
 
 export default function SignInPage() {
-  const { user, login, isLoading } = useAuth();
+  const userAuth = useAuth();
+  const { user, login, isLoading } = userAuth;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +43,13 @@ export default function SignInPage() {
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [formError, setFormError] = useState("");
   const [errorShake, setErrorShake] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,6 +236,60 @@ export default function SignInPage() {
                 "Sign In"
               )}
             </Button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200 dark:border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-slate-50 px-2 text-slate-500 dark:bg-slate-900/80 dark:text-slate-400">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    setIsSubmitting(true);
+                    try {
+                      await userAuth.googleLogin(credentialResponse.credential);
+                      const existingKey = localStorage.getItem(
+                        "secureSyncZ_secretKey"
+                      );
+                      if (
+                        existingKey &&
+                        /^[0-9a-fA-F]{64}$/.test(existingKey)
+                      ) {
+                        router.push("/passwords");
+                      } else {
+                        setShowSecretKeyModal(true);
+                      }
+                    } catch (error) {
+                      // Error handled by provider
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  }
+                }}
+                onError={() => {
+                  showToast({
+                    title: "Google Login Failed",
+                    description: "Could not authenticate with Google.",
+                  });
+                }}
+                theme={
+                  mounted && resolvedTheme === "dark"
+                    ? "filled_black"
+                    : "outline"
+                }
+                size="large"
+                width="100%"
+                text="continue_with"
+                shape="rectangular"
+              />
+            </div>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center border-t border-slate-100 px-5 py-4 sm:px-6 dark:border-white/[0.06]">

@@ -160,7 +160,7 @@ export default function ProfilePage() {
     if (e) e.preventDefault();
 
     setFormError("");
-    if (!currentPassword) {
+    if (user?.hasPassword && !currentPassword) {
       setFormError("Please enter your current password.");
       setErrorShake(true);
       setTimeout(() => setErrorShake(false), 500);
@@ -272,35 +272,39 @@ export default function ProfilePage() {
     );
   }
 
-  const renderCurrentPasswordInput = () => (
-    <div className="space-y-1.5 pt-2">
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-        Current Password <span className="text-red-500">*</span>
-      </label>
-      <div className="relative">
-        <Input
-          type={showCurrentPassword ? "text" : "password"}
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          required
-          className={`h-11 border-slate-200 bg-white/60 pr-10 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 ${
-            formError ? "border-red-500 focus:border-red-500" : ""
-          }`}
-        />
-        <button
-          type="button"
-          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-          className="absolute top-1/2 right-3 -translate-y-1/2 p-0.5 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
-        >
-          {showCurrentPassword ? (
-            <EyeOff className="h-4 w-4" />
-          ) : (
-            <Eye className="h-4 w-4" />
-          )}
-        </button>
+  const renderCurrentPasswordInput = () => {
+    if (!user.hasPassword) return null;
+
+    return (
+      <div className="space-y-1.5 pt-2">
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          Current Password <span className="text-red-500">*</span>
+        </label>
+        <div className="relative">
+          <Input
+            type={showCurrentPassword ? "text" : "password"}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            required
+            className={`h-11 border-slate-200 bg-white/60 pr-10 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 ${
+              formError ? "border-red-500 focus:border-red-500" : ""
+            }`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            className="absolute top-1/2 right-3 -translate-y-1/2 p-0.5 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+          >
+            {showCurrentPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderOtpInput = () => (
     <div className="pt-4 text-center">
@@ -382,7 +386,6 @@ export default function ProfilePage() {
                 fill
                 sizes="96px"
                 priority
-                unoptimized
                 className="object-cover"
               />
             ) : (
@@ -549,15 +552,22 @@ export default function ProfilePage() {
                   Password
                 </p>
                 <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                  Update your account password
+                  {user.hasPassword
+                    ? "Update your account password"
+                    : "You haven't set a password yet"}
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveModal("password")}
+                className={
+                  !user.hasPassword
+                    ? "border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                    : ""
+                }
               >
-                Change Password
+                {user.hasPassword ? "Change Password" : "Set Password"}
               </Button>
             </div>
             <div className="flex items-center justify-between px-6 py-4">
@@ -644,7 +654,8 @@ export default function ProfilePage() {
                   : "text-slate-900 dark:text-white"
               }
             >
-              {activeModal === "password" && "Change Password"}
+              {activeModal === "password" &&
+                (user.hasPassword ? "Change Password" : "Set Password")}
               {activeModal === "passkey" &&
                 (user.hasPasskey ? "Update Passkey" : "Setup Passkey")}
               {activeModal === "delete" && "Delete Account"}
@@ -773,7 +784,7 @@ export default function ProfilePage() {
                 type="submit"
                 disabled={
                   isSaving ||
-                  !currentPassword ||
+                  (user.hasPassword && !currentPassword) ||
                   (activeModal === "delete" &&
                     (!codeSent || otp.length !== 6)) ||
                   (activeModal === "passkey" && newPasskey.length !== 6) ||
