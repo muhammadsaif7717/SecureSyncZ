@@ -288,3 +288,32 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* ── Print Styles ────────────────────────────────────────────── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .printable-emergency-kit,
+  .printable-emergency-kit * {
+    visibility: visible;
+  }
+  
+  .printable-emergency-kit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    transform: none !important; /* Reset any scaling */
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}

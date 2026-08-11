@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy, ShieldAlert, Download, X } from "lucide-react";
 import { showToast } from "@/lib/toast";
+import jsPDF from "jspdf";
 
 interface EmergencyKitModalProps {
   isOpen: boolean;
@@ -30,10 +31,67 @@ export function EmergencyKitModal({
     });
   };
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(5, 150, 105); // Emerald-600
+    doc.text("SecureSyncZ Emergency Kit", 20, 30);
+    
+    // Add description
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.setTextColor(100, 116, 139); // Slate-500
+    doc.text(
+      "Keep this document in a safe place. If you ever lose your passkey,",
+      20,
+      45
+    );
+    doc.text(
+      "you will need this Secret Key to restore access to your encrypted vault.",
+      20,
+      52
+    );
+    doc.text(
+      "We do NOT store this key on our servers. Do not share it with anyone.",
+      20,
+      59
+    );
+
+    // Add Secret Key Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42); // Slate-900
+    doc.text("Your Secret Key:", 20, 75);
+
+    // Draw a box around the key
+    doc.setDrawColor(16, 185, 129); // Emerald-500
+    doc.setFillColor(236, 253, 245); // Emerald-50
+    doc.roundedRect(20, 80, 170, 20, 3, 3, "FD");
+
+    // Add Secret Key Text
+    doc.setFont("courier", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(4, 120, 87); // Emerald-700
+    
+    // Center the key vertically inside the box
+    doc.text(secretKey, 25, 91);
+    
+    // Save the PDF
+    doc.save("SecureSyncZ-Emergency-Kit.pdf");
+    
+    showToast({
+      title: "PDF Downloaded",
+      description: "Emergency Kit saved to your device.",
+    });
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md scale-95 rounded-2xl bg-white transition-transform sm:w-full sm:scale-100 dark:bg-slate-900 [&>button]:hidden">
-        <div className="absolute top-4 right-4">
+      <DialogContent className="printable-emergency-kit w-[calc(100vw-2rem)] max-w-md scale-95 rounded-2xl bg-white transition-transform sm:w-full sm:scale-100 dark:bg-slate-900 [&>button]:hidden">
+        <div className="absolute top-4 right-4 no-print">
           <button
             onClick={onConfirm}
             className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -62,7 +120,7 @@ export function EmergencyKitModal({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center no-print">
           <Button
             onClick={handleCopy}
             variant="outline"
@@ -72,7 +130,7 @@ export function EmergencyKitModal({
             Copy Secret Key
           </Button>
           <Button
-            onClick={() => window.print()}
+            onClick={handleDownloadPDF}
             variant="outline"
             className="flex items-center gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
           >
@@ -81,7 +139,7 @@ export function EmergencyKitModal({
           </Button>
         </div>
 
-        <DialogFooter className="mt-6 flex-col gap-2 sm:flex-row sm:space-x-0">
+        <DialogFooter className="mt-6 flex-col gap-2 sm:flex-row sm:space-x-0 no-print">
           <Button
             onClick={onConfirm}
             className="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700 dark:from-red-500 dark:to-orange-500"
