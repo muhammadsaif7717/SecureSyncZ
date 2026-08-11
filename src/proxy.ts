@@ -1,6 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import * as jose from "jose";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+// Initialize Upstash Redis & Rate Limiter
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL || "",
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
+});
+
+// 5 requests per minute
+const ratelimit = new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.slidingWindow(5, "1 m"),
+  analytics: true,
+});
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -8,11 +23,38 @@ const JWT_SECRET =
 
 const protectedPaths = ["/passwords", "/cards", "/post"];
 const authPaths = ["/sign-in", "/sign-up"];
+const rateLimitPaths = [
+  "/api/v1/auth/login",
+  "/api/v1/auth/signup",
+  "/api/v1/auth/send-verification",
+  "/api/v1/auth/verify-email",
+  "/api/v1/auth/verify-reset-otp",
+  "/api/v1/auth/passkey/verify",
+  "/api/v1/auth/passkey/setup",
+  "/api/v1/auth/forgot-password",
+  "/api/v1/auth/reset-password",
+  "/api/v1/auth/profile/update",
+  "/api/v1/upload",
+];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check if pathname starts with any protected path
+  // 1. Rate Limiting Logic
+  const isRateLimitedPath = rateLimitPaths.some((path) => pathname === path);
+  if (isRateLimitedPath && process.env.UPSTASH_REDIS_REST_URL) {
+    const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    const { success } = await ratelimit.limit(ip);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+  }
+
+  // 2. Protected Paths Logic
   const isProtected = protectedPaths.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
@@ -64,11 +106,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes, except if we want to protect some later, but middleware is best for pages)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
