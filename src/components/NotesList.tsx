@@ -1,14 +1,14 @@
 "use client";
 
-import React from "react";
-import { ChevronRight, FileText, Search } from "lucide-react";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import getNotes from "@/lib/getNotes";
-import { useQuery } from "@tanstack/react-query";
-import { NotesData } from "@/types";
 import { useEncryption } from "@/providers/EncryptionProvider";
+import { NotesData } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronRight, FileText, Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
 
 const loadNotesData = async (cryptoKey: CryptoKey | null) => {
   const data = await getNotes(cryptoKey);

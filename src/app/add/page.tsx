@@ -32,6 +32,7 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 import { ChevronLeft, ChevronDown } from "lucide-react";
 import VerifyPasskey from "@/components/VerifyPasskey";
+import PremiumPaywallModal from "@/components/PremiumPaywallModal";
 
 const formatExpiry = (value: string) => {
   const digits = value.replace(/\D/g, "");
@@ -102,7 +103,15 @@ export default function PostPage() {
     }
   }, []);
 
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallFeature, setPaywallFeature] = useState("");
+
   const handleCategoryChange = (val: "password" | "card" | "note") => {
+    if ((val === "card" || val === "note") && user && !user.isPremium) {
+      setPaywallFeature(val === "card" ? "Secure Cards" : "Secure Notes");
+      setShowPaywall(true);
+      return;
+    }
     setSelectedCategory(val);
     localStorage.setItem("addPageActiveCategory", val);
   };
@@ -757,6 +766,11 @@ export default function PostPage() {
           </div>
         )}
       </div>
+      <PremiumPaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        featureName={paywallFeature}
+      />
     </div>
   );
 }

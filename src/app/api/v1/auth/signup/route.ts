@@ -64,6 +64,9 @@ export async function POST(req: Request) {
       isVerified: false,
       encryptedValidationStr: encryptedValidationStr || null,
       createdAt: new Date().toISOString(),
+      isPremium: false,
+      subscriptionExpiry: null,
+      playStorePurchaseToken: null,
     };
 
     const result = await usersCollection.insertOne(newUser);

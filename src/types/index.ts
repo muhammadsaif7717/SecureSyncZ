@@ -1,6 +1,7 @@
 type UserData = {
   email: string;
   username: string;
+  isPremium?: boolean;
 };
 
 export type PasswordsData = {

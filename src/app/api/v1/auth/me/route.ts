@@ -28,6 +28,7 @@ export async function GET(req: Request) {
       hasPasskey: !!user.passkey,
       isVerified: user.isVerified || false,
       encryptedValidationStr: user.encryptedValidationStr,
+      isPremium: user.isPremium || false,
     };
 
     return NextResponse.json({ user: returnUser }, { status: 200 });

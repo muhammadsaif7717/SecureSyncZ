@@ -42,6 +42,8 @@ import { extractRootDomain } from "@/lib/utils";
 import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
 import VerifyPasskey from "@/components/VerifyPasskey";
+import { useAuth } from "@/providers/AuthProvider";
+import PremiumPaywallModal from "@/components/PremiumPaywallModal";
 
 const loadCardsData = async (
   cryptoKey: CryptoKey | null
@@ -85,6 +87,15 @@ export default function CardPageClient({ name }: { name: string }) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { cryptoKey, isUnlocked } = useEncryption();
+  const { user } = useAuth();
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  // Check premium status
+  useEffect(() => {
+    if (user && !user.isPremium) {
+      setShowPaywall(true);
+    }
+  }, [user]);
 
   const {
     data = [],
@@ -279,6 +290,17 @@ export default function CardPageClient({ name }: { name: string }) {
   };
 
   if (filteredPassData.length === 0) {
+    if (user && !user.isPremium) {
+      return (
+        <div className="flex min-h-[calc(100vh-56px)] items-center justify-center p-4">
+          <PremiumPaywallModal
+            isOpen={true}
+            onClose={() => window.history.back()}
+            featureName="Secure Cards"
+          />
+        </div>
+      );
+    }
     return (
       <div className="mt-20 flex flex-col items-center justify-center space-y-4 px-4 text-center">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-500/10">
@@ -598,6 +620,10 @@ export default function CardPageClient({ name }: { name: string }) {
                         size="sm"
                         className="h-10 flex-1 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:flex-none dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                         onClick={() => {
+                          if (user && !user.isPremium) {
+                            setShowPaywall(true);
+                            return;
+                          }
                           setEditableData(card);
                           setIsDialogOpen(true);
                         }}
@@ -864,6 +890,12 @@ export default function CardPageClient({ name }: { name: string }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Premium Paywall Modal for Edit block */}
+      <PremiumPaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        featureName="Secure Cards"
+      />
     </section>
   );
 }

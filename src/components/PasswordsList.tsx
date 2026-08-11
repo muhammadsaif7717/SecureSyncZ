@@ -58,9 +58,11 @@ const PasswordsList = () => {
   }
 
   const handleClick = (website: string) => {
-    router.push(
-      `/passwords/${encodeURIComponent(website.toLowerCase().replace(/\s+/g, "-"))}`
-    );
+    let url = `/passwords/${encodeURIComponent(website.toLowerCase().replace(/\s+/g, "-"))}`;
+    if (searchQuery.trim()) {
+      url += `?search=${encodeURIComponent(searchQuery.trim())}`;
+    }
+    router.push(url);
   };
 
   const groups = new Map<

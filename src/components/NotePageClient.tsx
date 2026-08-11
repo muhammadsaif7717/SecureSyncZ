@@ -31,6 +31,8 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
 import VerifyPasskey from "@/components/VerifyPasskey";
+import { useAuth } from "@/providers/AuthProvider";
+import PremiumPaywallModal from "@/components/PremiumPaywallModal";
 
 const loadNotesData = async (cryptoKey: CryptoKey | null) => {
   const data = await getNotes(cryptoKey);
@@ -57,6 +59,14 @@ export default function NotePageClient({ name }: { name: string }) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { cryptoKey, isUnlocked } = useEncryption();
+  const { user } = useAuth();
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  useEffect(() => {
+    if (user && !user.isPremium) {
+      setShowPaywall(true);
+    }
+  }, [user]);
 
   const { data, isLoading, refetch } = useQuery<NotesData[]>({
     queryKey: ["notes", !!cryptoKey],
@@ -105,16 +115,26 @@ export default function NotePageClient({ name }: { name: string }) {
     .toLowerCase()
     .replace(/\s+/g, "-");
 
-  const filteredNotes = fetchedNotesData.filter((item) => {
+  const filteredNotesData = fetchedNotesData.filter((item) => {
     return item.title.toLowerCase().replace(/\s+/g, "-") === decodedSlug;
   });
 
+  if (!isUnlocked) {
+    return (
+      <VerifyPasskey
+        reasonText={
+          <>Please enter your 6-digit passkey to access your secure notes.</>
+        }
+      />
+    );
+  }
+
   const actualName =
-    filteredNotes.length > 0
-      ? filteredNotes[0].title
+    filteredNotesData.length > 0
+      ? filteredNotesData[0].title
       : decodeURIComponent(name);
 
-  const displayNotes = filteredNotes.filter(
+  const displayNotes = filteredNotesData.filter(
     (item) =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -205,7 +225,18 @@ export default function NotePageClient({ name }: { name: string }) {
     }
   };
 
-  if (filteredNotes.length === 0) {
+  if (filteredNotesData.length === 0) {
+    if (user && !user.isPremium) {
+      return (
+        <div className="flex min-h-[calc(100vh-56px)] items-center justify-center p-4">
+          <PremiumPaywallModal
+            isOpen={true}
+            onClose={() => window.history.back()}
+            featureName="Secure Notes"
+          />
+        </div>
+      );
+    }
     return (
       <div className="mt-20 flex flex-col items-center justify-center space-y-4 px-4 text-center">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-purple-50 dark:bg-purple-500/10">
@@ -245,7 +276,13 @@ export default function NotePageClient({ name }: { name: string }) {
             No notes found matching "{searchQuery}".
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            className={
+              displayNotes.length === 1
+                ? "mx-auto max-w-2xl"
+                : "grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3"
+            }
+          >
             {displayNotes.map((item) => (
               <Card
                 key={item._id}
@@ -358,6 +395,10 @@ export default function NotePageClient({ name }: { name: string }) {
                       variant="outline"
                       className="h-10 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:w-28 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                       onClick={() => {
+                        if (user && !user.isPremium) {
+                          setShowPaywall(true);
+                          return;
+                        }
                         setEditableData(item);
                         setIsDialogOpen(true);
                       }}
@@ -472,6 +513,12 @@ export default function NotePageClient({ name }: { name: string }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Premium Paywall Modal for Edit block */}
+      <PremiumPaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        featureName="Secure Notes"
+      />
     </section>
   );
 }

@@ -54,9 +54,11 @@ const CardsList = () => {
   }
 
   const handleClick = (name: string) => {
-    router.push(
-      `/cards/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`
-    );
+    let url = `/cards/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`;
+    if (searchQuery.trim()) {
+      url += `?search=${encodeURIComponent(searchQuery.trim())}`;
+    }
+    router.push(url);
   };
 
   const groups = new Map<

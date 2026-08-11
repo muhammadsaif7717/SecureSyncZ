@@ -14,6 +14,7 @@ interface User {
   hasPasskey?: boolean;
   isVerified?: boolean;
   encryptedValidationStr?: string;
+  isPremium?: boolean;
 }
 
 interface AuthContextType {

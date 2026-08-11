@@ -17,6 +17,8 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { useAuth } from "@/providers/AuthProvider";
+import PremiumPaywallModal from "@/components/PremiumPaywallModal";
 
 interface BackupModalProps {
   isOpen: boolean;
@@ -31,6 +33,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { cryptoKey, isUnlocked, unlockVault } = useEncryption();
+  const { user } = useAuth();
   const [passkey, setPasskey] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -379,6 +382,16 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
           </form>
         </DialogContent>
       </Dialog>
+    );
+  }
+
+  if (user && !user.isPremium) {
+    return (
+      <PremiumPaywallModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        featureName="Encrypted Backup"
+      />
     );
   }
 
