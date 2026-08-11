@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Eye,
   EyeOff,
@@ -50,6 +50,7 @@ const loadPasswordsData = async (cryptoKey: CryptoKey | null) => {
 
 export default function PasswordPageClient({ name }: { name: string }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearch);
 
@@ -258,6 +259,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
       setIsDeleteDialogOpen(false);
       setDeleteId(null);
       await refetch();
+      router.push("/passwords");
     } catch (err) {
       showToast({
         title: err instanceof Error ? err.message : "Error",
@@ -487,7 +489,8 @@ export default function PasswordPageClient({ name }: { name: string }) {
                   <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:justify-end sm:gap-4 sm:pt-4">
                     <Button
                       variant="outline"
-                      className="h-10 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:w-28 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                      size="sm"
+                      className="h-10 flex-1 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:flex-none dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                       onClick={() => {
                         setEditableData(item);
                         setIsDialogOpen(true);
@@ -501,9 +504,10 @@ export default function PasswordPageClient({ name }: { name: string }) {
                         setIsDeleteDialogOpen(true);
                       }}
                       variant="destructive"
-                      className="h-10 text-sm sm:w-28"
+                      size="sm"
+                      className="h-10 flex-1 text-sm sm:flex-none"
                     >
-                      Delete
+                      Move to Trash
                     </Button>
                   </div>
                 </div>
@@ -627,11 +631,11 @@ export default function PasswordPageClient({ name }: { name: string }) {
         <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
-              Confirm Deletion
+              Move to Trash
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
-              Are you sure you want to delete this password? This action cannot
-              be undone.
+              Are you sure you want to move this password to the trash? You can
+              restore it later if needed.
             </DialogDescription>
           </DialogHeader>
 
@@ -648,7 +652,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
               className="h-11 text-sm sm:h-10"
               onClick={handleDeleteConfirm}
             >
-              Delete
+              Move to Trash
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -24,14 +24,33 @@ export const DELETE = async (
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
-    // Delete only if user owns the card entry
-    const result = await db.collection("cards").deleteOne({
-      _id: new ObjectId(id),
-      "user.email": user.email,
-      "user.username": user.username,
-    });
+    const { searchParams } = new URL(request.url);
+    const isPermanent = searchParams.get("permanent") === "true";
 
-    if (result.deletedCount === 0) {
+    let isNotFound = false;
+    if (isPermanent) {
+      const deleteResult = await db.collection("cards").deleteOne({
+        _id: new ObjectId(id),
+        "user.email": user.email,
+      });
+      isNotFound = deleteResult.deletedCount === 0;
+    } else {
+      const updateResult = await db.collection("cards").updateOne(
+        {
+          _id: new ObjectId(id),
+          "user.email": user.email,
+        },
+        {
+          $set: {
+            isDeleted: true,
+            deletedAt: new Date(),
+          },
+        }
+      );
+      isNotFound = updateResult.matchedCount === 0;
+    }
+
+    if (isNotFound) {
       return NextResponse.json(
         { error: "Card not found or unauthorized" },
         { status: 404 }
@@ -39,7 +58,11 @@ export const DELETE = async (
     }
 
     return NextResponse.json(
-      { message: "Card deleted successfully" },
+      {
+        message: isPermanent
+          ? "Card permanently deleted"
+          : "Card moved to trash",
+      },
       { status: 200 }
     );
   } catch (error) {

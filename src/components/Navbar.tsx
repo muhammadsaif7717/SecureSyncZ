@@ -31,6 +31,7 @@ import {
   FileText,
   ShieldAlert,
   ArrowLeft,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -266,6 +267,18 @@ export default function Navbar() {
                           Data Management
                         </div>
 
+                        <SheetClose asChild>
+                          <Link
+                            href="/trash"
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+                              <Trash2 className="h-4 w-4" />
+                            </div>
+                            Trash
+                          </Link>
+                        </SheetClose>
+
                         <button
                           onClick={openEmergencyKit}
                           className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
@@ -273,7 +286,7 @@ export default function Navbar() {
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
                             <ShieldAlert className="h-4 w-4" />
                           </div>
-                          Emergency Kit (PDF)
+                          Secret key
                         </button>
 
                         <button

@@ -30,7 +30,7 @@ export const GET = async (req: Request) => {
     // Fetch all card records belonging to this user
     const userCards = await db
       .collection("cards")
-      .find({ "user.email": email })
+      .find({ "user.email": email, isDeleted: { $ne: true } })
       .toArray();
 
     const decryptedCards = userCards.map((item) => ({

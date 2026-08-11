@@ -294,12 +294,12 @@
   body * {
     visibility: hidden;
   }
-  
+
   .printable-emergency-kit,
   .printable-emergency-kit * {
     visibility: visible;
   }
-  
+
   .printable-emergency-kit {
     position: absolute;
     left: 0;

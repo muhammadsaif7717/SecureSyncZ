@@ -211,6 +211,7 @@ export default function NotePageClient({ name }: { name: string }) {
 
       setIsDeleteDialogOpen(false);
       setDeleteId(null);
+      await refetch();
       router.push("/notes");
     } catch (err) {
       showToast({
@@ -388,7 +389,8 @@ export default function NotePageClient({ name }: { name: string }) {
                   <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:justify-end sm:gap-4 sm:pt-4">
                     <Button
                       variant="outline"
-                      className="h-10 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:w-28 dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                      size="sm"
+                      className="h-10 flex-1 border-emerald-200 text-sm text-emerald-700 transition-all hover:bg-emerald-50 sm:flex-none dark:border-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                       onClick={() => {
                         if (user && !user.isPremium) {
                           setShowPaywall(true);
@@ -406,9 +408,10 @@ export default function NotePageClient({ name }: { name: string }) {
                         setIsDeleteDialogOpen(true);
                       }}
                       variant="destructive"
-                      className="h-10 text-sm sm:w-28"
+                      size="sm"
+                      className="h-10 flex-1 text-sm sm:flex-none"
                     >
-                      Delete
+                      Move to Trash
                     </Button>
                   </div>
                 </div>
@@ -482,11 +485,11 @@ export default function NotePageClient({ name }: { name: string }) {
         <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-white sm:w-full dark:bg-slate-900">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white">
-              Confirm Deletion
+              Move to Trash
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
-              Are you sure you want to delete this note? This action cannot be
-              undone.
+              Are you sure you want to move this note to the trash? You can
+              restore it later if needed.
             </DialogDescription>
           </DialogHeader>
 
@@ -503,7 +506,7 @@ export default function NotePageClient({ name }: { name: string }) {
               className="h-11 text-sm sm:h-10"
               onClick={handleDeleteConfirm}
             >
-              Delete
+              Move to Trash
             </Button>
           </DialogFooter>
         </DialogContent>

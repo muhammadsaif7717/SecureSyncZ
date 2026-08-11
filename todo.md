@@ -12,8 +12,6 @@
 
 **Secure Vault Sharing:** Implement public/private key cryptography to allow users to securely share specific passwords or notes with other registered users without compromising the zero-knowledge architecture.
 
-**Trash / Recycle Bin (Soft Delete):** Add a recovery system so users can restore accidentally deleted passwords, cards, or notes within a 30-day window.
-
 **Secure File Attachments:** Allow users to upload and encrypt small files or images (like passport photos or ID scans) directly inside their Secure Notes.
 
 **Real-time Cross-Device Sync:** Implement WebSockets to instantly sync changes (like adding a new password) across all active sessions on different devices.

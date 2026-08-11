@@ -30,7 +30,7 @@ export const GET = async (req: Request) => {
     // Fetch all password records belonging to this user
     const userPasswords = await db
       .collection("passwords")
-      .find({ "user.email": email })
+      .find({ "user.email": email, isDeleted: { $ne: true } })
       .toArray();
 
     const decryptedPasswords = userPasswords.map((item) => ({

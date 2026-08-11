@@ -24,14 +24,33 @@ export const DELETE = async (
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
-    // Delete only if user owns the password entry
-    const result = await db.collection("passwords").deleteOne({
-      _id: new ObjectId(id),
-      "user.email": user.email,
-      "user.username": user.username,
-    });
+    const { searchParams } = new URL(request.url);
+    const isPermanent = searchParams.get("permanent") === "true";
 
-    if (result.deletedCount === 0) {
+    let isNotFound = false;
+    if (isPermanent) {
+      const deleteResult = await db.collection("passwords").deleteOne({
+        _id: new ObjectId(id),
+        "user.email": user.email,
+      });
+      isNotFound = deleteResult.deletedCount === 0;
+    } else {
+      const updateResult = await db.collection("passwords").updateOne(
+        {
+          _id: new ObjectId(id),
+          "user.email": user.email,
+        },
+        {
+          $set: {
+            isDeleted: true,
+            deletedAt: new Date(),
+          },
+        }
+      );
+      isNotFound = updateResult.matchedCount === 0;
+    }
+
+    if (isNotFound) {
       return NextResponse.json(
         { error: "Password not found or unauthorized" },
         { status: 404 }
@@ -39,7 +58,11 @@ export const DELETE = async (
     }
 
     return NextResponse.json(
-      { message: "Password deleted successfully" },
+      {
+        message: isPermanent
+          ? "Password permanently deleted"
+          : "Password moved to trash",
+      },
       { status: 200 }
     );
   } catch (error) {

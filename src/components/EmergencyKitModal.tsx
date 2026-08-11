@@ -33,13 +33,13 @@ export function EmergencyKitModal({
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    
+
     // Add title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.setTextColor(5, 150, 105); // Emerald-600
     doc.text("SecureSyncZ Emergency Kit", 20, 30);
-    
+
     // Add description
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
@@ -75,13 +75,13 @@ export function EmergencyKitModal({
     doc.setFont("courier", "bold");
     doc.setFontSize(10);
     doc.setTextColor(4, 120, 87); // Emerald-700
-    
+
     // Center the key vertically inside the box
     doc.text(secretKey, 25, 91);
-    
+
     // Save the PDF
     doc.save("SecureSyncZ-Emergency-Kit.pdf");
-    
+
     showToast({
       title: "PDF Downloaded",
       description: "Emergency Kit saved to your device.",
@@ -91,7 +91,7 @@ export function EmergencyKitModal({
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="printable-emergency-kit w-[calc(100vw-2rem)] max-w-md scale-95 rounded-2xl bg-white transition-transform sm:w-full sm:scale-100 dark:bg-slate-900 [&>button]:hidden">
-        <div className="absolute top-4 right-4 no-print">
+        <div className="no-print absolute top-4 right-4">
           <button
             onClick={onConfirm}
             className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -120,7 +120,7 @@ export function EmergencyKitModal({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center no-print">
+        <div className="no-print flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button
             onClick={handleCopy}
             variant="outline"
@@ -139,7 +139,7 @@ export function EmergencyKitModal({
           </Button>
         </div>
 
-        <DialogFooter className="mt-6 flex-col gap-2 sm:flex-row sm:space-x-0 no-print">
+        <DialogFooter className="no-print mt-6 flex-col gap-2 sm:flex-row sm:space-x-0">
           <Button
             onClick={onConfirm}
             className="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700 dark:from-red-500 dark:to-orange-500"
