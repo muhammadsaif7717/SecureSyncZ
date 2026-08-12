@@ -158,12 +158,75 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
         }
       }
 
-      const jsonString = JSON.stringify(decryptedData, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
+      const Papa = await import("papaparse");
+      const exportRows: any[] = [];
+
+      decryptedData.passwords.forEach((p) => {
+        exportRows.push({
+          _id: p._id || "",
+          type: "password",
+          website: p.website || "",
+          username: p.username || "",
+          password: p.password || "",
+          note: p.note || "",
+          cardName: "",
+          cardNumber: "",
+          expiry: "",
+          cvv: "",
+          pin: "",
+          title: "",
+          content: "",
+          isFavorite: p.isFavorite ? "true" : "false",
+          tags: p.tags ? p.tags.join(",") : "",
+        });
+      });
+
+      decryptedData.cards.forEach((c) => {
+        exportRows.push({
+          _id: c._id || "",
+          type: "card",
+          website: "",
+          username: "",
+          password: "",
+          note: c.note || "",
+          cardName: c.cardName || "",
+          cardNumber: c.cardNumber || "",
+          expiry: c.expiry || "",
+          cvv: c.cvv || "",
+          pin: c.pin || "",
+          title: "",
+          content: "",
+          isFavorite: c.isFavorite ? "true" : "false",
+          tags: c.tags ? c.tags.join(",") : "",
+        });
+      });
+
+      decryptedData.notes.forEach((n) => {
+        exportRows.push({
+          _id: n._id || "",
+          type: "note",
+          website: "",
+          username: "",
+          password: "",
+          note: "",
+          cardName: "",
+          cardNumber: "",
+          expiry: "",
+          cvv: "",
+          pin: "",
+          title: n.title || "",
+          content: n.content || "",
+          isFavorite: n.isFavorite ? "true" : "false",
+          tags: n.tags ? n.tags.join(",") : "",
+        });
+      });
+
+      const csvString = Papa.unparse(exportRows);
+      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "securesyncz-backup-decrypted.json";
+      a.download = "securesyncz-backup-decrypted.csv";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -196,6 +259,10 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
       const fileContent = await selectedFile.text();
       const isCSV = selectedFile.name.toLowerCase().endsWith(".csv");
 
+      if (!isCSV) {
+        throw new Error("Only CSV files are supported for import.");
+      }
+
       let payload = {
         passwords: [] as any[],
         cards: [] as any[],
@@ -203,15 +270,16 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
       };
 
       const { encryptData } = await import("@/lib/clientCrypto");
+      const Papa = await import("papaparse");
+      const results = Papa.parse(fileContent, {
+        header: true,
+        skipEmptyLines: true,
+      });
 
-      if (isCSV) {
-        const Papa = await import("papaparse");
-        const results = Papa.parse(fileContent, {
-          header: true,
-          skipEmptyLines: true,
-        });
+      for (const record of results.data as any[]) {
+        const type = record.type || "password";
 
-        for (const record of results.data as any[]) {
+        if (type === "password") {
           const encryptedPassword = record.password
             ? await encryptData(record.password, cryptoKey)
             : "";
@@ -220,71 +288,54 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
             : "";
 
           payload.passwords.push({
-            website: record.url || record.name || "Unknown",
+            _id: record._id || undefined,
+            website: record.website || record.url || record.name || "Unknown",
             username: record.username || "",
             password: encryptedPassword,
             note: encryptedNote,
-            isFavorite: false,
-            tags: [],
+            isFavorite: record.isFavorite === "true",
+            tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
           });
-        }
-      } else {
-        let data;
-        try {
-          data = JSON.parse(fileContent);
-        } catch (e) {
-          throw new Error("Invalid JSON file");
-        }
+        } else if (type === "card") {
+          const encryptedCardNumber = record.cardNumber
+            ? await encryptData(record.cardNumber, cryptoKey)
+            : "";
+          const encryptedExpiry = record.expiry
+            ? await encryptData(record.expiry, cryptoKey)
+            : "";
+          const encryptedCvv = record.cvv
+            ? await encryptData(record.cvv, cryptoKey)
+            : "";
+          const encryptedPin = record.pin
+            ? await encryptData(record.pin, cryptoKey)
+            : "";
+          const encryptedNote = record.note
+            ? await encryptData(record.note, cryptoKey)
+            : "";
 
-        if (data.passwords && Array.isArray(data.passwords)) {
-          for (const p of data.passwords) {
-            const encryptedPassword = p.password
-              ? await encryptData(p.password, cryptoKey)
-              : "";
-            const encryptedNote = p.note
-              ? await encryptData(p.note, cryptoKey)
-              : "";
-            payload.passwords.push({
-              ...p,
-              password: encryptedPassword,
-              note: encryptedNote,
-            });
-          }
-        }
-        if (data.cards && Array.isArray(data.cards)) {
-          for (const c of data.cards) {
-            const encryptedCardNumber = c.cardNumber
-              ? await encryptData(c.cardNumber, cryptoKey)
-              : "";
-            const encryptedExpiry = c.expiry
-              ? await encryptData(c.expiry, cryptoKey)
-              : "";
-            const encryptedCvv = c.cvv
-              ? await encryptData(c.cvv, cryptoKey)
-              : "";
-            const encryptedPin = c.pin
-              ? await encryptData(c.pin, cryptoKey)
-              : "";
-            const encryptedNote = c.note
-              ? await encryptData(c.note, cryptoKey)
-              : "";
-            payload.cards.push({
-              ...c,
-              cardNumber: encryptedCardNumber,
-              expiry: encryptedExpiry,
-              cvv: encryptedCvv,
-              pin: encryptedPin,
-              note: encryptedNote,
-            });
-          }
-        }
-        if (data.notes && Array.isArray(data.notes)) {
-          for (const n of data.notes) {
-            const encryptedContent = n.content
-              ? await encryptData(n.content, cryptoKey)
-              : "";
-            payload.notes.push({ ...n, content: encryptedContent });
-          }
+          payload.cards.push({
+            _id: record._id || undefined,
+            cardName: record.cardName || "Unknown",
+            cardNumber: encryptedCardNumber,
+            expiry: encryptedExpiry,
+            cvv: encryptedCvv,
+            pin: encryptedPin,
+            note: encryptedNote,
+            isFavorite: record.isFavorite === "true",
+            tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
+          });
+        } else if (type === "note") {
+          const encryptedContent = record.content
+            ? await encryptData(record.content, cryptoKey)
+            : "";
+
+          payload.notes.push({
+            _id: record._id || undefined,
+            title: record.title || "Unknown",
+            content: encryptedContent,
+            isFavorite: record.isFavorite === "true",
+            tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
+          });
         }
       }
 
@@ -400,12 +451,12 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
       <DialogContent className="w-[calc(100vw-2rem)] sm:w-full">
         <DialogHeader>
           <DialogTitle>
-            {action === "export" ? "Export Backup (JSON)" : "Import Backup"}
+            {action === "export" ? "Export Backup (CSV)" : "Import Backup"}
           </DialogTitle>
           <DialogDescription>
             {action === "export"
-              ? "Download all your secure data into a single JSON file. The data will remain encrypted on your device if zero-knowledge encryption is active."
-              : "Upload a JSON backup file or a CSV file (e.g., from Chrome) to import your passwords, cards, and notes."}
+              ? "Download all your data into a single CSV file. The data will be decrypted in the downloaded file."
+              : "Upload a CSV backup file to import your passwords, cards, and notes."}
           </DialogDescription>
         </DialogHeader>
 
@@ -428,7 +479,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
               >
                 <input
                   type="file"
-                  accept=".json,.csv"
+                  accept=".csv"
                   className="hidden"
                   ref={fileInputRef}
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
@@ -446,7 +497,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
                   <div className="flex flex-col items-center text-center">
                     <UploadCloud className="mb-2 h-8 w-8 text-slate-400" />
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                      Drag and drop your JSON or CSV backup here
+                      Drag and drop your CSV backup here
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
                       or click to browse files
