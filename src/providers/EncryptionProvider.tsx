@@ -6,6 +6,7 @@ import axios from "axios";
 import { showToast } from "@/lib/toast";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
+import { RestoreVaultModal } from "@/components/RestoreVaultModal";
 
 interface EncryptionContextType {
   cryptoKey: CryptoKey | null;
@@ -28,21 +29,31 @@ export function EncryptionProvider({
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
 
-  // Check if secret key is missing or tampered
-  useEffect(() => {
-    if (typeof window !== "undefined" && !isLoading && user) {
-      const secretKeyHex = localStorage.getItem("secureSyncZ_secretKey");
-      const isValidKey = secretKeyHex && /^[0-9a-fA-F]{64}$/.test(secretKeyHex);
 
-      if (!isValidKey && pathname !== "/sign-in" && pathname !== "/sign-up") {
-        logout();
-        showToast({
-          title: "Session Terminated",
-          description: "Missing or invalid security key. Please log in again.",
-        });
-      }
-    }
-  }, [user, isLoading, logout, pathname]);
+  // Inside the component:
+  const protectedPaths = [
+    "/passwords",
+    "/cards",
+    "/post",
+    "/profile",
+    "/add",
+    "/health",
+  ];
+  
+  const isProtectedPath = protectedPaths.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+
+  const existingKey = typeof window !== "undefined" ? localStorage.getItem("secureSyncZ_secretKey") : null;
+  const needsSecretKey = !existingKey || !/^[0-9a-fA-F]{64}$/.test(existingKey);
+
+  const showRestoreVaultModal = 
+    !isLoading && 
+    !!user && 
+    isProtectedPath && 
+    !cryptoKey && 
+    !!user.encryptedValidationStr && 
+    needsSecretKey;
 
   // Auto-lock inactivity timer (3 minutes)
   useEffect(() => {
@@ -104,19 +115,17 @@ export function EncryptionProvider({
           );
           if (decrypted !== "VALID-KEY") {
             // Secret key is wrong
-            localStorage.removeItem("secureSyncZ_secretKey");
             return {
               success: false,
               error:
-                "Invalid Secret Key. We have cleared it. Please refresh and enter the correct Secret Key.",
+                "Invalid Secret Key or Passkey.",
             };
           }
         } catch (error) {
-          localStorage.removeItem("secureSyncZ_secretKey");
           return {
             success: false,
             error:
-              "Invalid Secret Key. We have cleared it. Please refresh and enter the correct Secret Key.",
+              "Invalid Secret Key or Passkey.",
           };
         }
       }
@@ -149,6 +158,9 @@ export function EncryptionProvider({
       value={{ cryptoKey, isUnlocked: !!cryptoKey, unlockVault, lockVault }}
     >
       {children}
+      {showRestoreVaultModal && (
+        <RestoreVaultModal isOpen={showRestoreVaultModal} />
+      )}
     </EncryptionContext.Provider>
   );
 }

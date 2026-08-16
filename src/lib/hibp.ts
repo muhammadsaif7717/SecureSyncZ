@@ -22,7 +22,7 @@ export async function checkPwnedPassword(password: string): Promise<boolean> {
     });
 
     if (!res.ok) {
-      console.error("HIBP API error:", res.status);
+      // console.error("HIBP API error:", res.status);
       return false;
     }
 
@@ -39,7 +39,7 @@ export async function checkPwnedPassword(password: string): Promise<boolean> {
 
     return false; // Safe
   } catch (error) {
-    console.error("Error checking HIBP:", error);
+    // console.error("Error checking HIBP:", error);
     return false;
   }
 }

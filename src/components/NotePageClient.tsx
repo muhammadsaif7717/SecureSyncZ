@@ -30,9 +30,10 @@ import axios from "axios";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
-import VerifyPasskey from "@/components/VerifyPasskey";
+
 import { useAuth } from "@/providers/AuthProvider";
 import PremiumPaywallModal from "@/components/PremiumPaywallModal";
+import VerifyPasskey from "@/components/VerifyPasskey";
 
 const loadNotesData = async (cryptoKey: CryptoKey | null) => {
   const data = await getNotes(cryptoKey);

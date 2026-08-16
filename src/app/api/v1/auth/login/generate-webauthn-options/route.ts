@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(options, { status: 200 });
   } catch (error) {
-    console.error("WebAuthn auth generation error:", error);
+    // console.error("WebAuthn auth generation error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

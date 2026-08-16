@@ -139,7 +139,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("Update passkey error:", error);
+    // console.error("Update passkey error:", error);
     return NextResponse.json(
       { error: "Internal Server Error while re-encrypting data" },
       { status: 500 }

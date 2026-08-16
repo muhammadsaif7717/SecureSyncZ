@@ -31,8 +31,8 @@ import {
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 import { ChevronLeft, ChevronDown } from "lucide-react";
-import VerifyPasskey from "@/components/VerifyPasskey";
 import PremiumPaywallModal from "@/components/PremiumPaywallModal";
+import VerifyPasskey from "@/components/VerifyPasskey";
 
 const formatExpiry = (value: string) => {
   const digits = value.replace(/\D/g, "");

@@ -137,7 +137,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("Google login error:", error);
+    // console.error("Google login error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

@@ -27,8 +27,9 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import VerifyPasskey from "@/components/VerifyPasskey";
+
 import PremiumPaywallModal from "@/components/PremiumPaywallModal";
+import VerifyPasskey from "@/components/VerifyPasskey";
 
 const getPasswordStrength = (password: string) => {
   if (!password) return 0;

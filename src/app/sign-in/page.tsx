@@ -40,10 +40,8 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSecretKeyModal, setShowSecretKeyModal] = useState(false);
-  const [secretKeyInput, setSecretKeyInput] = useState("");
-  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [formError, setFormError] = useState("");
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [errorShake, setErrorShake] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
@@ -55,21 +53,6 @@ export default function SignInPage() {
 
   const [showTwoFactorPrompt, setShowTwoFactorPrompt] = useState(false);
   const [twoFactorMethods, setTwoFactorMethods] = useState<string[]>([]);
-
-  const handleSuccessfulAuth = (userData: any) => {
-    userAuth.updateUser(userData);
-    const existingKey = localStorage.getItem("secureSyncZ_secretKey");
-    if (existingKey && /^[0-9a-fA-F]{64}$/.test(existingKey)) {
-      router.push("/passwords");
-    } else {
-      if (!userData?.encryptedValidationStr) {
-        // They never generated a secret key (old Google users or aborted signups)
-        router.push("/passwords");
-      } else {
-        setShowSecretKeyModal(true);
-      }
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,22 +68,8 @@ export default function SignInPage() {
         setShowTwoFactorPrompt(true);
       } else {
         // login was successful!
-        handleSuccessfulAuth(userAuth.user); // Note: userAuth.user might not be updated synchronously here, so using handleSuccessfulAuth after a tick or fetching might be needed. Actually, if success, the provider updated it. We can just proceed.
-        // Wait, handleSuccessfulAuth uses userAuth.user which might be stale.
-        // I will just read localStorage directly in the check anyway.
-        const existingKey = localStorage.getItem("secureSyncZ_secretKey");
-        if (existingKey && /^[0-9a-fA-F]{64}$/.test(existingKey)) {
-          router.push("/passwords");
-        } else {
-          if (
-            !result?.user?.encryptedValidationStr &&
-            !userAuth.user?.encryptedValidationStr
-          ) {
-            router.push("/passwords");
-          } else {
-            setShowSecretKeyModal(true);
-          }
-        }
+        userAuth.updateUser(result.user);
+        router.push("/passwords");
       }
     } catch (error: any) {
       setFormError(error?.message || "Invalid credentials");
@@ -109,31 +78,6 @@ export default function SignInPage() {
       // Error is handled and toasted by AuthProvider
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleSecretKeySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const key = secretKeyInput.trim();
-
-    // Re-fetch user in case it's stale from AuthProvider
-    const currentUser = userAuth.user;
-
-    if (/^[0-9a-fA-F]{64}$/.test(key)) {
-      setIsSubmitting(true);
-      localStorage.setItem("secureSyncZ_secretKey", key);
-      setShowSecretKeyModal(false);
-      setIsSubmitting(false);
-      router.push("/passwords");
-      showToast({
-        title: "Key Restored",
-        description: "Your secret key was successfully restored.",
-      });
-    } else {
-      showToast({
-        title: "Invalid Key",
-        description: "Please enter a valid 64-character hex Secret Key.",
-      });
     }
   };
 
@@ -288,21 +232,8 @@ export default function SignInPage() {
                           setShowTwoFactorPrompt(true);
                         } else {
                           // login was successful!
-                          const existingKey = localStorage.getItem(
-                            "secureSyncZ_secretKey"
-                          );
-                          if (
-                            existingKey &&
-                            /^[0-9a-fA-F]{64}$/.test(existingKey)
-                          ) {
-                            router.push("/passwords");
-                          } else {
-                            if (!result?.user?.encryptedValidationStr) {
-                              router.push("/passwords");
-                            } else {
-                              setShowSecretKeyModal(true);
-                            }
-                          }
+                          userAuth.updateUser(result.user);
+                          router.push("/passwords");
                         }
                       } catch (error) {
                         // Error handled by provider
@@ -344,50 +275,14 @@ export default function SignInPage() {
         </div>
       </Card>
 
-      {/* Secret Key Modal */}
-      <Dialog open={showSecretKeyModal} onOpenChange={setShowSecretKeyModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Enter Your Secret Key</DialogTitle>
-            <DialogDescription>
-              We detected you are logging in from a new device or your secure
-              storage was cleared. Please provide your 64-character Secret Key
-              to unlock your vault.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSecretKeySubmit} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="secretKey">Secret Key</Label>
-              <Input
-                id="secretKey"
-                type="text"
-                placeholder="Paste your 64-character hex key..."
-                value={secretKeyInput}
-                onChange={(e) => setSecretKeyInput(e.target.value)}
-                required
-                className="font-mono text-sm"
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="submit"
-                className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Verifying..." : "Restore Key & Continue"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
       <TwoFactorPrompt
         isOpen={showTwoFactorPrompt}
         onClose={() => setShowTwoFactorPrompt(false)}
         methods={twoFactorMethods}
         onSuccess={(user) => {
           setShowTwoFactorPrompt(false);
-          handleSuccessfulAuth(user);
+          userAuth.updateUser(user);
+          router.push("/passwords");
         }}
       />
 

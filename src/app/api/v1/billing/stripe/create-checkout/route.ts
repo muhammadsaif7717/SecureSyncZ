@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url }, { status: 200 });
   } catch (error: any) {
-    console.error("Stripe Create Checkout Error:", error);
+    // console.error("Stripe Create Checkout Error:", error);
     return NextResponse.json(
       { error: error.message || "Internal Server Error" },
       { status: 500 }

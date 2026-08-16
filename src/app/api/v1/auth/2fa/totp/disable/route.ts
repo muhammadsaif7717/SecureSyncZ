@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Disable TOTP error:", error);
+    // console.error("Disable TOTP error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

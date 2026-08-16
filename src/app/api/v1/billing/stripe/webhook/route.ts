@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET || ""
     );
   } catch (err: any) {
-    console.error("Webhook Error:", err.message);
+    // console.error("Webhook Error:", err.message);
     return NextResponse.json(
       { error: `Webhook Error: ${err.message}` },
       { status: 400 }
@@ -78,10 +78,10 @@ export async function POST(req: Request) {
       }
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        // console.log(`Unhandled event type ${event.type}`);
     }
   } catch (error) {
-    console.error("Error processing webhook:", error);
+    // console.error("Error processing webhook:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

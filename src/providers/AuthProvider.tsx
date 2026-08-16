@@ -225,10 +225,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       // Clear React Query cache so no stale data remains in memory
       queryClient.clear();
-      // Clear local storage (except theme)
+      // Clear local storage (except theme and secret key)
       const theme = localStorage.getItem("theme");
+      const secretKey = localStorage.getItem("secureSyncZ_secretKey");
       localStorage.clear();
       if (theme) localStorage.setItem("theme", theme);
+      if (secretKey) localStorage.setItem("secureSyncZ_secretKey", secretKey);
 
       showToast({
         title: "Logged Out",

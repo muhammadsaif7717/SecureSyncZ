@@ -110,7 +110,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("2FA verify error:", error);
+    // console.error("2FA verify error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

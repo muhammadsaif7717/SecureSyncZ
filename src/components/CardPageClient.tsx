@@ -41,9 +41,10 @@ import { extractRootDomain } from "@/lib/utils";
 
 import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
-import VerifyPasskey from "@/components/VerifyPasskey";
+
 import { useAuth } from "@/providers/AuthProvider";
 import PremiumPaywallModal from "@/components/PremiumPaywallModal";
+import VerifyPasskey from "@/components/VerifyPasskey";
 
 const loadCardsData = async (
   cryptoKey: CryptoKey | null

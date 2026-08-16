@@ -43,6 +43,7 @@ import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
 import VerifyPasskey from "@/components/VerifyPasskey";
 
+
 const loadPasswordsData = async (cryptoKey: CryptoKey | null) => {
   const data = await getPasswords(cryptoKey);
   return data;
