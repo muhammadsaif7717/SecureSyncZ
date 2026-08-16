@@ -23,6 +23,7 @@
 - **🛡️ Rate Limiting & Protection:** Built-in API rate limiting powered by Upstash Redis to prevent brute-force attacks.
 - **🔑 Google OAuth Integration:** Fast and secure alternative authentication using "Sign in with Google".
 - **💎 Premium Subscriptions:** Integrated Stripe billing for secure handling of premium subscriptions, featuring 14-day free trials and automated webhook syncing.
+
 ## 🛠️ Tech Stack
 
 - **Framework:** Next.js 16 (App Router & Turbopack)

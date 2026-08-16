@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { GlobalVerificationModal } from "@/components/GlobalVerificationModal";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface User {
   id: string;
@@ -215,11 +216,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const queryClient = useQueryClient();
+
   const logout = async () => {
     setIsLoading(true);
     try {
       await axios.post("/api/v1/auth/logout");
       setUser(null);
+      // Clear React Query cache so no stale data remains in memory
+      queryClient.clear();
+      // Clear local storage (except theme)
+      const theme = localStorage.getItem("theme");
+      localStorage.clear();
+      if (theme) localStorage.setItem("theme", theme);
+
       showToast({
         title: "Logged Out",
         description: "You have been logged out of your session.",
