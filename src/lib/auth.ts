@@ -11,12 +11,13 @@ export async function signToken(payload: {
   id: string;
   email: string;
   username: string;
+  is2faPending?: boolean;
 }) {
   const secret = new TextEncoder().encode(JWT_SECRET);
   return await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime(payload.is2faPending ? "15m" : "7d")
     .sign(secret);
 }
 
@@ -24,7 +25,12 @@ export async function verifyToken(token: string) {
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jose.jwtVerify(token, secret);
-    return payload as { id: string; email: string; username: string };
+    return payload as {
+      id: string;
+      email: string;
+      username: string;
+      is2faPending?: boolean;
+    };
   } catch (error) {
     // console.error("JWT verification failed:", error);
     return null;

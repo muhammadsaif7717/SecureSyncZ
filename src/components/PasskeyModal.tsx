@@ -20,6 +20,8 @@ import { Loader2, KeyRound } from "lucide-react";
 import axios from "axios";
 import { showToast } from "@/lib/toast";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { generateSecretKey, deriveKey, encryptData } from "@/lib/clientCrypto";
+import { EmergencyKitModal } from "@/components/EmergencyKitModal";
 
 const protectedPaths = ["/passwords", "/cards", "/post", "/profile"];
 
@@ -29,6 +31,8 @@ export default function PasskeyModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [passkey, setPasskey] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [showEmergencyKit, setShowEmergencyKit] = useState(false);
+  const [secretKey, setSecretKey] = useState("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -61,17 +65,37 @@ export default function PasskeyModal() {
 
     setIsSaving(true);
     try {
+      let newSecretKey = "";
+      let encryptedValidationStr = undefined;
+
+      if (!user?.encryptedValidationStr) {
+        newSecretKey = generateSecretKey();
+        const tempKey = await deriveKey(passkey, newSecretKey);
+        encryptedValidationStr = await encryptData("VALID-KEY", tempKey);
+      }
+
       const response = await axios.post("/api/v1/auth/passkey/setup", {
         passkey,
+        encryptedValidationStr,
       });
 
       if (response.data && response.data.user) {
         updateUser(response.data.user);
-        setIsOpen(false);
-        showToast({
-          title: "Success",
-          description: "Passkey set successfully!",
-        });
+
+        if (newSecretKey) {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("secureSyncZ_secretKey", newSecretKey);
+          }
+          setSecretKey(newSecretKey);
+          setIsOpen(false);
+          setShowEmergencyKit(true);
+        } else {
+          setIsOpen(false);
+          showToast({
+            title: "Success",
+            description: "Passkey set successfully!",
+          });
+        }
       }
     } catch (error: any) {
       // console.error("Failed to set passkey:", error);
@@ -88,60 +112,68 @@ export default function PasskeyModal() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent
-        className="w-[calc(100vw-2rem)] sm:w-full"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-      >
-        <DialogHeader>
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-            <KeyRound className="h-6 w-6" />
-          </div>
-          <DialogTitle className="text-center text-xl text-slate-900 dark:text-white">
-            Set Your Passkey
-          </DialogTitle>
-          <DialogDescription className="text-center text-sm text-slate-500 dark:text-slate-400">
-            For enhanced security, please set a 6-digit passkey. You will need
-            this to access your passwords and cards.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form
-          onSubmit={handleSubmit}
-          className="mt-4 flex flex-col items-center space-y-6"
+    <>
+      <Dialog open={isOpen} onOpenChange={() => {}}>
+        <DialogContent
+          className="w-[calc(100vw-2rem)] sm:w-full [&>button]:hidden"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <InputOTP
-            maxLength={6}
-            pattern={REGEXP_ONLY_DIGITS}
-            value={passkey}
-            onChange={(value) => setPasskey(value)}
-            autoFocus
-          >
-            <InputOTPGroup className="gap-2">
-              {[...Array(6)].map((_, i) => (
-                <InputOTPSlot
-                  key={i}
-                  index={i}
-                  showChar={true}
-                  className="h-10 w-10 rounded-md border-slate-200 bg-white/60 text-base sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
-                />
-              ))}
-            </InputOTPGroup>
-          </InputOTP>
+          <DialogHeader>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+              <KeyRound className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center text-xl text-slate-900 dark:text-white">
+              Set Your Passkey
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm text-slate-500 dark:text-slate-400">
+              For enhanced security, please set a 6-digit passkey. You will need
+              this to access your passwords and cards.
+            </DialogDescription>
+          </DialogHeader>
 
-          <Button
-            type="submit"
-            disabled={passkey.length !== 6 || isSaving}
-            className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 dark:from-emerald-500 dark:to-teal-500"
+          <form
+            onSubmit={handleSubmit}
+            className="mt-4 flex flex-col items-center space-y-6"
           >
-            {isSaving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
-            Set Passkey
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <InputOTP
+              maxLength={6}
+              pattern={REGEXP_ONLY_DIGITS}
+              value={passkey}
+              onChange={(value) => setPasskey(value)}
+              autoFocus
+            >
+              <InputOTPGroup className="gap-2">
+                {[...Array(6)].map((_, i) => (
+                  <InputOTPSlot
+                    key={i}
+                    index={i}
+                    showChar={true}
+                    className="h-10 w-10 rounded-md border-slate-200 bg-white/60 text-base sm:h-14 sm:w-14 sm:text-xl dark:border-white/10 dark:bg-white/5"
+                  />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+
+            <Button
+              type="submit"
+              disabled={passkey.length !== 6 || isSaving}
+              className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 dark:from-emerald-500 dark:to-teal-500"
+            >
+              {isSaving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Set Passkey
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <EmergencyKitModal
+        isOpen={showEmergencyKit}
+        secretKey={secretKey}
+        onConfirm={() => setShowEmergencyKit(false)}
+      />
+    </>
   );
 }

@@ -158,6 +158,7 @@ export async function POST(req: Request) {
       username: result.username,
       profilePicture: result.profilePicture,
       hasPasskey: !!result.passkey,
+      hasPassword: !!result.password,
       isVerified: result.isVerified || false,
     };
 

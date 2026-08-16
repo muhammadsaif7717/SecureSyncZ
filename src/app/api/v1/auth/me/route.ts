@@ -30,6 +30,8 @@ export async function GET(req: Request) {
       encryptedValidationStr: user.encryptedValidationStr,
       isPremium: user.isPremium || false,
       hasPassword: !!user.password,
+      twoFactorEnabled: user.twoFactorEnabled || false,
+      hasUsedTrial: user.hasUsedTrial || false,
     };
 
     return NextResponse.json({ user: returnUser }, { status: 200 });

@@ -35,9 +35,13 @@ import { showToast } from "@/lib/toast";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { DeleteDataModal } from "@/components/DeleteDataModal";
 import { compressImage, cn } from "@/lib/utils";
+import { TwoFactorSettings } from "@/components/auth/TwoFactorSettings";
+import { deriveKey, decryptData, encryptData } from "@/lib/clientCrypto";
+import { useEncryption } from "@/providers/EncryptionProvider";
 
 export default function ProfilePage() {
   const { user, updateUser, isLoading } = useAuth();
+  const { cryptoKey } = useEncryption();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -46,6 +50,7 @@ export default function ProfilePage() {
     "password" | "passkey" | "delete" | "inline_confirm" | null
   >(null);
   const [deleteDataModalOpen, setDeleteDataModalOpen] = useState(false);
+  const [showSetPasswordFirst, setShowSetPasswordFirst] = useState(false);
   const [editingField, setEditingField] = useState<"username" | "email" | null>(
     null
   );
@@ -219,9 +224,81 @@ export default function ProfilePage() {
         return;
       }
 
+      if (activeModal === "passkey") {
+        if (!cryptoKey) {
+          throw new Error("Vault must be unlocked to change passkey.");
+        }
+
+        const secretKeyHex = localStorage.getItem("secureSyncZ_secretKey");
+        if (!secretKeyHex) throw new Error("Missing secret key.");
+
+        // 1. Derive new key
+        const newCryptoKey = await deriveKey(newPasskey, secretKeyHex);
+
+        // 2. Encrypt validation string
+        const encryptedValidationStr = await encryptData(
+          "VALID-KEY",
+          newCryptoKey
+        );
+
+        // 3. Fetch all data
+        const [pwRes, cardRes, noteRes] = await Promise.all([
+          axios.get("/api/v1/data/passwords"),
+          axios.get("/api/v1/data/cards"),
+          axios.get("/api/v1/data/notes"),
+        ]);
+
+        const oldPasswords = pwRes.data.passwords || [];
+        const oldCards = cardRes.data.cards || [];
+        const oldNotes = noteRes.data.notes || [];
+
+        // 4. Decrypt & Re-encrypt
+        const processItems = async (items: any[]) => {
+          return Promise.all(
+            items.map(async (item) => {
+              const decrypted = await decryptData(
+                item.encryptedData,
+                cryptoKey
+              );
+              const reEncrypted = await encryptData(decrypted, newCryptoKey);
+              return { _id: item._id, encryptedData: reEncrypted };
+            })
+          );
+        };
+
+        const [newPasswords, newCards, newNotes] = await Promise.all([
+          processItems(oldPasswords),
+          processItems(oldCards),
+          processItems(oldNotes),
+        ]);
+
+        // 5. Send to server
+        const updateRes = await axios.post(
+          "/api/v1/auth/profile/update-passkey",
+          {
+            passkey: newPasskey,
+            encryptedValidationStr,
+            passwords: newPasswords,
+            cards: newCards,
+            notes: newNotes,
+          }
+        );
+
+        updateUser(updateRes.data.user);
+
+        showToast({
+          title: "Success",
+          description: "Passkey updated and data re-encrypted successfully!",
+        });
+
+        closeModal();
+        // Reload so EncryptionProvider picks up the new passkey/vault lock state
+        window.location.reload();
+        return;
+      }
+
       const payload: Record<string, string> = { currentPassword };
       if (activeModal === "password") payload.password = newPassword;
-      if (activeModal === "passkey") payload.passkey = newPasskey;
 
       const updateRes = await axios.post(
         "/api/v1/auth/profile/update",
@@ -232,11 +309,17 @@ export default function ProfilePage() {
 
       updateUser(updatedUser);
 
+      const wasPasswordModal = activeModal === "password";
+
       showToast({
         title: "Success",
         description: "Profile updated successfully!",
       });
       closeModal();
+
+      if (wasPasswordModal) {
+        window.location.reload();
+      }
     } catch (err: any) {
       setFormError(err?.response?.data?.error || "Failed to update.");
       setErrorShake(true);
@@ -559,64 +642,66 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Security Card */}
-          <div className="animate-fade-in-up stagger-2 glass group relative w-full overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
-            <div className="relative z-10">
-              <div className="border-b border-white/20 bg-white/40 px-6 py-5 dark:border-white/5 dark:bg-white/5">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Security
-                </h2>
+        {/* Security Card */}
+        <div className="animate-fade-in-up stagger-2 glass group relative w-full overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="relative z-10">
+            <div className="border-b border-white/20 bg-white/40 px-6 py-5 dark:border-white/5 dark:bg-white/5">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                Security
+              </h2>
+            </div>
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
+              <div className="flex items-center justify-between px-6 py-4">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    Password
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                    {user.hasPassword
+                      ? "Update your account password"
+                      : "You haven't set a password yet"}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveModal("password")}
+                  className={
+                    !user.hasPassword
+                      ? "border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                      : ""
+                  }
+                >
+                  {user.hasPassword ? "Change Password" : "Set Password"}
+                </Button>
               </div>
-              <div className="divide-y divide-slate-100 dark:divide-white/5">
-                <div className="flex items-center justify-between px-6 py-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                      Password
-                    </p>
-                    <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                      {user.hasPassword
-                        ? "Update your account password"
-                        : "You haven't set a password yet"}
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveModal("password")}
-                    className={
-                      !user.hasPassword
-                        ? "border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                        : ""
-                    }
-                  >
-                    {user.hasPassword ? "Change Password" : "Set Password"}
-                  </Button>
+
+              <div className="flex items-center justify-between px-6 py-4">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    Passkey PIN
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                    {user.hasPasskey
+                      ? "Update your 6-digit passkey"
+                      : "Set up a 6-digit passkey"}
+                  </p>
                 </div>
-                <div className="flex items-center justify-between px-6 py-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                      Passkey PIN
-                    </p>
-                    <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                      {user.hasPasskey
-                        ? "Update your 6-digit passkey"
-                        : "Set up a 6-digit passkey"}
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveModal("passkey")}
-                  >
-                    {user.hasPasskey ? "Update Passkey" : "Setup Passkey"}
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveModal("passkey")}
+                >
+                  {user.hasPasskey ? "Update Passkey" : "Setup Passkey"}
+                </Button>
               </div>
             </div>
           </div>
         </div>
+        <TwoFactorSettings />
 
         {/* Danger Zone Card */}
         <div className="animate-fade-in-up stagger-3 glass group relative w-full overflow-hidden rounded-[2rem] border border-red-200/50 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-red-900/50 dark:shadow-red-900/20">
@@ -639,7 +724,13 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => setDeleteDataModalOpen(true)}
+                  onClick={() => {
+                    if (!user?.hasPassword) {
+                      setShowSetPasswordFirst(true);
+                    } else {
+                      setDeleteDataModalOpen(true);
+                    }
+                  }}
                   variant="outline"
                   className="shrink-0 border-red-200 font-semibold text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-500 dark:hover:bg-red-950/20"
                 >
@@ -657,7 +748,13 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => setActiveModal("delete")}
+                  onClick={() => {
+                    if (!user?.hasPassword) {
+                      setShowSetPasswordFirst(true);
+                    } else {
+                      setActiveModal("delete");
+                    }
+                  }}
                   variant="destructive"
                   className="shrink-0 font-semibold"
                 >
@@ -832,6 +929,42 @@ export default function ProfilePage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Password First Modal */}
+      <Dialog
+        open={showSetPasswordFirst}
+        onOpenChange={setShowSetPasswordFirst}
+      >
+        <DialogContent className="rounded-2xl bg-white sm:max-w-md dark:bg-slate-900">
+          <DialogHeader>
+            <DialogTitle className="text-slate-900 dark:text-white">
+              Action Required
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+              For security reasons, you must set a password for your account
+              before you can perform this destructive action.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 pt-4 sm:flex-row">
+            <Button
+              variant="outline"
+              onClick={() => setShowSetPasswordFirst(false)}
+              className="sm:w-1/2"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setShowSetPasswordFirst(false);
+                setActiveModal("password");
+              }}
+              className="bg-emerald-600 text-white hover:bg-emerald-700 sm:w-1/2"
+            >
+              Set Password
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

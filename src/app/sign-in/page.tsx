@@ -29,6 +29,7 @@ import {
 import { ModeToggle } from "@/components/mode-toggle";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { deriveKey, decryptData } from "@/lib/clientCrypto";
+import { TwoFactorPrompt } from "@/components/auth/TwoFactorPrompt";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTheme } from "next-themes";
 
@@ -52,6 +53,24 @@ export default function SignInPage() {
     setMounted(true);
   }, []);
 
+  const [showTwoFactorPrompt, setShowTwoFactorPrompt] = useState(false);
+  const [twoFactorMethods, setTwoFactorMethods] = useState<string[]>([]);
+
+  const handleSuccessfulAuth = (userData: any) => {
+    userAuth.updateUser(userData);
+    const existingKey = localStorage.getItem("secureSyncZ_secretKey");
+    if (existingKey && /^[0-9a-fA-F]{64}$/.test(existingKey)) {
+      router.push("/passwords");
+    } else {
+      if (!userData?.encryptedValidationStr) {
+        // They never generated a secret key (old Google users or aborted signups)
+        router.push("/passwords");
+      } else {
+        setShowSecretKeyModal(true);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -59,16 +78,32 @@ export default function SignInPage() {
     setFormError("");
     setIsSubmitting(true);
     try {
-      await login(email, password);
-      // login was successful!
-      const existingKey = localStorage.getItem("secureSyncZ_secretKey");
-      if (existingKey && /^[0-9a-fA-F]{64}$/.test(existingKey)) {
-        router.push("/passwords");
+      const result = await login(email, password);
+
+      if (result?.require2FA) {
+        setTwoFactorMethods(result.methods || []);
+        setShowTwoFactorPrompt(true);
       } else {
-        setShowSecretKeyModal(true);
+        // login was successful!
+        handleSuccessfulAuth(userAuth.user); // Note: userAuth.user might not be updated synchronously here, so using handleSuccessfulAuth after a tick or fetching might be needed. Actually, if success, the provider updated it. We can just proceed.
+        // Wait, handleSuccessfulAuth uses userAuth.user which might be stale.
+        // I will just read localStorage directly in the check anyway.
+        const existingKey = localStorage.getItem("secureSyncZ_secretKey");
+        if (existingKey && /^[0-9a-fA-F]{64}$/.test(existingKey)) {
+          router.push("/passwords");
+        } else {
+          if (
+            !result?.user?.encryptedValidationStr &&
+            !userAuth.user?.encryptedValidationStr
+          ) {
+            router.push("/passwords");
+          } else {
+            setShowSecretKeyModal(true);
+          }
+        }
       }
     } catch (error: any) {
-      setFormError(error?.response?.data?.error || "Invalid credentials");
+      setFormError(error?.message || "Invalid credentials");
       setErrorShake(true);
       setTimeout(() => setErrorShake(false), 500);
       // Error is handled and toasted by AuthProvider
@@ -81,13 +116,16 @@ export default function SignInPage() {
     e.preventDefault();
     const key = secretKeyInput.trim();
 
+    // Re-fetch user in case it's stale from AuthProvider
+    const currentUser = userAuth.user;
+
     if (/^[0-9a-fA-F]{64}$/.test(key)) {
-      if (user?.encryptedValidationStr) {
+      if (currentUser?.encryptedValidationStr) {
         setIsSubmitting(true);
         try {
           const cryptoKey = await deriveKey(password, key);
           const decrypted = await decryptData(
-            user.encryptedValidationStr,
+            currentUser.encryptedValidationStr,
             cryptoKey
           );
 
@@ -263,19 +301,30 @@ export default function SignInPage() {
                     if (credentialResponse.credential) {
                       setIsSubmitting(true);
                       try {
-                        await userAuth.googleLogin(
+                        const result = await userAuth.googleLogin(
                           credentialResponse.credential
                         );
-                        const existingKey = localStorage.getItem(
-                          "secureSyncZ_secretKey"
-                        );
-                        if (
-                          existingKey &&
-                          /^[0-9a-fA-F]{64}$/.test(existingKey)
-                        ) {
-                          router.push("/passwords");
+
+                        if (result?.require2FA) {
+                          setTwoFactorMethods(result.methods || []);
+                          setShowTwoFactorPrompt(true);
                         } else {
-                          setShowSecretKeyModal(true);
+                          // login was successful!
+                          const existingKey = localStorage.getItem(
+                            "secureSyncZ_secretKey"
+                          );
+                          if (
+                            existingKey &&
+                            /^[0-9a-fA-F]{64}$/.test(existingKey)
+                          ) {
+                            router.push("/passwords");
+                          } else {
+                            if (!result?.user?.encryptedValidationStr) {
+                              router.push("/passwords");
+                            } else {
+                              setShowSecretKeyModal(true);
+                            }
+                          }
                         }
                       } catch (error) {
                         // Error handled by provider
@@ -353,6 +402,16 @@ export default function SignInPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <TwoFactorPrompt
+        isOpen={showTwoFactorPrompt}
+        onClose={() => setShowTwoFactorPrompt(false)}
+        methods={twoFactorMethods}
+        onSuccess={(user) => {
+          setShowTwoFactorPrompt(false);
+          handleSuccessfulAuth(user);
+        }}
+      />
 
       <ForgotPasswordModal
         isOpen={showForgotPasswordModal}

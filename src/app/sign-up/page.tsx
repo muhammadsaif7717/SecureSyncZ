@@ -23,8 +23,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { showToast } from "@/lib/toast";
-import { generateSecretKey, deriveKey, encryptData } from "@/lib/clientCrypto";
-import { EmergencyKitModal } from "@/components/EmergencyKitModal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -41,8 +39,6 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [secretKey, setSecretKey] = useState("");
-  const [showEmergencyKit, setShowEmergencyKit] = useState(false);
   const [formError, setFormError] = useState("");
   const [errorShake, setErrorShake] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -74,26 +70,11 @@ export default function SignUpPage() {
 
     setIsSubmitting(true);
     try {
-      // Generate Secret Key first
-      const newSecretKey = generateSecretKey();
+      // Create user without validation string (it will be set during Passkey setup)
+      await signup(username, email, password);
 
-      // Derive a temporary CryptoKey just for the validation string
-      const tempKey = await deriveKey(password, newSecretKey);
-      const encryptedValidationStr = await encryptData("VALID-KEY", tempKey);
-
-      // Create user with the encrypted validation string
-      await signup(username, email, password, encryptedValidationStr);
-
-      // Save it securely to localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem("secureSyncZ_secretKey", newSecretKey);
-      }
-
-      setSecretKey(newSecretKey);
-      setShowEmergencyKit(true);
-
-      // Note: We no longer automatically redirect to /passwords here.
-      // We wait for the user to confirm the Emergency Kit modal.
+      // Redirect to passwords page where Passkey and Secret Key setup will happen
+      router.push("/passwords");
     } catch (error: any) {
       setFormError(error?.response?.data?.error || "Registration failed");
       setErrorShake(true);
@@ -102,11 +83,6 @@ export default function SignUpPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleEmergencyKitConfirm = () => {
-    setShowEmergencyKit(false);
-    router.push("/passwords");
   };
 
   return (
@@ -354,13 +330,6 @@ export default function SignUpPage() {
           </CardFooter>
         </div>
       </Card>
-
-      {/* Zero Knowledge Emergency Kit Modal */}
-      <EmergencyKitModal
-        isOpen={showEmergencyKit}
-        secretKey={secretKey}
-        onConfirm={handleEmergencyKitConfirm}
-      />
     </div>
   );
 }

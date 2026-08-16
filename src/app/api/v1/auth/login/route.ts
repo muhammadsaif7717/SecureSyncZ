@@ -50,7 +50,44 @@ export async function POST(req: Request) {
 
     const userId = user._id.toString();
 
-    // Sign JWT
+    const requires2FA =
+      user.twoFactorEnabled ||
+      (user.webAuthnCredentials && user.webAuthnCredentials.length > 0);
+
+    if (requires2FA) {
+      const token2fa = await signToken({
+        id: user._id.toString(),
+        email: user.email,
+        username: user.username,
+        is2faPending: true,
+      });
+
+      const response = NextResponse.json(
+        {
+          require2FA: true,
+          methods: [
+            ...(user.twoFactorEnabled ? ["totp"] : []),
+            ...(user.webAuthnCredentials?.length ? ["webauthn"] : []),
+          ],
+        },
+        { status: 200 }
+      );
+
+      // Set temporary 2FA token
+      response.cookies.set({
+        name: "token2fa",
+        value: token2fa,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 15 * 60, // 15 mins
+        path: "/",
+      });
+
+      return response;
+    }
+
+    // Sign final JWT
     const token = await signToken({
       id: userId,
       email: user.email,
@@ -70,6 +107,7 @@ export async function POST(req: Request) {
           isVerified: user.isVerified || false,
           hasPassword: !!user.password,
           encryptedValidationStr: user.encryptedValidationStr,
+          twoFactorEnabled: user.twoFactorEnabled || false,
         },
       },
       { status: 200 }

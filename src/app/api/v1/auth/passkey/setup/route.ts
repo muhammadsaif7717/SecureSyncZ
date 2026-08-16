@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { passkey } = body;
+    const { passkey, encryptedValidationStr } = body;
 
     if (!passkey || passkey.length !== 6) {
       // console.log("Passkey setup error 400: Invalid passkey sent", { passkey });
@@ -56,9 +56,14 @@ export async function POST(req: Request) {
     const salt = await bcrypt.genSalt(10);
     const hashedPasskey = await bcrypt.hash(passkey, salt);
 
+    const updateData: any = { passkey: hashedPasskey };
+    if (encryptedValidationStr) {
+      updateData.encryptedValidationStr = encryptedValidationStr;
+    }
+
     const result = await usersCollection.findOneAndUpdate(
       { _id: new ObjectId(userPayload.id) },
-      { $set: { passkey: hashedPasskey } },
+      { $set: updateData },
       { returnDocument: "after" }
     );
 
@@ -72,6 +77,7 @@ export async function POST(req: Request) {
       username: result.username,
       profilePicture: result.profilePicture,
       hasPasskey: !!result.passkey,
+      encryptedValidationStr: result.encryptedValidationStr,
     };
 
     return NextResponse.json(

@@ -50,8 +50,6 @@ export async function POST(req: Request) {
         encryptedValidationStr: null,
         profilePicture: picture || null,
         isPremium: false,
-        playStorePurchaseToken: null,
-        subscriptionExpiry: null,
       };
 
       const result = await usersCollection.insertOne(newUser);
@@ -63,6 +61,42 @@ export async function POST(req: Request) {
         { $set: { profilePicture: picture } }
       );
       user.profilePicture = picture;
+    }
+
+    const requires2FA =
+      user.twoFactorEnabled ||
+      (user.webAuthnCredentials && user.webAuthnCredentials.length > 0);
+
+    if (requires2FA) {
+      const token2fa = await signToken({
+        id: user._id.toString(),
+        email: user.email,
+        username: user.username,
+        is2faPending: true,
+      });
+
+      const response = NextResponse.json(
+        {
+          require2FA: true,
+          methods: [
+            ...(user.twoFactorEnabled ? ["totp"] : []),
+            ...(user.webAuthnCredentials?.length ? ["webauthn"] : []),
+          ],
+        },
+        { status: 200 }
+      );
+
+      response.cookies.set({
+        name: "token2fa",
+        value: token2fa,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 15 * 60, // 15 mins
+        path: "/",
+      });
+
+      return response;
     }
 
     // Generate JWT Token
@@ -82,6 +116,9 @@ export async function POST(req: Request) {
           profilePicture: user.profilePicture,
           hasPasskey: !!user.passkey,
           isVerified: user.isVerified || false,
+          hasPassword: !!user.password,
+          encryptedValidationStr: user.encryptedValidationStr || null,
+          twoFactorEnabled: user.twoFactorEnabled || false,
         },
       },
       { status: 200 }

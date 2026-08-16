@@ -1,6 +1,13 @@
 "use client";
 
-import { Crown, Lock, ShieldCheck, CreditCard, KeyRound } from "lucide-react";
+import {
+  Crown,
+  Lock,
+  ShieldCheck,
+  CreditCard,
+  KeyRound,
+  Loader2,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +15,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useGooglePlayBilling } from "@/hooks/useGooglePlayBilling";
+import { useState } from "react";
+import { showToast } from "@/lib/toast";
+
+import { useAuth } from "@/providers/AuthProvider";
 
 interface PremiumPaywallModalProps {
   isOpen: boolean;
@@ -21,10 +31,29 @@ export default function PremiumPaywallModal({
   onClose,
   featureName,
 }: PremiumPaywallModalProps) {
-  const { initiatePurchase, isProcessing } = useGooglePlayBilling();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
 
-  const handleStartTrial = () => {
-    initiatePurchase("premium_subscription");
+  const handleStartTrial = async () => {
+    try {
+      setIsProcessing(true);
+      const res = await fetch("/api/v1/billing/stripe/create-checkout", {
+        method: "POST",
+      });
+      const data = await res.json();
+
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || "Failed to create checkout session");
+      }
+    } catch (error: any) {
+      showToast({
+        title: "Error",
+        description: error.message || "Failed to start checkout",
+      });
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -78,7 +107,16 @@ export default function PremiumPaywallModal({
               disabled={isProcessing}
               className="bg-primary hover:bg-primary/90 text-primary-foreground flex w-full items-center justify-center rounded-lg px-4 py-3 font-medium shadow-md transition-all disabled:opacity-70"
             >
-              {isProcessing ? "Processing..." : "Start 7-Day Free Trial"}
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </>
+              ) : user?.hasUsedTrial ? (
+                "Upgrade to Premium"
+              ) : (
+                "Start 14-Day Free Trial"
+              )}
             </button>
             <button
               onClick={onClose}

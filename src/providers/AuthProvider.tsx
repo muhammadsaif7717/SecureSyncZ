@@ -16,13 +16,16 @@ interface User {
   isVerified?: boolean;
   encryptedValidationStr?: string;
   isPremium?: boolean;
+  twoFactorEnabled?: boolean;
+  webAuthnCredentials?: any[];
+  hasUsedTrial?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  googleLogin: (credential: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
+  googleLogin: (credential: string) => Promise<any>;
   signup: (
     username: string,
     email: string,
@@ -115,12 +118,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       });
+
+      if (response.data?.require2FA) {
+        return response.data;
+      }
+
       if (response.data && response.data.user) {
         setUser(response.data.user);
         showToast({
           title: "Logged In Successfully",
           description: `Welcome back, ${response.data.user.username}!`,
         });
+        return { success: true };
       }
     } catch (error) {
       let errorMsg = "Login failed. Please check credentials.";
@@ -141,12 +150,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const response = await axios.post("/api/v1/auth/google", { credential });
+
+      if (response.data?.require2FA) {
+        return response.data;
+      }
+
       if (response.data && response.data.user) {
         setUser(response.data.user);
         showToast({
           title: "Logged In Successfully",
           description: `Welcome, ${response.data.user.username}!`,
         });
+        return { success: true };
       }
     } catch (error) {
       let errorMsg = "Google Login failed.";
