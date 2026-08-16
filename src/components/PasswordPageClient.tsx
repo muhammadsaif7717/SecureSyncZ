@@ -14,6 +14,8 @@ import {
   RefreshCw,
   Check,
 } from "lucide-react";
+import { PasswordGenerator } from "@/components/PasswordGenerator";
+import { TagInput } from "@/components/TagInput";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,7 +44,6 @@ import { extractRootDomain } from "@/lib/utils";
 import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
 import VerifyPasskey from "@/components/VerifyPasskey";
-
 
 const loadPasswordsData = async (cryptoKey: CryptoKey | null) => {
   const data = await getPasswords(cryptoKey);
@@ -77,6 +78,19 @@ export default function PasswordPageClient({ name }: { name: string }) {
   });
 
   const fetchedPasswordsData = data ?? [];
+  const originalItem = editableData
+    ? fetchedPasswordsData.find((p) => p._id === editableData._id)
+    : null;
+  const hasChanges =
+    editableData && originalItem
+      ? (editableData.website || "") !== (originalItem.website || "") ||
+        (editableData.username || "") !== (originalItem.username || "") ||
+        (editableData.password || "") !== (originalItem.password || "") ||
+        (editableData.note || "") !== (originalItem.note || "") ||
+        JSON.stringify(editableData.tags || []) !==
+          JSON.stringify(originalItem.tags || [])
+      : false;
+
   if (isLoading) {
     return (
       <div className="mt-10 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
@@ -134,38 +148,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
     item.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const generatePassword = () => {
-    if (!editableData) return;
-    const charset =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
-    let password = "";
-    for (let i = 0, n = charset.length; i < 16; ++i) {
-      password += charset.charAt(Math.floor(Math.random() * n));
-    }
-    setEditableData({ ...editableData, password });
-  };
-
-  const getPasswordStrength = (password: string) => {
-    if (!password) return 0;
-    let strength = 0;
-    if (password.length > 7) strength += 1;
-    if (password.length > 12) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/[0-9]/.test(password)) strength += 1;
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-    return strength;
-  };
-
-  const strength = editableData
-    ? getPasswordStrength(editableData.password)
-    : 0;
-  const getStrengthColor = () => {
-    if (!editableData || editableData.password.length === 0)
-      return "bg-transparent";
-    if (strength <= 2) return "bg-red-500";
-    if (strength <= 4) return "bg-yellow-500";
-    return "bg-emerald-500";
-  };
+  const [showGenerator, setShowGenerator] = useState(false);
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -572,34 +555,62 @@ export default function PasswordPageClient({ name }: { name: string }) {
                   Password
                 </Label>
                 <div className="relative">
-                  <Input
-                    id="password"
-                    value={editableData.password}
-                    onChange={(e) =>
-                      setEditableData({
-                        ...editableData,
-                        password: e.target.value,
-                      })
-                    }
-                    className="h-11 pr-10 text-sm sm:h-10"
-                  />
-                  <button
-                    type="button"
-                    className="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-slate-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-                    onClick={generatePassword}
-                    title="Generate Password"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </button>
+                  {showGenerator ? (
+                    <div className="flex h-11 w-full items-center justify-between border border-transparent px-3 sm:h-10">
+                      <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                        Using Password Generator
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowGenerator(false)}
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="password"
+                        value={editableData.password}
+                        onChange={(e) =>
+                          setEditableData({
+                            ...editableData,
+                            password: e.target.value,
+                          })
+                        }
+                        className="h-11 pr-10 text-sm sm:h-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowGenerator(true)}
+                        className="absolute top-0 right-0 flex h-11 w-10 items-center justify-center text-emerald-500 hover:text-emerald-600 sm:h-10 dark:hover:text-emerald-400"
+                        title="Open Password Generator"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
-                {editableData.password && (
-                  <div className="mt-2 flex h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-                    <div
-                      className={`h-full transition-all duration-300 ${getStrengthColor()}`}
-                      style={{ width: `${(strength / 5) * 100}%` }}
+                {showGenerator && (
+                  <div className="mt-2">
+                    <PasswordGenerator
+                      onGenerate={(password) =>
+                        setEditableData({
+                          ...editableData,
+                          password,
+                        })
+                      }
                     />
                   </div>
                 )}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs sm:text-sm">Tags</Label>
+                <TagInput
+                  tags={editableData.tags || []}
+                  setTags={(tags) => setEditableData({ ...editableData, tags })}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="note" className="text-xs sm:text-sm">
@@ -620,7 +631,12 @@ export default function PasswordPageClient({ name }: { name: string }) {
               <DialogFooter className="pt-3 sm:pt-4">
                 <Button
                   type="submit"
-                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white sm:h-10 sm:w-auto dark:from-emerald-500 dark:to-teal-500"
+                  disabled={
+                    !hasChanges ||
+                    !editableData.website ||
+                    !editableData.password
+                  }
+                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:w-auto dark:from-emerald-500 dark:to-teal-500"
                 >
                   Save changes
                 </Button>

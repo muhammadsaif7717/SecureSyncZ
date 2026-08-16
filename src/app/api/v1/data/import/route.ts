@@ -47,13 +47,32 @@ export const POST = async (req: Request) => {
           objectId = _id; // In case it's not a standard ObjectId
         }
 
-        await db
+        const existingItem = await db
           .collection(collectionName)
-          .updateOne(
-            { _id: objectId, "user.email": user.email },
-            { $set: updateData },
-            { upsert: true }
-          );
+          .findOne({ _id: objectId, "user.email": user.email });
+
+        if (existingItem) {
+          const dbUpdatedAt = existingItem.updatedAt
+            ? new Date(existingItem.updatedAt).getTime()
+            : 0;
+          const importUpdatedAt = updateData.updatedAt
+            ? new Date(updateData.updatedAt).getTime()
+            : 0;
+
+          // Only update if import data is newer or if we cannot determine (fallback to overwrite)
+          if (importUpdatedAt >= dbUpdatedAt || !existingItem.updatedAt) {
+            await db
+              .collection(collectionName)
+              .updateOne(
+                { _id: objectId, "user.email": user.email },
+                { $set: updateData }
+              );
+          }
+        } else {
+          await db
+            .collection(collectionName)
+            .insertOne({ _id: objectId, ...updateData });
+        }
       } else {
         // Insert as new data
         await db.collection(collectionName).insertOne(normalizedItem);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Copy, FileText, KeyRound, Loader2, Search, Check } from "lucide-react";
+import { TagInput } from "@/components/TagInput";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -135,6 +136,17 @@ export default function NotePageClient({ name }: { name: string }) {
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const originalItem = editableData
+    ? fetchedNotesData.find((p) => p._id === editableData._id)
+    : null;
+  const hasChanges =
+    editableData && originalItem
+      ? (editableData.title || "") !== (originalItem.title || "") ||
+        (editableData.content || "") !== (originalItem.content || "") ||
+        JSON.stringify(editableData.tags || []) !==
+          JSON.stringify(originalItem.tags || [])
+      : false;
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -471,10 +483,20 @@ export default function NotePageClient({ name }: { name: string }) {
                   className="min-h-[150px] text-sm break-words break-all"
                 />
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs sm:text-sm">Tags</Label>
+                <TagInput
+                  tags={editableData.tags || []}
+                  setTags={(tags) => setEditableData({ ...editableData, tags })}
+                />
+              </div>
               <DialogFooter className="pt-3 sm:pt-4">
                 <Button
                   type="submit"
-                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white sm:h-10 sm:w-auto dark:from-emerald-500 dark:to-teal-500"
+                  disabled={
+                    !hasChanges || !editableData.title || !editableData.content
+                  }
+                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:w-auto dark:from-emerald-500 dark:to-teal-500"
                 >
                   Save changes
                 </Button>

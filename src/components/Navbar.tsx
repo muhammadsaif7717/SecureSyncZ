@@ -32,6 +32,7 @@ import {
   ShieldAlert,
   ArrowLeft,
   Trash2,
+  LayoutDashboard,
   Crown,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -47,6 +48,7 @@ import { useState, useEffect } from "react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const navLinks = [
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/cards", label: "Cards", icon: CreditCard },
   { href: "/passwords", label: "Passwords", icon: Key },
   { href: "/notes", label: "Notes", icon: FileText },

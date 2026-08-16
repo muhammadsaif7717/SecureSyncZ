@@ -29,7 +29,6 @@ export function EncryptionProvider({
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
 
-
   // Inside the component:
   const protectedPaths = [
     "/passwords",
@@ -38,21 +37,25 @@ export function EncryptionProvider({
     "/profile",
     "/add",
     "/health",
+    "/",
   ];
-  
+
   const isProtectedPath = protectedPaths.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
 
-  const existingKey = typeof window !== "undefined" ? localStorage.getItem("secureSyncZ_secretKey") : null;
+  const existingKey =
+    typeof window !== "undefined"
+      ? localStorage.getItem("secureSyncZ_secretKey")
+      : null;
   const needsSecretKey = !existingKey || !/^[0-9a-fA-F]{64}$/.test(existingKey);
 
-  const showRestoreVaultModal = 
-    !isLoading && 
-    !!user && 
-    isProtectedPath && 
-    !cryptoKey && 
-    !!user.encryptedValidationStr && 
+  const showRestoreVaultModal =
+    !isLoading &&
+    !!user &&
+    isProtectedPath &&
+    !cryptoKey &&
+    !!user.encryptedValidationStr &&
     needsSecretKey;
 
   // Auto-lock inactivity timer (3 minutes)
@@ -105,7 +108,7 @@ export function EncryptionProvider({
         return { success: false, error: "Missing secret key." };
       }
 
-    const derivedKey = await deriveKey(pin, secretKeyHex);
+      const derivedKey = await deriveKey(pin, secretKeyHex);
 
       if (user?.encryptedValidationStr) {
         try {
@@ -117,15 +120,13 @@ export function EncryptionProvider({
             // Secret key is wrong
             return {
               success: false,
-              error:
-                "Invalid Secret Key or Passkey.",
+              error: "Invalid Secret Key or Passkey.",
             };
           }
         } catch (error) {
           return {
             success: false,
-            error:
-              "Invalid Secret Key or Passkey.",
+            error: "Invalid Secret Key or Passkey.",
           };
         }
       }

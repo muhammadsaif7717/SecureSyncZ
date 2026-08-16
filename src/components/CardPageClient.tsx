@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Check,
 } from "lucide-react";
+import { TagInput } from "@/components/TagInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -167,6 +168,25 @@ export default function CardPageClient({ name }: { name: string }) {
       item.cardNumber?.includes(searchQuery) ||
       item.note?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const originalItem = editableData
+    ? fetchedPasswordsData.find((p) => p._id === editableData._id)
+    : null;
+  const hasChanges =
+    editableData && originalItem
+      ? (editableData.name || "") !== (originalItem.name || "") ||
+        (editableData.serviceName || "") !== (originalItem.serviceName || "") ||
+        (editableData.cardType || "Others") !==
+          (originalItem.cardType || "Others") ||
+        (editableData.website || "") !== (originalItem.website || "") ||
+        (editableData.cardNumber || "") !== (originalItem.cardNumber || "") ||
+        (editableData.expiry || "") !== (originalItem.expiry || "") ||
+        (editableData.cvv || "") !== (originalItem.cvv || "") ||
+        (editableData.pin || "") !== (originalItem.pin || "") ||
+        (editableData.note || "") !== (originalItem.note || "") ||
+        JSON.stringify(editableData.tags || []) !==
+          JSON.stringify(originalItem.tags || [])
+      : false;
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -719,23 +739,7 @@ export default function CardPageClient({ name }: { name: string }) {
                   className="h-11 text-sm sm:h-10"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="tags" className="text-xs sm:text-sm">
-                  Tags
-                </Label>
-                <Input
-                  id="tags"
-                  placeholder="e.g. Finance, Shopping"
-                  value={editableData.tags?.join(", ") || ""}
-                  onChange={(e) =>
-                    setEditableData({
-                      ...editableData,
-                      tags: e.target.value.split(",").map((t) => t.trimStart()),
-                    })
-                  }
-                  className="h-11 text-sm sm:h-10"
-                />
-              </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="cardType" className="text-xs sm:text-sm">
                   Card Type
@@ -836,6 +840,13 @@ export default function CardPageClient({ name }: { name: string }) {
                 />
               </div>
               <div className="space-y-1.5">
+                <Label className="text-xs sm:text-sm">Tags</Label>
+                <TagInput
+                  tags={editableData.tags || []}
+                  setTags={(tags) => setEditableData({ ...editableData, tags })}
+                />
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="note" className="text-xs sm:text-sm">
                   Note
                 </Label>
@@ -854,7 +865,12 @@ export default function CardPageClient({ name }: { name: string }) {
               <DialogFooter className="pt-3 sm:pt-4">
                 <Button
                   type="submit"
-                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white sm:h-10 sm:w-auto dark:from-emerald-500 dark:to-teal-500"
+                  disabled={
+                    !hasChanges ||
+                    !editableData.name ||
+                    !editableData.cardNumber
+                  }
+                  className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:w-auto dark:from-emerald-500 dark:to-teal-500"
                 >
                   Save changes
                 </Button>

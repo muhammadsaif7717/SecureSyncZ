@@ -16,6 +16,8 @@ import {
   KeyRound,
   Loader2,
 } from "lucide-react";
+import { PasswordGenerator } from "@/components/PasswordGenerator";
+import { TagInput } from "@/components/TagInput";
 import { useAuth } from "@/providers/AuthProvider";
 import { useEncryption } from "@/providers/EncryptionProvider";
 import { encryptData } from "@/lib/clientCrypto";
@@ -116,33 +118,7 @@ export default function PostPage() {
     localStorage.setItem("addPageActiveCategory", val);
   };
 
-  const generatePassword = () => {
-    const charset =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
-    let password = "";
-    for (let i = 0, n = charset.length; i < 16; ++i) {
-      password += charset.charAt(Math.floor(Math.random() * n));
-    }
-    setNewPassword({ ...newPassword, password });
-  };
-
-  const getPasswordStrength = (password: string) => {
-    let strength = 0;
-    if (password.length > 7) strength += 1;
-    if (password.length > 12) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/[0-9]/.test(password)) strength += 1;
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-    return strength; // 0 to 5
-  };
-
-  const strength = getPasswordStrength(newPassword.password);
-  const getStrengthColor = () => {
-    if (newPassword.password.length === 0) return "bg-transparent";
-    if (strength <= 2) return "bg-red-500";
-    if (strength <= 4) return "bg-yellow-500";
-    return "bg-emerald-500";
-  };
+  const [showGenerator, setShowGenerator] = useState(false);
 
   // Update states once user is loaded
   React.useEffect(() => {
@@ -344,8 +320,12 @@ export default function PostPage() {
     "glass rounded-2xl shadow-sm overflow-hidden mb-6";
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-slate-50/50 px-4 pt-6 pb-32 sm:min-h-[calc(100vh-60px)] sm:px-6 sm:pt-10 sm:pb-36 dark:bg-[#0a0e1a]">
-      <div className="animate-in fade-in zoom-in-95 mx-auto w-full max-w-2xl duration-500">
+    <div className="relative min-h-[calc(100vh-56px)] overflow-hidden bg-slate-50/50 px-4 pt-6 pb-32 sm:min-h-[calc(100vh-60px)] sm:px-6 sm:pt-10 sm:pb-36 dark:bg-[#0a0e1a]">
+      {/* Background glow effects */}
+      <div className="animate-glow-pulse absolute top-1/4 left-1/4 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-emerald-500/[0.06]" />
+      <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-teal-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-teal-500/[0.05]" />
+
+      <div className="animate-in fade-in zoom-in-95 relative z-10 mx-auto w-full max-w-2xl duration-500">
         {/* Toggle Switch */}
         <div className="mx-auto mb-8 flex w-full max-w-sm rounded-xl bg-slate-200/50 p-1 lg:max-w-md dark:bg-slate-800/50">
           <button
@@ -412,69 +392,78 @@ export default function PostPage() {
                 <div className={rowClasses}>
                   <Label className={labelClasses}>Password</Label>
                   <div className={inputWrapperClasses}>
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={newPassword.password}
-                      onChange={(e) =>
-                        setNewPassword({
-                          ...newPassword,
-                          password: e.target.value,
-                        })
+                    {showGenerator ? (
+                      <div className="flex w-full items-center justify-between px-3 py-3 sm:py-2 lg:py-2.5">
+                        <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                          Using Password Generator
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowGenerator(false)}
+                          className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={newPassword.password}
+                          onChange={(e) =>
+                            setNewPassword({
+                              ...newPassword,
+                              password: e.target.value,
+                            })
+                          }
+                          required
+                          className={borderlessInputClasses}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowGenerator(true)}
+                          className="p-2 text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400"
+                          title="Open password generator"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {showGenerator && (
+                  <div className="px-4 pb-4">
+                    <PasswordGenerator
+                      onGenerate={(password) =>
+                        setNewPassword({ ...newPassword, password })
                       }
-                      required
-                      className={borderlessInputClasses}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={generatePassword}
-                      className="p-2 text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400"
-                      title="Generate strong password"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </button>
                   </div>
-                </div>
-                <div className="flex items-center px-4 pb-3">
-                  <div className="w-full sm:w-1/3"></div>
-                  <div className="mt-1 flex flex-1 gap-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div
-                        key={i}
-                        className={`h-1 flex-1 rounded-full ${i <= strength ? getStrengthColor() : "bg-slate-200 dark:bg-slate-800"}`}
-                      />
-                    ))}
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className={cardContainerClasses}>
                 <div className={rowClasses}>
                   <Label className={labelClasses}>Tags</Label>
                   <div className={inputWrapperClasses}>
-                    <Input
-                      placeholder="e.g. Work, Personal"
-                      value={newPassword.tags?.join(", ") || ""}
-                      onChange={(e) =>
-                        setNewPassword({
-                          ...newPassword,
-                          tags: e.target.value
-                            .split(",")
-                            .map((t) => t.trimStart()),
-                        })
+                    <TagInput
+                      tags={newPassword.tags || []}
+                      setTags={(tags) =>
+                        setNewPassword({ ...newPassword, tags })
                       }
-                      className={borderlessInputClasses}
+                      className="border-none bg-transparent p-0"
                     />
                   </div>
                 </div>
@@ -660,18 +649,10 @@ export default function PostPage() {
                 <div className={rowClasses}>
                   <Label className={labelClasses}>Tags</Label>
                   <div className={inputWrapperClasses}>
-                    <Input
-                      placeholder="e.g. Finance, Shopping"
-                      value={newCard.tags?.join(", ") || ""}
-                      onChange={(e) =>
-                        setNewCard({
-                          ...newCard,
-                          tags: e.target.value
-                            .split(",")
-                            .map((t) => t.trimStart()),
-                        })
-                      }
-                      className={borderlessInputClasses}
+                    <TagInput
+                      tags={newCard.tags || []}
+                      setTags={(tags) => setNewCard({ ...newCard, tags })}
+                      className="border-none bg-transparent p-0"
                     />
                   </div>
                 </div>
@@ -740,18 +721,10 @@ export default function PostPage() {
                 <div className={rowClasses}>
                   <Label className={labelClasses}>Tags</Label>
                   <div className={inputWrapperClasses}>
-                    <Input
-                      placeholder="e.g. Crypto, Backup"
-                      value={newNote.tags?.join(", ") || ""}
-                      onChange={(e) =>
-                        setNewNote({
-                          ...newNote,
-                          tags: e.target.value
-                            .split(",")
-                            .map((t) => t.trimStart()),
-                        })
-                      }
-                      className={borderlessInputClasses}
+                    <TagInput
+                      tags={newNote.tags || []}
+                      setTags={(tags) => setNewNote({ ...newNote, tags })}
+                      className="border-none bg-transparent p-0"
                     />
                   </div>
                 </div>

@@ -74,7 +74,7 @@ export default function SignUpPage() {
       await signup(username, email, password);
 
       // Redirect to passwords page where Passkey and Secret Key setup will happen
-      router.push("/passwords");
+      router.push("/");
     } catch (error: any) {
       setFormError(error?.response?.data?.error || "Registration failed");
       setErrorShake(true);
@@ -283,13 +283,13 @@ export default function SignUpPage() {
                           existingKey &&
                           /^[0-9a-fA-F]{64}$/.test(existingKey)
                         ) {
-                          router.push("/passwords");
+                          router.push("/");
                         } else {
                           // Redirect to passkey/secret key setup (or show modal)
                           // Wait, for new Google login users, we should show the passkey modal or emergency kit.
                           // However, we don't know their secret key yet.
                           // We will just send them to /passwords where the PasskeyModal will pop up automatically.
-                          router.push("/passwords");
+                          router.push("/");
                         }
                       } catch (error) {
                         // Error handled by provider

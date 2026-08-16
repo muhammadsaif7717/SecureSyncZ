@@ -165,11 +165,13 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
         exportRows.push({
           _id: p._id || "",
           type: "password",
+          name: p.name || "",
           website: p.website || "",
           username: p.username || "",
           password: p.password || "",
           note: p.note || "",
-          cardName: "",
+          serviceName: "",
+          cardType: "",
           cardNumber: "",
           expiry: "",
           cvv: "",
@@ -178,6 +180,8 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
           content: "",
           isFavorite: p.isFavorite ? "true" : "false",
           tags: p.tags ? p.tags.join(",") : "",
+          createdAt: p.createdAt || "",
+          updatedAt: p.updatedAt || "",
         });
       });
 
@@ -185,11 +189,13 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
         exportRows.push({
           _id: c._id || "",
           type: "card",
-          website: "",
+          name: c.name || "",
+          website: c.website || "",
           username: "",
           password: "",
           note: c.note || "",
-          cardName: c.cardName || "",
+          serviceName: c.serviceName || "",
+          cardType: c.cardType || "",
           cardNumber: c.cardNumber || "",
           expiry: c.expiry || "",
           cvv: c.cvv || "",
@@ -198,6 +204,8 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
           content: "",
           isFavorite: c.isFavorite ? "true" : "false",
           tags: c.tags ? c.tags.join(",") : "",
+          createdAt: c.createdAt || "",
+          updatedAt: c.updatedAt || "",
         });
       });
 
@@ -205,11 +213,13 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
         exportRows.push({
           _id: n._id || "",
           type: "note",
+          name: "",
           website: "",
           username: "",
           password: "",
           note: "",
-          cardName: "",
+          serviceName: "",
+          cardType: "",
           cardNumber: "",
           expiry: "",
           cvv: "",
@@ -218,6 +228,8 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
           content: n.content || "",
           isFavorite: n.isFavorite ? "true" : "false",
           tags: n.tags ? n.tags.join(",") : "",
+          createdAt: n.createdAt || "",
+          updatedAt: n.updatedAt || "",
         });
       });
 
@@ -289,12 +301,15 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
 
           payload.passwords.push({
             _id: record._id || undefined,
-            website: record.website || record.url || record.name || "Unknown",
+            name: record.name || record.cardName || "",
+            website: record.website || record.url || "Unknown",
             username: record.username || "",
             password: encryptedPassword,
             note: encryptedNote,
             isFavorite: record.isFavorite === "true",
             tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
+            createdAt: record.createdAt || undefined,
+            updatedAt: record.updatedAt || undefined,
           });
         } else if (type === "card") {
           const encryptedCardNumber = record.cardNumber
@@ -315,7 +330,11 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
 
           payload.cards.push({
             _id: record._id || undefined,
-            cardName: record.cardName || "Unknown",
+            name: record.name || record.cardName || "Unknown",
+            serviceName:
+              record.serviceName || record.name || record.cardName || "Unknown",
+            cardType: record.cardType || "Others",
+            website: record.website || "",
             cardNumber: encryptedCardNumber,
             expiry: encryptedExpiry,
             cvv: encryptedCvv,
@@ -323,6 +342,8 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
             note: encryptedNote,
             isFavorite: record.isFavorite === "true",
             tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
+            createdAt: record.createdAt || undefined,
+            updatedAt: record.updatedAt || undefined,
           });
         } else if (type === "note") {
           const encryptedContent = record.content
@@ -335,6 +356,8 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
             content: encryptedContent,
             isFavorite: record.isFavorite === "true",
             tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
+            createdAt: record.createdAt || undefined,
+            updatedAt: record.updatedAt || undefined,
           });
         }
       }
