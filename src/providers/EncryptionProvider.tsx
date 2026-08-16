@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { deriveKey } from "@/lib/clientCrypto";
+import { deriveKey, decryptData } from "@/lib/clientCrypto";
 import axios from "axios";
 import { showToast } from "@/lib/toast";
 import { useRouter, usePathname } from "next/navigation";
@@ -94,7 +94,32 @@ export function EncryptionProvider({
         return { success: false, error: "Missing secret key." };
       }
 
-      const derivedKey = await deriveKey(pin, secretKeyHex);
+    const derivedKey = await deriveKey(pin, secretKeyHex);
+
+      if (user?.encryptedValidationStr) {
+        try {
+          const decrypted = await decryptData(
+            user.encryptedValidationStr,
+            derivedKey
+          );
+          if (decrypted !== "VALID-KEY") {
+            // Secret key is wrong
+            localStorage.removeItem("secureSyncZ_secretKey");
+            return {
+              success: false,
+              error:
+                "Invalid Secret Key. We have cleared it. Please refresh and enter the correct Secret Key.",
+            };
+          }
+        } catch (error) {
+          localStorage.removeItem("secureSyncZ_secretKey");
+          return {
+            success: false,
+            error:
+              "Invalid Secret Key. We have cleared it. Please refresh and enter the correct Secret Key.",
+          };
+        }
+      }
 
       // Verify the passkey with the backend if they have one set
       if (user?.hasPasskey) {

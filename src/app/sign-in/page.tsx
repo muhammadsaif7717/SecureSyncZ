@@ -120,32 +120,10 @@ export default function SignInPage() {
     const currentUser = userAuth.user;
 
     if (/^[0-9a-fA-F]{64}$/.test(key)) {
-      if (currentUser?.encryptedValidationStr) {
-        setIsSubmitting(true);
-        try {
-          const cryptoKey = await deriveKey(password, key);
-          const decrypted = await decryptData(
-            currentUser.encryptedValidationStr,
-            cryptoKey
-          );
-
-          if (decrypted !== "VALID-KEY") {
-            throw new Error("Invalid key");
-          }
-        } catch (error) {
-          showToast({
-            title: "Invalid Key",
-            description:
-              "The Secret Key you entered is incorrect. Please try again.",
-          });
-          setIsSubmitting(false);
-          return;
-        }
-        setIsSubmitting(false);
-      }
-
+      setIsSubmitting(true);
       localStorage.setItem("secureSyncZ_secretKey", key);
       setShowSecretKeyModal(false);
+      setIsSubmitting(false);
       router.push("/passwords");
       showToast({
         title: "Key Restored",
