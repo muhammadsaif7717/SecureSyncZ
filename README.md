@@ -22,8 +22,7 @@
 - **🖼️ Profile Customization:** Custom avatars with automatic client-side image compression and Cloudinary cloud storage.
 - **🛡️ Rate Limiting & Protection:** Built-in API rate limiting powered by Upstash Redis to prevent brute-force attacks.
 - **🔑 Google OAuth Integration:** Fast and secure alternative authentication using "Sign in with Google".
-- **💎 Premium Paywall:** Integrated Google Play Store Billing for secure handling of in-app purchases and premium subscriptions.
-
+- **💎 Premium Subscriptions:** Integrated Stripe billing for secure handling of premium subscriptions, featuring 14-day free trials and automated webhook syncing.
 ## 🛠️ Tech Stack
 
 - **Framework:** Next.js 16 (App Router & Turbopack)
@@ -45,7 +44,8 @@ SecureSyncZ is built for users who want complete control over their digital life
 - **Zero-Knowledge Encryption:** Your data is encrypted locally on your device _before_ it reaches the server using AES-GCM 256-bit encryption. The keys are derived using PBKDF2. We never see your raw data.
 - **Two-Secret Security Model:** Your vault is protected by a combination of your Master Password and an unrecoverable 64-character device-level Secret Key. Both are required to decrypt your data.
 - **Secret Key Validation System:** Automatically verifies your 64-character Secret Key on new devices to prevent accidental lockouts or garbage data decryption using a secure validation challenge.
-- **Advanced Passkeys:** Access your vault quickly and securely with a lightning-fast 6-digit passkey PIN that is verified on the server via bcrypt hashing.
+- **Advanced Passkeys & Biometrics:** Access your vault quickly and securely using WebAuthn (TouchID, FaceID, Windows Hello) and a fallback 6-digit passkey PIN.
+- **Two-Factor Authentication (2FA):** Add an extra layer of security with Time-Based One-Time Passwords (TOTP) supported by standard Authenticator apps.
 - **Email Verification & OTP:** Requires users to verify their identity via Email OTP before performing sensitive actions like account deletion.
 - **Auto-Lock:** Automatically secures your vault and clears the decryption keys from memory after 3 minutes of inactivity.
 
