@@ -34,7 +34,7 @@ const PasswordsList = () => {
   if (isLoading) {
     return (
       <div className="animate-fade-in-up glass group relative mx-auto w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 dark:border-white/5 dark:shadow-emerald-900/20">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
         <div className="relative z-10">
           <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
           <div className="space-y-6 p-4 sm:p-5 lg:p-6">
@@ -112,7 +112,7 @@ const PasswordsList = () => {
 
   return (
     <div className="animate-fade-in-up glass group relative mx-auto w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
       <div className="relative z-10">
         {/* Emerald top accent */}
         <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />

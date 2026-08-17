@@ -248,8 +248,8 @@ export default function NotePageClient({ name }: { name: string }) {
     }
     return (
       <div className="mt-20 flex flex-col items-center justify-center space-y-4 px-4 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-purple-50 dark:bg-purple-500/10">
-          <FileText className="h-10 w-10 text-purple-500" />
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cyan-50 dark:bg-cyan-500/10">
+          <FileText className="h-10 w-10 text-cyan-500" />
         </div>
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
           No notes found
@@ -297,7 +297,7 @@ export default function NotePageClient({ name }: { name: string }) {
                 key={item._id}
                 className="animate-fade-in-up glass group relative h-full space-y-4 overflow-hidden rounded-[2rem] border border-white/20 p-0 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20"
               >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
                 <div className="relative z-10 flex h-full flex-col">
                   <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 

@@ -466,7 +466,7 @@ export default function ProfilePage() {
 
         {/* Avatar Section */}
         <div className="animate-fade-in-up glass group relative flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[2rem] border border-white/20 p-6 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl sm:p-8 dark:border-white/5 dark:shadow-emerald-900/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
           <div className="relative z-10 flex flex-col items-center gap-4">
             <div
               className={cn(
@@ -516,7 +516,7 @@ export default function ProfilePage() {
 
         {/* Profile Details Card */}
         <div className="animate-fade-in-up stagger-1 glass group relative w-full overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
           <div className="relative z-10">
             <div className="border-b border-white/20 bg-white/40 px-6 py-5 dark:border-white/5 dark:bg-white/5">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -646,7 +646,7 @@ export default function ProfilePage() {
 
         {/* Security Card */}
         <div className="animate-fade-in-up stagger-2 glass group relative w-full overflow-hidden rounded-[2rem] border border-white/20 shadow-xl backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
           <div className="relative z-10">
             <div className="border-b border-white/20 bg-white/40 px-6 py-5 dark:border-white/5 dark:bg-white/5">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">

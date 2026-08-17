@@ -115,11 +115,12 @@ export default function RootLayout({
                     <main className="safe-bottom">{children}</main>
                   </SwipeWrapper>
                   <Toaster
-                    position="bottom-center"
+                    position="top-center"
+                    expand={false}
                     toastOptions={{
                       className:
-                        "glass !border-emerald-500/20 !text-foreground",
-                      duration: 2000,
+                        "glass !w-auto !min-w-0 !px-3 !py-2 !text-xs sm:!text-sm !border-emerald-500/20 !text-foreground",
+                      duration: 1500,
                     }}
                   />
                   <PasskeyModal />

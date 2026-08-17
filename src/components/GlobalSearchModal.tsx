@@ -221,7 +221,7 @@ export function GlobalSearchModal() {
                       onClick={() => handleSelectNote(n)}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
                     >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400">
                         <FileText className="h-4 w-4" />
                       </div>
                       <div className="flex flex-col overflow-hidden">

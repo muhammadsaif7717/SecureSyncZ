@@ -9,7 +9,7 @@ export default function Loading() {
       <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-[250px] w-[250px] rounded-full bg-teal-500/10 blur-[80px] dark:bg-teal-500/[0.05]" />
 
       <div className="glass relative z-10 flex flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 p-10 shadow-2xl backdrop-blur-xl dark:border-white/5 dark:bg-black/20 dark:shadow-emerald-900/20">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
 
         <div className="relative z-10 flex flex-col items-center gap-6">
           <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.5rem] shadow-lg dark:shadow-none">

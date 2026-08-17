@@ -92,7 +92,7 @@ export default function SignUpPage() {
       <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-teal-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-teal-500/[0.05]" />
 
       <Card className="animate-fade-in-up glass relative w-full max-w-[420px] overflow-hidden rounded-[2rem] border border-white/20 shadow-2xl backdrop-blur-xl transition-all duration-500 dark:border-white/5 dark:shadow-emerald-900/20">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
         <div className="relative z-10">
           <CardHeader className="space-y-2 px-5 pt-6 text-center sm:px-6 sm:pt-8">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl shadow-inner dark:shadow-none">

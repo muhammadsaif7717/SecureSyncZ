@@ -39,7 +39,7 @@ export default function Home() {
         "Manage your credit cards, expiry dates, and CVVs securely with categories and global search.",
     },
     {
-      icon: <FileText className="h-5 w-5 text-purple-500 sm:h-6 sm:w-6" />,
+      icon: <FileText className="h-5 w-5 text-cyan-500 sm:h-6 sm:w-6" />,
       title: "Secure Notes",
       description:
         "Keep your sensitive information, API keys, and private texts encrypted and safely stored.",
@@ -138,7 +138,7 @@ export default function Home() {
                 key={idx}
                 className="glass group relative overflow-hidden rounded-[2rem] border border-white/20 p-6 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl sm:p-8 dark:border-white/5 dark:shadow-emerald-900/20"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
                 <div className="relative z-10">
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-white shadow-inner transition-transform group-hover:scale-110 sm:mb-6 dark:from-white/10 dark:to-white/5">
                     {feature.icon}

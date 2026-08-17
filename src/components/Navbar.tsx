@@ -133,7 +133,7 @@ export default function Navbar() {
         secretKey={secretKey}
         onConfirm={() => setShowEmergencyKit(false)}
       />
-      <header className="glass sticky top-0 z-50 w-full border-b border-white/20 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-black/20">
+      <header className="glass sticky top-0 z-50 w-full border-b border-white/20 bg-emerald-50/70 backdrop-blur-xl dark:border-white/5 dark:bg-black/20">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-[60px] sm:px-6">
           {/* Logo */}
           <Link
@@ -198,9 +198,9 @@ export default function Navbar() {
                   </SheetTrigger>
                   <SheetContent
                     side="right"
-                    className="w-[85vw] max-w-[350px] border-l p-0 sm:w-[350px]"
+                    className="w-[85vw] max-w-[350px] border-l border-white/20 bg-slate-50 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 p-0 sm:w-[350px] dark:border-white/10 dark:bg-[#0a0e1a] dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10"
                   >
-                    <div className="flex flex-col border-b border-black/5 bg-slate-50/50 p-6 dark:border-white/5 dark:bg-slate-900/30">
+                    <div className="flex flex-col border-b border-black/5 bg-white/40 p-6 backdrop-blur-md dark:border-white/5 dark:bg-black/20">
                       <SheetTitle className="mb-4 text-left text-lg font-bold tracking-tight text-slate-900 dark:text-white">
                         My Account
                       </SheetTitle>
@@ -260,7 +260,7 @@ export default function Navbar() {
                         <SheetClose asChild>
                           <Link
                             href="/profile"
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
                           >
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
                               <UserIcon className="h-4 w-4" />
@@ -273,7 +273,7 @@ export default function Navbar() {
                           onClick={() =>
                             setTheme(theme === "dark" ? "light" : "dark")
                           }
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400">
                             <Sun className="hidden h-4 w-4 dark:block" />
@@ -290,7 +290,7 @@ export default function Navbar() {
                         <SheetClose asChild>
                           <Link
                             href="/trash"
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
                           >
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
                               <Trash2 className="h-4 w-4" />
@@ -301,7 +301,7 @@ export default function Navbar() {
 
                         <button
                           onClick={openEmergencyKit}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
                             <ShieldAlert className="h-4 w-4" />
@@ -311,9 +311,9 @@ export default function Navbar() {
 
                         <button
                           onClick={() => openBackupModal("export")}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
                         >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400">
                             <Download className="h-4 w-4" />
                           </div>
                           Export Data
@@ -321,9 +321,9 @@ export default function Navbar() {
 
                         <button
                           onClick={() => openBackupModal("import")}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
                         >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400">
                             <Upload className="h-4 w-4" />
                           </div>
                           Import Data
@@ -379,7 +379,7 @@ export default function Navbar() {
       {user && (
         <div
           className={cn(
-            "glass fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center justify-center rounded-[2rem] border border-white/20 bg-white/70 px-2 py-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-in-out dark:border-white/5 dark:bg-black/20 dark:shadow-emerald-900/20",
+            "glass fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center justify-center rounded-[2rem] border border-white/20 bg-emerald-50/70 px-2 py-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-in-out dark:border-white/5 dark:bg-black/20 dark:shadow-emerald-900/20",
             isVisible ? "translate-y-0" : "translate-y-[150%]"
           )}
         >

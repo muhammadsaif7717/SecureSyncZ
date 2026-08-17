@@ -9,6 +9,9 @@ export const showToast = ({
   title: string;
   description?: string;
 }) => {
+  // Dismiss all previous toasts so they don't stack up
+  toast.dismiss();
+
   toast(title, {
     description,
   });

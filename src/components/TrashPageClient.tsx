@@ -220,7 +220,7 @@ export default function TrashPageClient() {
                   key={item._id}
                   className="animate-fade-in-up glass group relative overflow-hidden rounded-[2rem] border border-white/20 p-0 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-white/5 dark:shadow-emerald-900/20"
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
                   <div className="relative z-10">
                     <CardHeader className="p-4 pb-2">
                       <div className="flex items-center gap-3">

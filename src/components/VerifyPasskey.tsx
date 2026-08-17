@@ -52,7 +52,7 @@ export default function VerifyPasskey({ reasonText }: VerifyPasskeyProps) {
 
       <div className="relative z-10 w-full max-w-md">
         <Card className="glass relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 p-0 shadow-2xl backdrop-blur-xl dark:border-white/5 dark:bg-black/20 dark:shadow-emerald-900/20">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:via-teal-500/10 dark:to-cyan-500/10" />
           <div className="relative z-10 flex flex-col items-center p-6 text-center">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
               <KeyRound className="h-6 w-6" />

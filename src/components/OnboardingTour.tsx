@@ -66,7 +66,7 @@ export function OnboardingTour() {
       title: "Smart Tagging System",
       description:
         "Organize your life with tags instead of rigid folders. Add multiple tags to passwords, cards, and notes for quick filtering.",
-      icon: <Settings className="h-10 w-10 text-purple-500" />,
+      icon: <Settings className="h-10 w-10 text-cyan-500" />,
     },
     {
       title: "You're All Set!",

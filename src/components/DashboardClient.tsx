@@ -126,11 +126,7 @@ export function DashboardClient() {
     oldPasswords > 0;
 
   return (
-    <div className="relative min-h-[calc(100vh-56px)] overflow-hidden bg-slate-50 sm:min-h-[calc(100vh-60px)] dark:bg-[#0a0e1a]">
-      {/* Background glow effects */}
-      <div className="animate-glow-pulse absolute top-1/4 left-1/4 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-emerald-500/[0.06]" />
-      <div className="animate-glow-pulse absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-teal-500/10 blur-[80px] sm:h-72 sm:w-72 dark:bg-teal-500/[0.05]" />
-
+    <div className="relative min-h-[calc(100vh-56px)] bg-slate-50 sm:min-h-[calc(100vh-60px)] dark:bg-[#0a0e1a]">
       <div className="relative z-10 mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
         <h1 className="mb-2 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">
           Vault Dashboard
@@ -144,8 +140,8 @@ export function DashboardClient() {
             Loading vault data...
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-3 sm:gap-6">
-            <div className="glass flex flex-col items-center rounded-2xl border border-white/20 p-3 text-center shadow-xl backdrop-blur-xl sm:p-6 dark:border-white/5">
+          <div className="grid grid-cols-3 gap-4 sm:gap-6">
+            <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 sm:mb-4 sm:h-12 sm:w-12 dark:bg-emerald-900/30 dark:text-emerald-400">
                 <Key className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
@@ -157,7 +153,7 @@ export function DashboardClient() {
               </p>
             </div>
 
-            <div className="glass flex flex-col items-center rounded-2xl border border-white/20 p-3 text-center shadow-xl backdrop-blur-xl sm:p-6 dark:border-white/5">
+            <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600 sm:mb-4 sm:h-12 sm:w-12 dark:bg-teal-900/30 dark:text-teal-400">
                 <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
@@ -169,8 +165,8 @@ export function DashboardClient() {
               </p>
             </div>
 
-            <div className="glass flex flex-col items-center rounded-2xl border border-white/20 p-3 text-center shadow-xl backdrop-blur-xl sm:p-6 dark:border-white/5">
-              <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600 sm:mb-4 sm:h-12 sm:w-12 dark:bg-purple-900/30 dark:text-purple-400">
+            <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600 sm:mb-4 sm:h-12 sm:w-12 dark:bg-cyan-900/30 dark:text-cyan-400">
                 <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <h2 className="text-xl font-bold text-slate-900 sm:text-3xl dark:text-white">
@@ -185,7 +181,7 @@ export function DashboardClient() {
               <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">
                 Vault Health
               </h2>
-              <div className="glass flex items-center gap-4 rounded-2xl border border-white/20 p-6 shadow-lg dark:border-white/5">
+              <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div
                   className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${hasIssues ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"}`}
                 >

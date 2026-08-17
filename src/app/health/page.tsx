@@ -209,7 +209,7 @@ export default function HealthDashboard() {
       <div className="mx-auto max-w-5xl space-y-8 sm:space-y-10">
         {/* Header / Score Card */}
         <div className="glass animate-in fade-in slide-in-from-bottom-4 relative overflow-hidden rounded-[2rem] border border-white/20 p-8 shadow-2xl backdrop-blur-xl duration-700 dark:border-white/5 dark:shadow-emerald-900/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/10 dark:to-pink-500/20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 dark:from-emerald-500/20 dark:via-teal-500/10 dark:to-cyan-500/20" />
 
           <div className="relative flex flex-col items-center text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
             <div className="mb-8 sm:mr-8 sm:mb-0">
@@ -225,9 +225,9 @@ export default function HealthDashboard() {
               </p>
             </div>
 
-            <div className="group relative flex cursor-default items-center justify-center">
+            <div className="group relative flex cursor-default flex-col items-center justify-center sm:items-end">
               <div
-                className={`absolute inset-0 rounded-full opacity-20 blur-2xl transition-all duration-700 group-hover:opacity-40 ${
+                className={`absolute top-1/2 right-0 -mt-16 h-40 w-40 rounded-full opacity-20 blur-3xl transition-all duration-700 group-hover:opacity-40 ${
                   totalScore >= 80
                     ? "bg-emerald-500"
                     : totalScore >= 50
@@ -235,55 +235,67 @@ export default function HealthDashboard() {
                       : "bg-red-500"
                 }`}
               />
-              <svg
-                className="h-40 w-40 -rotate-90 transform drop-shadow-xl sm:h-48 sm:w-48"
-                viewBox="0 0 100 100"
-              >
-                <circle
-                  className="text-slate-200 dark:text-slate-800"
-                  strokeWidth="8"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="42"
-                  cx="50"
-                  cy="50"
-                />
-                <circle
-                  className={`${
+              <div className="relative z-10 flex items-center gap-4 sm:gap-6">
+                <div
+                  className={`flex h-20 w-20 items-center justify-center rounded-[1.5rem] shadow-xl backdrop-blur-md transition-transform duration-500 group-hover:scale-105 sm:h-24 sm:w-24 ${
                     totalScore >= 80
-                      ? "text-emerald-500"
+                      ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
                       : totalScore >= 50
-                        ? "text-yellow-500"
-                        : "text-red-500"
-                  } transition-all duration-1000 ease-out`}
-                  strokeWidth="8"
-                  strokeDasharray={2 * Math.PI * 42}
-                  strokeDashoffset={
-                    2 * Math.PI * 42 - (totalScore / 100) * (2 * Math.PI * 42)
-                  }
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="42"
-                  cx="50"
-                  cy="50"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span
-                  className={`text-4xl font-black tracking-tighter sm:text-5xl ${
-                    totalScore >= 80
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : totalScore >= 50
-                        ? "text-yellow-600 dark:text-yellow-400"
-                        : "text-red-600 dark:text-red-400"
+                        ? "border border-yellow-500/20 bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400"
+                        : "border border-red-500/20 bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400"
                   }`}
                 >
-                  {totalScore}
-                </span>
-                <span className="mt-1 text-[10px] font-bold tracking-widest text-slate-400 uppercase sm:text-xs">
-                  Health
-                </span>
+                  {totalScore >= 80 ? (
+                    <ShieldCheck className="h-10 w-10 sm:h-12 sm:w-12" />
+                  ) : totalScore >= 50 ? (
+                    <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12" />
+                  ) : (
+                    <ShieldAlert className="h-10 w-10 sm:h-12 sm:w-12" />
+                  )}
+                </div>
+                <div className="flex flex-col items-start">
+                  <span
+                    className={`text-5xl font-black tracking-tighter drop-shadow-sm sm:text-6xl ${
+                      totalScore >= 80
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : totalScore >= 50
+                          ? "text-yellow-600 dark:text-yellow-400"
+                          : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {totalScore}
+                  </span>
+                  <div
+                    className={`mt-1 flex items-center justify-center rounded-full px-3 py-1 text-[10px] font-extrabold tracking-widest uppercase sm:text-xs ${
+                      totalScore >= 80
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                        : totalScore >= 50
+                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300"
+                          : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
+                    }`}
+                  >
+                    {totalScore >= 80
+                      ? "Excellent"
+                      : totalScore >= 50
+                        ? "Fair"
+                        : "Critical"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative z-10 mt-6 w-full max-w-[280px] sm:w-[280px]">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200/60 shadow-inner dark:bg-black/40">
+                  <div
+                    className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                      totalScore >= 80
+                        ? "bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)] dark:from-emerald-500 dark:to-emerald-400"
+                        : totalScore >= 50
+                          ? "bg-gradient-to-r from-yellow-400 to-yellow-500 shadow-[0_0_12px_rgba(234,179,8,0.8)] dark:from-yellow-500 dark:to-yellow-400"
+                          : "bg-gradient-to-r from-red-400 to-red-500 shadow-[0_0_12px_rgba(239,68,68,0.8)] dark:from-red-500 dark:to-red-400"
+                    }`}
+                    style={{ width: `${totalScore}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -293,10 +305,10 @@ export default function HealthDashboard() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
           {/* Compromised Passwords */}
           <div className="glass animate-in fade-in slide-in-from-bottom-4 fill-mode-both group relative min-w-0 overflow-hidden rounded-3xl border border-white/20 p-6 shadow-xl shadow-black/5 delay-100 duration-700 dark:border-white/5 dark:shadow-black/30">
-            <div className="absolute top-0 right-0 -mt-8 -mr-8 h-32 w-32 rounded-full bg-purple-500/10 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+            <div className="absolute top-0 right-0 -mt-8 -mr-8 h-32 w-32 rounded-full bg-red-500/10 blur-3xl transition-transform duration-700 group-hover:scale-150" />
             <div className="relative z-10 mb-6 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-100 to-purple-50 text-purple-600 shadow-inner dark:from-purple-500/20 dark:to-purple-500/5 dark:text-purple-400">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-100 to-red-50 text-red-600 shadow-inner dark:from-red-500/20 dark:to-red-500/5 dark:text-red-400">
                   <Flame className="h-6 w-6" />
                 </div>
                 <div>
@@ -304,13 +316,13 @@ export default function HealthDashboard() {
                     Compromised
                   </h3>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                    <p className="text-sm font-semibold text-red-600 dark:text-red-400">
                       {isCheckingPwned
                         ? "Scanning vaults..."
                         : `${compromisedPasswords.length} Found`}
                     </p>
                     {isCheckingPwned && (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-600 dark:text-purple-400" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-red-600 dark:text-red-400" />
                     )}
                   </div>
                 </div>
@@ -323,7 +335,7 @@ export default function HealthDashboard() {
                   <Link
                     key={p._id}
                     href={`/passwords/${encodeURIComponent(extractRootDomain(p.website).toLowerCase())}?search=${encodeURIComponent(p.username)}`}
-                    className="glass flex items-center justify-between rounded-xl border border-white/20 bg-white/40 p-3 text-sm shadow-sm backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/60 hover:shadow-md dark:border-white/10 dark:bg-black/20 dark:hover:bg-purple-500/20"
+                    className="glass flex items-center justify-between rounded-xl border border-white/20 bg-white/40 p-3 text-sm shadow-sm backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/60 hover:shadow-md dark:border-white/10 dark:bg-black/20 dark:hover:bg-red-500/20"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
@@ -341,7 +353,7 @@ export default function HealthDashboard() {
                         {extractRootDomain(p.website)}
                       </span>
                     </div>
-                    <span className="shrink-0 rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
+                    <span className="shrink-0 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-600 dark:bg-red-500/20 dark:text-red-400">
                       Fix Now
                     </span>
                   </Link>
@@ -354,8 +366,8 @@ export default function HealthDashboard() {
                 </p>
               </div>
             ) : (
-              <div className="glass flex h-24 items-center justify-center rounded-xl border border-dashed border-purple-300/50 bg-purple-50/30 backdrop-blur-md dark:border-purple-500/20 dark:bg-purple-900/20">
-                <p className="animate-pulse text-sm font-medium text-purple-700 dark:text-purple-300">
+              <div className="glass flex h-24 items-center justify-center rounded-xl border border-dashed border-red-300/50 bg-red-50/30 backdrop-blur-md dark:border-red-500/20 dark:bg-red-900/20">
+                <p className="animate-pulse text-sm font-medium text-red-700 dark:text-red-300">
                   Analyzing against global data breaches...
                 </p>
               </div>
