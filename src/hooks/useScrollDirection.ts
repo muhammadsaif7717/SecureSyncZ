@@ -8,12 +8,20 @@ export function useScrollDirection() {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    const scrollContainer = document.getElementById("main-scroll") || window;
+
     const toggleScrollDirection = () => {
-      let scrollY = window.pageYOffset;
-      if (scrollY === 0) {
+      let scrollY = 0;
+      if (scrollContainer === window) {
+        scrollY = window.pageYOffset;
+      } else {
+        scrollY = (scrollContainer as HTMLElement).scrollTop;
+      }
+
+      if (scrollY <= 0) {
         setScrollDirection(null);
         setIsVisible(true);
-        setPrevOffset(scrollY);
+        setPrevOffset(0);
         return;
       }
 
@@ -27,9 +35,11 @@ export function useScrollDirection() {
       setPrevOffset(scrollY);
     };
 
-    window.addEventListener("scroll", toggleScrollDirection);
+    scrollContainer.addEventListener("scroll", toggleScrollDirection, {
+      passive: true,
+    });
     return () => {
-      window.removeEventListener("scroll", toggleScrollDirection);
+      scrollContainer.removeEventListener("scroll", toggleScrollDirection);
     };
   }, [prevOffset]);
 

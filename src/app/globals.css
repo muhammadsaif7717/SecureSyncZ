@@ -279,6 +279,16 @@
 }
 
 /* ── Hide Scrollbars Globally ─────────────────────────────────────── */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 ::-webkit-scrollbar {
   display: none;
   width: 0;
