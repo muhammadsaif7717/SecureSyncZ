@@ -95,7 +95,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${inter.variable} ${geistMono.variable} flex h-[100dvh] flex-col overflow-hidden font-sans antialiased`}
+        className={`${inter.variable} ${geistMono.variable} flex h-[100dvh] flex-col overflow-hidden overscroll-none font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"
@@ -112,7 +112,8 @@ export default function RootLayout({
                   <Navbar />
                   <main
                     id="main-scroll"
-                    className="safe-bottom no-scrollbar flex-1 overflow-x-hidden overflow-y-auto"
+                    className="safe-bottom no-scrollbar min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+                    style={{ WebkitOverflowScrolling: "touch" }}
                   >
                     {children}
                   </main>
