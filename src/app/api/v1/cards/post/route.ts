@@ -32,6 +32,17 @@ export const POST = async (req: Request) => {
 
     const db = await connectDB();
 
+    const { ObjectId } = require("mongodb");
+    const userDoc = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(user.id) });
+    if (!userDoc?.isPremium) {
+      return NextResponse.json(
+        { error: "Premium subscription required" },
+        { status: 403 }
+      );
+    }
+
     const normalizedCard = normalizeCard({
       ...body,
       user: {

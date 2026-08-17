@@ -9,7 +9,6 @@ import { Toaster } from "@/components/ui/sonner";
 
 import PasskeyModal from "@/components/PasskeyModal";
 import { EncryptionProvider } from "@/providers/EncryptionProvider";
-import { SwipeWrapper } from "@/components/SwipeWrapper";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geistMono = Geist_Mono({
@@ -111,9 +110,7 @@ export default function RootLayout({
               <AuthProvider>
                 <EncryptionProvider>
                   <Navbar />
-                  <SwipeWrapper>
-                    <main className="safe-bottom">{children}</main>
-                  </SwipeWrapper>
+                  <main className="safe-bottom">{children}</main>
                   <Toaster
                     position="top-center"
                     expand={false}

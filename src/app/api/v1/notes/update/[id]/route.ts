@@ -38,6 +38,16 @@ export const PUT = async (
 
     const db = await connectDB();
 
+    const userDoc = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(user.id) });
+    if (!userDoc?.isPremium) {
+      return NextResponse.json(
+        { message: "Premium subscription required" },
+        { status: 403 }
+      );
+    }
+
     const normalizedData = normalizeNote(body);
     delete (normalizedData as any)._id;
     delete (normalizedData as any).user;

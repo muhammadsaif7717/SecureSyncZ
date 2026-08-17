@@ -99,11 +99,21 @@ export default function PostPage() {
   >("password");
 
   React.useEffect(() => {
+    if (user === undefined) return;
     const savedCat = localStorage.getItem("addPageActiveCategory") as any;
     if (savedCat && ["password", "card", "note"].includes(savedCat)) {
-      setSelectedCategory(savedCat);
+      if (
+        (savedCat === "card" || savedCat === "note") &&
+        user &&
+        !user.isPremium
+      ) {
+        setSelectedCategory("password");
+        localStorage.setItem("addPageActiveCategory", "password");
+      } else {
+        setSelectedCategory(savedCat);
+      }
     }
-  }, []);
+  }, [user]);
 
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallFeature, setPaywallFeature] = useState("");

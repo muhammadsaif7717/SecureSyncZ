@@ -51,6 +51,16 @@ export const PUT = async (
 
     const db = await connectDB();
 
+    const userDoc = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(user.id) });
+    if (!userDoc?.isPremium) {
+      return NextResponse.json(
+        { message: "Premium subscription required" },
+        { status: 403 }
+      );
+    }
+
     // Normalize data before updating
     const normalizedData = normalizeCard(body);
     // Remove _id, user, and createdAt from being overwritten, but ensure updatedAt is fresh
