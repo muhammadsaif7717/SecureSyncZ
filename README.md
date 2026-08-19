@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.png" alt="SecureSyncZ Logo" width="120" height="120" />
+  <img src="public/brand-logo.png" alt="SecureSyncZ Logo" width="120" height="120" />
   <h1>SecureSyncZ</h1>
   <p><strong>Secure Password & Credit Card Vault</strong></p>
 </div>

@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     siteName: "SecureSyncZ",
     images: [
       {
-        url: "/logo.png",
+        url: "/brand-logo.png",
         width: 512,
         height: 512,
         alt: "SecureSyncZ Logo",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SecureSyncZ — Secure Password & Card Vault",
     description: "Your premium digital vault for passwords and credit cards.",
-    images: ["/logo.png"],
+    images: ["/brand-logo.png"],
   },
   robots: {
     index: true,

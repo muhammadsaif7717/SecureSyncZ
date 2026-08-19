@@ -93,11 +93,12 @@ export default function SignInPage() {
           <CardHeader className="space-y-2 px-5 pt-6 text-center sm:px-6 sm:pt-8">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl shadow-inner dark:shadow-none">
               <Image
-                src="/logo.png"
+                src="/brand-logo.png"
                 alt="Logo"
                 width={64}
                 height={64}
                 className="rounded-2xl drop-shadow-md"
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
             <CardTitle className="gradient-text text-2xl font-extrabold tracking-tight sm:text-3xl">

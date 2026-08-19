@@ -14,11 +14,12 @@ export default function Loading() {
         <div className="relative z-10 flex flex-col items-center gap-6">
           <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.5rem] shadow-lg dark:shadow-none">
             <Image
-              src="/logo.png"
+              src="/brand-logo.png"
               alt="Logo"
               width={96}
               height={96}
               className="animate-pulse rounded-[1.5rem] drop-shadow-md"
+              style={{ width: "auto", height: "auto" }}
             />
             <div className="absolute inset-0 animate-ping rounded-[1.5rem] bg-emerald-400 opacity-20" />
           </div>

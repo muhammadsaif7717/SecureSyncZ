@@ -141,11 +141,12 @@ export default function Navbar() {
             className="flex items-center gap-2 text-base font-bold tracking-tight text-slate-900 sm:text-lg dark:text-white"
           >
             <Image
-              src="/logo.png"
+              src="/brand-logo.png"
               alt="SecureSyncZ Logo"
               width={28}
               height={28}
               className="rounded-lg shadow-md shadow-emerald-500/20"
+              style={{ width: "auto", height: "auto" }}
             />
             <span>SecureSyncZ</span>
           </Link>
