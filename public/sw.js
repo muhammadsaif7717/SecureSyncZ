@@ -278,7 +278,10 @@ define(["./workbox-f1770938"], function (e) {
           url: "/icon-512x512.png",
           revision: "4bbf63082668e40f9e8ab2a45eccb4d8",
         },
-        { url: "/brand-logo.png", revision: "56b463e304b06b2537358d2ec5ba6eab" },
+        {
+          url: "/brand-logo.png",
+          revision: "56b463e304b06b2537358d2ec5ba6eab",
+        },
         { url: "/manifest.json", revision: "1943acc2adf879b97d586ca33d7c5302" },
         { url: "/pwa-logo.png", revision: "60f35183eb2ff59226541cfdd33b01aa" },
       ],

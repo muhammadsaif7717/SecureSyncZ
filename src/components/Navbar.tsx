@@ -48,9 +48,8 @@ import { useState, useEffect } from "react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const navLinks = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/cards", label: "Cards", icon: CreditCard },
   { href: "/passwords", label: "Passwords", icon: Key },
+  { href: "/cards", label: "Cards", icon: CreditCard },
   { href: "/notes", label: "Notes", icon: FileText },
   { href: "/add", label: "Add", icon: PlusCircle },
   { href: "/health", label: "Health", icon: ShieldCheck },

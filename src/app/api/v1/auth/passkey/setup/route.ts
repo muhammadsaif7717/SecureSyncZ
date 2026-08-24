@@ -53,17 +53,19 @@ export async function POST(req: Request) {
     /* console.log(
       "Passkey setup: Validation passed, proceeding to hash and save."
     ); */
-    const salt = await bcrypt.genSalt(10);
-    const hashedPasskey = await bcrypt.hash(passkey, salt);
-
-    const updateData: any = { passkey: hashedPasskey };
+    const updateData: any = {
+      hasPasskey: true,
+    };
     if (encryptedValidationStr) {
       updateData.encryptedValidationStr = encryptedValidationStr;
     }
 
     const result = await usersCollection.findOneAndUpdate(
       { _id: new ObjectId(userPayload.id) },
-      { $set: updateData },
+      {
+        $set: updateData,
+        $unset: { passkey: "" },
+      },
       { returnDocument: "after" }
     );
 
@@ -76,7 +78,7 @@ export async function POST(req: Request) {
       email: result.email,
       username: result.username,
       profilePicture: result.profilePicture,
-      hasPasskey: !!result.passkey,
+      hasPasskey: true,
       encryptedValidationStr: result.encryptedValidationStr,
     };
 

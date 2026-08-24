@@ -15,7 +15,6 @@ import getPasswords from "@/lib/getPasswords";
 import getCards from "@/lib/getCards";
 import getNotes from "@/lib/getNotes";
 import VerifyPasskey from "@/components/VerifyPasskey";
-import { OnboardingTour } from "@/components/OnboardingTour";
 import { checkPwnedPassword } from "@/lib/hibp";
 import { PasswordsData } from "@/types";
 
@@ -208,8 +207,6 @@ export function DashboardClient() {
           </div>
         )}
       </div>
-
-      {isUnlocked && <OnboardingTour />}
     </div>
   );
 }

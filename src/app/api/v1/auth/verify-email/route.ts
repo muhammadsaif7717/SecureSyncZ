@@ -80,7 +80,11 @@ export async function POST(req: Request) {
       email: updateResult.email,
       username: updateResult.username,
       profilePicture: updateResult.profilePicture,
-      hasPasskey: !!updateResult.passkey,
+      hasPasskey:
+        !!updateResult.encryptedValidationStr ||
+        !!updateResult.hasPasskey ||
+        !!updateResult.passkey,
+      encryptedValidationStr: updateResult.encryptedValidationStr,
       isVerified: updateResult.isVerified,
     };
 

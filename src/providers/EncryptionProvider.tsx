@@ -117,7 +117,7 @@ export function EncryptionProvider({
             derivedKey
           );
           if (decrypted !== "VALID-KEY") {
-            // Secret key is wrong
+            // Secret key or Passkey is wrong
             return {
               success: false,
               error: "Invalid Secret Key or Passkey.",
@@ -127,18 +127,6 @@ export function EncryptionProvider({
           return {
             success: false,
             error: "Invalid Secret Key or Passkey.",
-          };
-        }
-      }
-
-      // Verify the passkey with the backend if they have one set
-      if (user?.hasPasskey) {
-        try {
-          await axios.post("/api/v1/auth/passkey/verify", { passkey: pin });
-        } catch (error: any) {
-          return {
-            success: false,
-            error: error.response?.data?.error || "Invalid passkey. Try again.",
           };
         }
       }

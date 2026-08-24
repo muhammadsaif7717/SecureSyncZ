@@ -11,18 +11,22 @@ import {
   FileText,
   Search,
 } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
-import { DashboardClient } from "@/components/DashboardClient";
 
 export default function Home() {
   const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/passwords");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || user) {
     return <div className="min-h-screen bg-slate-50 dark:bg-[#0a0e1a]" />;
-  }
-
-  if (user) {
-    return <DashboardClient />;
   }
 
   const features = [

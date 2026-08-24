@@ -25,7 +25,8 @@ export async function GET(req: Request) {
       email: user.email,
       username: user.username,
       profilePicture: user.profilePicture,
-      hasPasskey: !!user.passkey,
+      hasPasskey:
+        !!user.encryptedValidationStr || !!user.hasPasskey || !!user.passkey,
       isVerified: user.isVerified || false,
       encryptedValidationStr: user.encryptedValidationStr,
       isPremium: user.isPremium || false,

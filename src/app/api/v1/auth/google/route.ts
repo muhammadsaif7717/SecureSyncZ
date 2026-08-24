@@ -114,7 +114,10 @@ export async function POST(req: Request) {
           email: user.email,
           username: user.username,
           profilePicture: user.profilePicture,
-          hasPasskey: !!user.passkey,
+          hasPasskey:
+            !!user.encryptedValidationStr ||
+            !!user.hasPasskey ||
+            !!user.passkey,
           isVerified: user.isVerified || false,
           hasPassword: !!user.password,
           encryptedValidationStr: user.encryptedValidationStr || null,

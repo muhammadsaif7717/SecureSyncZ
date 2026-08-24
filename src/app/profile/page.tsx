@@ -36,8 +36,14 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { DeleteDataModal } from "@/components/DeleteDataModal";
 import { compressImage, cn } from "@/lib/utils";
 import { TwoFactorSettings } from "@/components/auth/TwoFactorSettings";
-import { deriveKey, decryptData, encryptData } from "@/lib/clientCrypto";
+import {
+  deriveKey,
+  decryptData,
+  encryptData,
+  generateSecretKey,
+} from "@/lib/clientCrypto";
 import { useEncryption } from "@/providers/EncryptionProvider";
+import { EmergencyKitModal } from "@/components/EmergencyKitModal";
 
 export default function ProfilePage() {
   const { user, updateUser, isLoading } = useAuth();
@@ -63,14 +69,20 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [newPasskey, setNewPasskey] = useState("");
+  const [currentPasskey, setCurrentPasskey] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [otp, setOtp] = useState("");
+
+  // Emergency Kit states
+  const [emergencyKitSecretKey, setEmergencyKitSecretKey] = useState("");
+  const [showEmergencyKitModal, setShowEmergencyKitModal] = useState(false);
 
   // Visibility states
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showPasskey, setShowPasskey] = useState(false);
+  const [showCurrentPasskey, setShowCurrentPasskey] = useState(false);
 
   // Loading states
   const [isSaving, setIsSaving] = useState(false);
@@ -90,6 +102,7 @@ export default function ProfilePage() {
     setNewPassword("");
     setConfirmPassword("");
     setNewPasskey("");
+    setCurrentPasskey("");
     setOtp("");
     setCodeSent(false);
     setFormError("");
@@ -189,6 +202,8 @@ export default function ProfilePage() {
       }
     }
 
+    if (!user) return;
+
     setIsSaving(true);
     try {
       if (activeModal === "inline_confirm") {
@@ -225,76 +240,225 @@ export default function ProfilePage() {
       }
 
       if (activeModal === "passkey") {
-        if (!cryptoKey) {
-          throw new Error("Vault must be unlocked to change passkey.");
-        }
-
         const secretKeyHex = localStorage.getItem("secureSyncZ_secretKey");
-        if (!secretKeyHex) throw new Error("Missing secret key.");
 
-        // 1. Derive new key
-        const newCryptoKey = await deriveKey(newPasskey, secretKeyHex);
+        if (user.hasPasskey) {
+          if (!secretKeyHex) {
+            throw new Error(
+              "Missing Secret Key on this device. Please restore your vault first."
+            );
+          }
 
-        // 2. Encrypt validation string
-        const encryptedValidationStr = await encryptData(
-          "VALID-KEY",
-          newCryptoKey
-        );
+          let activeCurrentKey = cryptoKey;
+          if (!activeCurrentKey) {
+            if (!currentPasskey || currentPasskey.length !== 6) {
+              throw new Error("Please enter your current 6-digit passkey.");
+            }
+            activeCurrentKey = await deriveKey(currentPasskey, secretKeyHex);
+          }
 
-        // 3. Fetch all data
-        const [pwRes, cardRes, noteRes] = await Promise.all([
-          axios.get("/api/v1/data/passwords"),
-          axios.get("/api/v1/data/cards"),
-          axios.get("/api/v1/data/notes"),
-        ]);
-
-        const oldPasswords = pwRes.data.passwords || [];
-        const oldCards = cardRes.data.cards || [];
-        const oldNotes = noteRes.data.notes || [];
-
-        // 4. Decrypt & Re-encrypt
-        const processItems = async (items: any[]) => {
-          return Promise.all(
-            items.map(async (item) => {
-              const decrypted = await decryptData(
-                item.encryptedData,
-                cryptoKey
+          // Verify current key against encryptedValidationStr
+          if (user.encryptedValidationStr) {
+            try {
+              const testDecrypted = await decryptData(
+                user.encryptedValidationStr,
+                activeCurrentKey
               );
-              const reEncrypted = await encryptData(decrypted, newCryptoKey);
-              return { _id: item._id, encryptedData: reEncrypted };
+              if (testDecrypted !== "VALID-KEY") {
+                throw new Error("Current passkey is incorrect.");
+              }
+            } catch (e: any) {
+              throw new Error("Current passkey is incorrect.");
+            }
+          }
+
+          if (!newPasskey || newPasskey.length !== 6) {
+            throw new Error("New passkey must be exactly 6 digits.");
+          }
+
+          if (currentPasskey && currentPasskey === newPasskey) {
+            throw new Error(
+              "New passkey must be different from current passkey."
+            );
+          }
+
+          // 1. Derive new key
+          const newCryptoKey = await deriveKey(newPasskey, secretKeyHex);
+
+          // 2. Encrypt validation string
+          const encryptedValidationStr = await encryptData(
+            "VALID-KEY",
+            newCryptoKey
+          );
+
+          // 3. Fetch all current data
+          const [pwRes, cardRes, noteRes] = await Promise.all([
+            axios.get("/api/v1/passwords/get"),
+            axios.get("/api/v1/cards/get"),
+            axios.get("/api/v1/notes/get"),
+          ]);
+
+          const oldPasswords = Array.isArray(pwRes.data) ? pwRes.data : [];
+          const oldCards = Array.isArray(cardRes.data) ? cardRes.data : [];
+          const oldNotes = Array.isArray(noteRes.data) ? noteRes.data : [];
+
+          // 4. Decrypt with activeCurrentKey & Re-encrypt with newCryptoKey
+          const newPasswords = await Promise.all(
+            oldPasswords.map(async (item: any) => {
+              let reEncryptedPassword = item.password;
+              let reEncryptedNote = item.note;
+              try {
+                if (item.password) {
+                  const decryptedPw = await decryptData(
+                    item.password,
+                    activeCurrentKey!
+                  );
+                  reEncryptedPassword = await encryptData(
+                    decryptedPw,
+                    newCryptoKey
+                  );
+                }
+              } catch (e) {}
+              try {
+                if (item.note) {
+                  const decryptedNote = await decryptData(
+                    item.note,
+                    activeCurrentKey!
+                  );
+                  reEncryptedNote = await encryptData(
+                    decryptedNote,
+                    newCryptoKey
+                  );
+                }
+              } catch (e) {}
+              return {
+                _id: item._id,
+                password: reEncryptedPassword,
+                note: reEncryptedNote,
+              };
             })
           );
-        };
 
-        const [newPasswords, newCards, newNotes] = await Promise.all([
-          processItems(oldPasswords),
-          processItems(oldCards),
-          processItems(oldNotes),
-        ]);
+          const newCards = await Promise.all(
+            oldCards.map(async (item: any) => {
+              let reEncryptedCardNumber = item.cardNumber;
+              let reEncryptedExpiry = item.expiry;
+              let reEncryptedCvv = item.cvv;
+              let reEncryptedPin = item.pin;
+              let reEncryptedNote = item.note;
+              try {
+                if (item.cardNumber) {
+                  const dec = await decryptData(
+                    item.cardNumber,
+                    activeCurrentKey!
+                  );
+                  reEncryptedCardNumber = await encryptData(dec, newCryptoKey);
+                }
+              } catch (e) {}
+              try {
+                if (item.expiry) {
+                  const dec = await decryptData(item.expiry, activeCurrentKey!);
+                  reEncryptedExpiry = await encryptData(dec, newCryptoKey);
+                }
+              } catch (e) {}
+              try {
+                if (item.cvv) {
+                  const dec = await decryptData(item.cvv, activeCurrentKey!);
+                  reEncryptedCvv = await encryptData(dec, newCryptoKey);
+                }
+              } catch (e) {}
+              try {
+                if (item.pin) {
+                  const dec = await decryptData(item.pin, activeCurrentKey!);
+                  reEncryptedPin = await encryptData(dec, newCryptoKey);
+                }
+              } catch (e) {}
+              try {
+                if (item.note) {
+                  const dec = await decryptData(item.note, activeCurrentKey!);
+                  reEncryptedNote = await encryptData(dec, newCryptoKey);
+                }
+              } catch (e) {}
+              return {
+                _id: item._id,
+                cardNumber: reEncryptedCardNumber,
+                expiry: reEncryptedExpiry,
+                cvv: reEncryptedCvv,
+                pin: reEncryptedPin,
+                note: reEncryptedNote,
+              };
+            })
+          );
 
-        // 5. Send to server
-        const updateRes = await axios.post(
-          "/api/v1/auth/profile/update-passkey",
-          {
+          const newNotes = await Promise.all(
+            oldNotes.map(async (item: any) => {
+              let reEncryptedContent = item.content;
+              try {
+                if (item.content) {
+                  const dec = await decryptData(
+                    item.content,
+                    activeCurrentKey!
+                  );
+                  reEncryptedContent = await encryptData(dec, newCryptoKey);
+                }
+              } catch (e) {}
+              return {
+                _id: item._id,
+                content: reEncryptedContent,
+              };
+            })
+          );
+
+          // 5. Send to server
+          const updateRes = await axios.post(
+            "/api/v1/auth/profile/update-passkey",
+            {
+              currentPassword,
+              passkey: newPasskey,
+              encryptedValidationStr,
+              passwords: newPasswords,
+              cards: newCards,
+              notes: newNotes,
+            }
+          );
+
+          updateUser(updateRes.data.user);
+
+          showToast({
+            title: "Success",
+            description: "Passkey updated and data re-encrypted successfully!",
+          });
+
+          closeModal();
+          window.location.reload();
+          return;
+        } else {
+          // Setting up passkey for the first time
+          if (!newPasskey || newPasskey.length !== 6) {
+            throw new Error("Passkey must be exactly 6 digits.");
+          }
+
+          const newSecretKey = generateSecretKey();
+          const newCryptoKey = await deriveKey(newPasskey, newSecretKey);
+          const encryptedValidationStr = await encryptData(
+            "VALID-KEY",
+            newCryptoKey
+          );
+
+          const response = await axios.post("/api/v1/auth/passkey/setup", {
             passkey: newPasskey,
             encryptedValidationStr,
-            passwords: newPasswords,
-            cards: newCards,
-            notes: newNotes,
+          });
+
+          if (response.data && response.data.user) {
+            updateUser(response.data.user);
+            localStorage.setItem("secureSyncZ_secretKey", newSecretKey);
+            setEmergencyKitSecretKey(newSecretKey);
+            closeModal();
+            setShowEmergencyKitModal(true);
+            return;
           }
-        );
-
-        updateUser(updateRes.data.user);
-
-        showToast({
-          title: "Success",
-          description: "Passkey updated and data re-encrypted successfully!",
-        });
-
-        closeModal();
-        // Reload so EncryptionProvider picks up the new passkey/vault lock state
-        window.location.reload();
-        return;
+        }
       }
 
       const payload: Record<string, string> = { currentPassword };
@@ -321,7 +485,9 @@ export default function ProfilePage() {
         window.location.reload();
       }
     } catch (err: any) {
-      setFormError(err?.response?.data?.error || "Failed to update.");
+      setFormError(
+        err?.response?.data?.error || err?.message || "Failed to update."
+      );
       setErrorShake(true);
       setTimeout(() => setErrorShake(false), 500);
     } finally {
@@ -852,38 +1018,80 @@ export default function ProfilePage() {
             )}
 
             {activeModal === "passkey" && (
-              <div className="flex flex-col items-center pt-2">
-                <label className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  New 6-Digit Passkey
-                  <button
-                    type="button"
-                    onClick={() => setShowPasskey(!showPasskey)}
-                    className="ml-2 text-slate-400 hover:text-slate-600"
+              <div className="flex flex-col items-center space-y-4 pt-2">
+                {user.hasPasskey && !cryptoKey && (
+                  <div className="flex flex-col items-center">
+                    <label className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Current 6-Digit Passkey
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowCurrentPasskey(!showCurrentPasskey)
+                        }
+                        className="ml-2 text-slate-400 hover:text-slate-600"
+                      >
+                        {showCurrentPasskey ? (
+                          <EyeOff className="inline h-4 w-4" />
+                        ) : (
+                          <Eye className="inline h-4 w-4" />
+                        )}
+                      </button>
+                    </label>
+                    <InputOTP
+                      maxLength={6}
+                      pattern={REGEXP_ONLY_DIGITS}
+                      value={currentPasskey}
+                      onChange={setCurrentPasskey}
+                    >
+                      <InputOTPGroup className="gap-1 sm:gap-2">
+                        {[...Array(6)].map((_, i) => (
+                          <InputOTPSlot
+                            key={i}
+                            index={i}
+                            showChar={showCurrentPasskey}
+                            className="h-9 w-9 border-slate-200 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
+                          />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                )}
+
+                <div className="flex flex-col items-center">
+                  <label className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {user.hasPasskey
+                      ? "New 6-Digit Passkey"
+                      : "Set 6-Digit Passkey"}
+                    <button
+                      type="button"
+                      onClick={() => setShowPasskey(!showPasskey)}
+                      className="ml-2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPasskey ? (
+                        <EyeOff className="inline h-4 w-4" />
+                      ) : (
+                        <Eye className="inline h-4 w-4" />
+                      )}
+                    </button>
+                  </label>
+                  <InputOTP
+                    maxLength={6}
+                    pattern={REGEXP_ONLY_DIGITS}
+                    value={newPasskey}
+                    onChange={setNewPasskey}
                   >
-                    {showPasskey ? (
-                      <EyeOff className="inline h-4 w-4" />
-                    ) : (
-                      <Eye className="inline h-4 w-4" />
-                    )}
-                  </button>
-                </label>
-                <InputOTP
-                  maxLength={6}
-                  pattern={REGEXP_ONLY_DIGITS}
-                  value={newPasskey}
-                  onChange={setNewPasskey}
-                >
-                  <InputOTPGroup className="gap-1 sm:gap-2">
-                    {[...Array(6)].map((_, i) => (
-                      <InputOTPSlot
-                        key={i}
-                        index={i}
-                        showChar={showPasskey}
-                        className="h-9 w-9 border-slate-200 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
-                      />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
+                    <InputOTPGroup className="gap-1 sm:gap-2">
+                      {[...Array(6)].map((_, i) => (
+                        <InputOTPSlot
+                          key={i}
+                          index={i}
+                          showChar={showPasskey}
+                          className="h-9 w-9 border-slate-200 text-base sm:h-12 sm:w-12 sm:text-lg dark:border-white/10 dark:bg-white/5"
+                        />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
               </div>
             )}
 
@@ -913,7 +1121,11 @@ export default function ProfilePage() {
                   (user.hasPassword && !currentPassword) ||
                   (activeModal === "delete" &&
                     (!codeSent || otp.length !== 6)) ||
-                  (activeModal === "passkey" && newPasskey.length !== 6) ||
+                  (activeModal === "passkey" &&
+                    (newPasskey.length !== 6 ||
+                      (user.hasPasskey &&
+                        !cryptoKey &&
+                        currentPasskey.length !== 6))) ||
                   (activeModal === "password" &&
                     (!newPassword || newPassword !== confirmPassword))
                 }
@@ -931,6 +1143,16 @@ export default function ProfilePage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Emergency Kit Modal for Passkey Setup in Profile */}
+      <EmergencyKitModal
+        isOpen={showEmergencyKitModal}
+        secretKey={emergencyKitSecretKey}
+        onConfirm={() => {
+          setShowEmergencyKitModal(false);
+          window.location.reload();
+        }}
+      />
 
       {/* Set Password First Modal */}
       <Dialog

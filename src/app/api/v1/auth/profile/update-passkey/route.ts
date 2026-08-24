@@ -13,7 +13,14 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { passkey, encryptedValidationStr, passwords, cards, notes } = body;
+    const {
+      currentPassword,
+      passkey,
+      encryptedValidationStr,
+      passwords,
+      cards,
+      notes,
+    } = body;
 
     if (!passkey || !encryptedValidationStr) {
       return NextResponse.json(
@@ -31,20 +38,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPasskey = await bcrypt.hash(passkey, salt);
+    // Verify current account password if user has password set
+    if (user.password && user.password !== "") {
+      if (!currentPassword) {
+        return NextResponse.json(
+          { error: "Current account password is required." },
+          { status: 400 }
+        );
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return NextResponse.json(
+          { error: "Incorrect current password." },
+          { status: 401 }
+        );
+      }
+    }
 
-    // Use MongoDB transaction if replica set is available, else do sequential updates
-    // For standalone MongoDB instances (like Mongoose default dev), we'll do sequential operations.
-
-    // Update user passkey and encryptedValidationStr
+    // Update user passkey flag and encryptedValidationStr (WITHOUT storing passkey)
     await usersCollection.updateOne(
       { _id: userId },
       {
         $set: {
-          passkey: hashedPasskey,
           encryptedValidationStr: encryptedValidationStr,
+          hasPasskey: true,
         },
+        $unset: { passkey: "" },
       }
     );
 
@@ -55,7 +74,8 @@ export async function POST(req: Request) {
           filter: { _id: new ObjectId(p._id), "user.email": user.email },
           update: {
             $set: {
-              encryptedData: p.encryptedData,
+              password: p.password,
+              note: p.note,
               updatedAt: new Date(),
             },
           },
@@ -73,7 +93,11 @@ export async function POST(req: Request) {
           filter: { _id: new ObjectId(c._id), "user.email": user.email },
           update: {
             $set: {
-              encryptedData: c.encryptedData,
+              cardNumber: c.cardNumber,
+              expiry: c.expiry,
+              cvv: c.cvv,
+              pin: c.pin,
+              note: c.note,
               updatedAt: new Date(),
             },
           },
@@ -91,7 +115,7 @@ export async function POST(req: Request) {
           filter: { _id: new ObjectId(n._id), "user.email": user.email },
           update: {
             $set: {
-              encryptedData: n.encryptedData,
+              content: n.content,
               updatedAt: new Date(),
             },
           },

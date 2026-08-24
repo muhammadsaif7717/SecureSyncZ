@@ -69,7 +69,7 @@ export default function SignInPage() {
       } else {
         // login was successful!
         userAuth.updateUser(result.user);
-        router.push("/");
+        router.push("/passwords");
       }
     } catch (error: any) {
       setFormError(error?.message || "Invalid credentials");
@@ -234,7 +234,7 @@ export default function SignInPage() {
                         } else {
                           // login was successful!
                           userAuth.updateUser(result.user);
-                          router.push("/");
+                          router.push("/passwords");
                         }
                       } catch (error) {
                         // Error handled by provider
@@ -283,7 +283,7 @@ export default function SignInPage() {
         onSuccess={(user) => {
           setShowTwoFactorPrompt(false);
           userAuth.updateUser(user);
-          router.push("/");
+          router.push("/passwords");
         }}
       />
 

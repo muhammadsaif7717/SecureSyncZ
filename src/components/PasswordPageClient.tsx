@@ -69,6 +69,7 @@ export default function PasswordPageClient({ name }: { name: string }) {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showGenerator, setShowGenerator] = useState(false);
 
   const { cryptoKey, isUnlocked } = useEncryption();
 
@@ -147,8 +148,6 @@ export default function PasswordPageClient({ name }: { name: string }) {
   const displayPassData = filteredPassData.filter((item) =>
     item.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const [showGenerator, setShowGenerator] = useState(false);
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
