@@ -342,18 +342,21 @@ export default function PostPage() {
         {/* Toggle Switch */}
         <div className="mx-auto mb-8 flex w-full max-w-sm rounded-xl bg-slate-200/50 p-1 lg:max-w-md dark:bg-slate-800/50">
           <button
+            type="button"
             onClick={() => handleCategoryChange("password")}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all sm:text-base lg:py-2.5 lg:text-lg ${selectedCategory === "password" ? "bg-white text-emerald-600 shadow-sm dark:bg-[#0a0e1a] dark:text-emerald-400" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
           >
             Passwords
           </button>
           <button
+            type="button"
             onClick={() => handleCategoryChange("card")}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all sm:text-base lg:py-2.5 lg:text-lg ${selectedCategory === "card" ? "bg-white text-emerald-600 shadow-sm dark:bg-[#0a0e1a] dark:text-emerald-400" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
           >
             Cards
           </button>
           <button
+            type="button"
             onClick={() => handleCategoryChange("note")}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all sm:text-base lg:py-2.5 lg:text-lg ${selectedCategory === "note" ? "bg-white text-emerald-600 shadow-sm dark:bg-[#0a0e1a] dark:text-emerald-400" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
           >

@@ -65,6 +65,7 @@ export function PasswordGenerator({ onGenerate }: PasswordGeneratorProps) {
         </span>
         <div className="flex shrink-0 gap-2">
           <Button
+            type="button"
             variant="ghost"
             size="icon"
             onClick={generate}
@@ -73,6 +74,7 @@ export function PasswordGenerator({ onGenerate }: PasswordGeneratorProps) {
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Button
+            type="button"
             variant="ghost"
             size="icon"
             onClick={copyToClipboard}
