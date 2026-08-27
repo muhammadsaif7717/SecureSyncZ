@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronDown } from "lucide-react";
 import PremiumPaywallModal from "@/components/PremiumPaywallModal";
 import VerifyPasskey from "@/components/VerifyPasskey";
@@ -48,6 +49,8 @@ const formatExpiry = (value: string) => {
 };
 
 export default function PostPage() {
+  const searchParams = useSearchParams();
+  const initialPasswordFromUrl = searchParams.get("password") || "";
   const { user, isLoading } = useAuth();
   const { isUnlocked, cryptoKey } = useEncryption();
 
@@ -59,7 +62,7 @@ export default function PostPage() {
     createdAt: new Date().toISOString(),
     website: "",
     username: "",
-    password: "",
+    password: initialPasswordFromUrl,
     note: "",
     tags: [],
   });

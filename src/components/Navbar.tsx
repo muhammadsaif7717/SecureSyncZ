@@ -34,6 +34,7 @@ import {
   Trash2,
   LayoutDashboard,
   Crown,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -255,6 +256,22 @@ export default function Navbar() {
                     <div className="flex flex-1 flex-col px-4 py-6">
                       <div className="space-y-1">
                         <div className="px-2 pb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                          Tools & Generator
+                        </div>
+                        <SheetClose asChild>
+                          <Link
+                            href="/generator"
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                              <Sparkles className="h-4 w-4" />
+                            </div>
+                            Password Generator
+                          </Link>
+                        </SheetClose>
+
+                        <div className="my-2 border-t border-slate-200 dark:border-slate-800"></div>
+                        <div className="px-2 py-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                           Settings
                         </div>
                         <SheetClose asChild>
