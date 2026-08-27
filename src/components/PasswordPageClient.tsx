@@ -242,7 +242,9 @@ export default function PasswordPageClient({ name }: { name: string }) {
       setIsDeleteDialogOpen(false);
       setDeleteId(null);
       await refetch();
-      router.push("/passwords");
+      if (filteredPassData.length <= 1) {
+        router.push("/passwords");
+      }
     } catch (err) {
       showToast({
         title: err instanceof Error ? err.message : "Error",

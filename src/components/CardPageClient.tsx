@@ -298,7 +298,9 @@ export default function CardPageClient({ name }: { name: string }) {
       setIsDeleteDialogOpen(false);
       setDeleteId(null);
       await refetch();
-      router.push("/cards");
+      if (filteredPassData.length <= 1) {
+        router.push("/cards");
+      }
     } catch (err) {
       showToast({
         title: err instanceof Error ? err.message : "Error",

@@ -225,7 +225,9 @@ export default function NotePageClient({ name }: { name: string }) {
       setIsDeleteDialogOpen(false);
       setDeleteId(null);
       await refetch();
-      router.push("/notes");
+      if (filteredNotesData.length <= 1) {
+        router.push("/notes");
+      }
     } catch (err) {
       showToast({
         title: err instanceof Error ? err.message : "Error",
