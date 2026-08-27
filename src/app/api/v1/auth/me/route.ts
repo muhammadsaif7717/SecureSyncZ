@@ -30,6 +30,8 @@ export async function GET(req: Request) {
       isVerified: user.isVerified || false,
       encryptedValidationStr: user.encryptedValidationStr,
       isPremium: user.isPremium || false,
+      subscriptionProvider:
+        user.subscriptionProvider || (user.subscriptionId ? "stripe" : null),
       hasPassword: !!user.password,
       twoFactorEnabled: user.twoFactorEnabled || false,
       hasUsedTrial: user.hasUsedTrial || false,

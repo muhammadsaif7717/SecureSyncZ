@@ -14,15 +14,11 @@ export const DELETE = async (req: Request) => {
       );
     }
 
-    const body = await req.json();
-    const { password } = body;
-
-    if (!password) {
-      return NextResponse.json(
-        { error: "Password is required" },
-        { status: 400 }
-      );
-    }
+    let password = "";
+    try {
+      const body = await req.json();
+      password = body?.password || "";
+    } catch (_) {}
 
     const db = await connectDB();
     const usersCollection = db.collection("users");
@@ -35,12 +31,22 @@ export const DELETE = async (req: Request) => {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const isMatch = await bcrypt.compare(password, dbUser.password);
-    if (!isMatch) {
-      return NextResponse.json(
-        { error: "Incorrect password" },
-        { status: 401 }
-      );
+    const hasPassword = !!dbUser.password && dbUser.password !== "";
+
+    if (hasPassword) {
+      if (!password) {
+        return NextResponse.json(
+          { error: "Password is required to delete all data." },
+          { status: 400 }
+        );
+      }
+      const isMatch = await bcrypt.compare(password, dbUser.password);
+      if (!isMatch) {
+        return NextResponse.json(
+          { error: "Incorrect password." },
+          { status: 401 }
+        );
+      }
     }
 
     const query = { "user.email": user.email };
@@ -57,7 +63,6 @@ export const DELETE = async (req: Request) => {
       { status: 200 }
     );
   } catch (error) {
-    // console.error("Error deleting all data:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

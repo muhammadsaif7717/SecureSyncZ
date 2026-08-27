@@ -9,7 +9,15 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Download, Upload, UploadCloud, Loader2, KeyRound } from "lucide-react";
+import {
+  Download,
+  Upload,
+  UploadCloud,
+  Loader2,
+  KeyRound,
+  Globe,
+  ShieldCheck,
+} from "lucide-react";
 import { useEncryption } from "@/providers/EncryptionProvider";
 import {
   InputOTP,
@@ -58,10 +66,15 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
     }
   }, [passkey]);
 
+  const [exportFormat, setExportFormat] = useState<"browser" | "vault">(
+    "browser"
+  );
+
   const resetState = () => {
     setSelectedFile(null);
     setIsDragging(false);
     setPasskey("");
+    setExportFormat("browser");
   };
 
   const handleClose = () => {
@@ -79,7 +92,9 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
 
     try {
       setIsLoading(true);
-      toast.loading("Decrypting and exporting data...", { id: "export" });
+      toast.loading("Decrypting and preparing export file...", {
+        id: "export",
+      });
       const response = await fetch(`/api/v1/data/export`);
 
       if (!response.ok) throw new Error("Export failed");
@@ -159,90 +174,192 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
       }
 
       const Papa = await import("papaparse");
-      const exportRows: any[] = [];
+      let csvString = "";
+      let downloadFilename = "securesyncz-vault-backup.csv";
 
-      decryptedData.passwords.forEach((p) => {
-        exportRows.push({
-          _id: p._id || "",
-          type: "password",
-          name: p.name || "",
-          website: p.website || "",
-          username: p.username || "",
-          password: p.password || "",
-          note: p.note || "",
-          serviceName: "",
-          cardType: "",
-          cardNumber: "",
-          expiry: "",
-          cvv: "",
-          pin: "",
-          title: "",
-          content: "",
-          isFavorite: p.isFavorite ? "true" : "false",
-          tags: p.tags ? p.tags.join(",") : "",
-          createdAt: p.createdAt || "",
-          updatedAt: p.updatedAt || "",
+      if (exportFormat === "browser") {
+        // Strict Chrome / Safari / Edge standard format: name,url,username,password,note
+        const chromeRows: any[] = [];
+        downloadFilename = "chrome-passwords.csv";
+
+        const formatUrlForChrome = (rawUrl: string, name: string): string => {
+          let u = (rawUrl || "").trim();
+          if (!u) {
+            u = (name || "").trim();
+          }
+          if (!u) {
+            return "https://example.com";
+          }
+
+          // Remove whitespace
+          u = u.replace(/\s+/g, "");
+
+          // Prepend https:// if protocol is missing
+          if (!/^https?:\/\//i.test(u)) {
+            u = `https://${u}`;
+          }
+
+          // Remove trailing slashes and invalid trailing characters
+          u = u.replace(/[\/,]+$/, "");
+
+          try {
+            const urlObj = new URL(u);
+            if (!urlObj.hostname.includes(".")) {
+              return `https://${urlObj.hostname}.com`;
+            }
+            return (
+              urlObj.origin +
+              (urlObj.pathname && urlObj.pathname !== "/"
+                ? urlObj.pathname
+                : "")
+            );
+          } catch (e) {
+            const cleanDomain = u
+              .replace(/^https?:\/\//i, "")
+              .replace(/[^a-zA-Z0-9.-]/g, "");
+            return cleanDomain.includes(".")
+              ? `https://${cleanDomain}`
+              : `https://${cleanDomain || "example"}.com`;
+          }
+        };
+
+        decryptedData.passwords.forEach((p) => {
+          const pwd = (p.password || "").trim();
+          // Google Chrome strictly requires non-empty passwords for each entry
+          if (!pwd) {
+            return;
+          }
+
+          const siteUrl = formatUrlForChrome(p.website, p.name);
+          const entryName = (p.name || p.website || "Login").trim();
+          const username = (p.username || "").trim();
+          const note = (p.note || "").trim();
+
+          chromeRows.push({
+            name: entryName,
+            url: siteUrl,
+            username: username,
+            password: pwd,
+            note: note,
+          });
         });
-      });
 
-      decryptedData.cards.forEach((c) => {
-        exportRows.push({
-          _id: c._id || "",
-          type: "card",
-          name: c.name || "",
-          website: c.website || "",
-          username: "",
-          password: "",
-          note: c.note || "",
-          serviceName: c.serviceName || "",
-          cardType: c.cardType || "",
-          cardNumber: c.cardNumber || "",
-          expiry: c.expiry || "",
-          cvv: c.cvv || "",
-          pin: c.pin || "",
-          title: "",
-          content: "",
-          isFavorite: c.isFavorite ? "true" : "false",
-          tags: c.tags ? c.tags.join(",") : "",
-          createdAt: c.createdAt || "",
-          updatedAt: c.updatedAt || "",
+        if (chromeRows.length === 0) {
+          toast.error(
+            "No passwords with valid password field found to export for Chrome.",
+            {
+              id: "export",
+            }
+          );
+          return;
+        }
+
+        csvString = Papa.unparse({
+          fields: ["name", "url", "username", "password", "note"],
+          data: chromeRows,
         });
-      });
+      } else {
+        // Full Vault Backup format
+        const exportRows: any[] = [];
+        downloadFilename = "securesyncz-full-vault-backup.csv";
 
-      decryptedData.notes.forEach((n) => {
-        exportRows.push({
-          _id: n._id || "",
-          type: "note",
-          name: "",
-          website: "",
-          username: "",
-          password: "",
-          note: "",
-          serviceName: "",
-          cardType: "",
-          cardNumber: "",
-          expiry: "",
-          cvv: "",
-          pin: "",
-          title: n.title || "",
-          content: n.content || "",
-          isFavorite: n.isFavorite ? "true" : "false",
-          tags: n.tags ? n.tags.join(",") : "",
-          createdAt: n.createdAt || "",
-          updatedAt: n.updatedAt || "",
+        decryptedData.passwords.forEach((p) => {
+          const siteUrl = p.website || "";
+          const entryName = p.name || siteUrl || "Login";
+          exportRows.push({
+            name: entryName,
+            url: siteUrl,
+            username: p.username || "",
+            password: p.password || "",
+            note: p.note || "",
+            type: "password",
+            cardNumber: "",
+            cardType: "",
+            expiry: "",
+            cvv: "",
+            pin: "",
+            title: entryName,
+            content: "",
+            isFavorite: p.isFavorite ? "true" : "false",
+            tags: Array.isArray(p.tags) ? p.tags.join(",") : p.tags || "",
+            website: siteUrl,
+            _id: p._id || "",
+            createdAt: p.createdAt || "",
+            updatedAt: p.updatedAt || "",
+          });
         });
-      });
 
-      const csvString = Papa.unparse(exportRows);
+        decryptedData.cards.forEach((c) => {
+          const cardName = c.name || c.serviceName || "Credit Card";
+          exportRows.push({
+            name: cardName,
+            url: c.website || "",
+            username: "",
+            password: "",
+            note: c.note || "",
+            type: "card",
+            cardNumber: c.cardNumber || "",
+            cardType: c.cardType || "Others",
+            expiry: c.expiry || "",
+            cvv: c.cvv || "",
+            pin: c.pin || "",
+            title: cardName,
+            content: "",
+            isFavorite: c.isFavorite ? "true" : "false",
+            tags: Array.isArray(c.tags) ? c.tags.join(",") : c.tags || "",
+            website: c.website || "",
+            _id: c._id || "",
+            createdAt: c.createdAt || "",
+            updatedAt: c.updatedAt || "",
+          });
+        });
+
+        decryptedData.notes.forEach((n) => {
+          const noteTitle = n.title || "Secure Note";
+          const noteContent = n.content || "";
+          exportRows.push({
+            name: noteTitle,
+            url: "",
+            username: "",
+            password: "",
+            note: noteContent,
+            type: "note",
+            cardNumber: "",
+            cardType: "",
+            expiry: "",
+            cvv: "",
+            pin: "",
+            title: noteTitle,
+            content: noteContent,
+            isFavorite: n.isFavorite ? "true" : "false",
+            tags: Array.isArray(n.tags) ? n.tags.join(",") : n.tags || "",
+            website: "",
+            _id: n._id || "",
+            createdAt: n.createdAt || "",
+            updatedAt: n.updatedAt || "",
+          });
+        });
+
+        csvString = Papa.unparse(exportRows, {
+          quotes: true,
+          header: true,
+        });
+      }
+
       const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "securesyncz-backup-decrypted.csv";
+      a.download = downloadFilename;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      toast.success("Successfully exported data", { id: "export" });
+      toast.success(
+        exportFormat === "browser"
+          ? "Chrome compatible password CSV exported!"
+          : "Full vault backup exported successfully!",
+        { id: "export" }
+      );
       handleClose();
     } catch (error) {
       toast.error("Failed to export data", { id: "export" });
@@ -285,81 +402,257 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
       const Papa = await import("papaparse");
       const results = Papa.parse(fileContent, {
         header: true,
-        skipEmptyLines: true,
+        skipEmptyLines: "greedy",
+        transformHeader: (header) => header.trim(),
       });
 
+      const getField = (
+        row: Record<string, any>,
+        ...keys: string[]
+      ): string => {
+        if (!row || typeof row !== "object") return "";
+        for (const k of keys) {
+          if (
+            row[k] !== undefined &&
+            row[k] !== null &&
+            String(row[k]).trim() !== ""
+          ) {
+            return String(row[k]).trim();
+          }
+        }
+        const rowKeys = Object.keys(row);
+        for (const k of keys) {
+          const targetKey = k.toLowerCase().replace(/[^a-z0-9]/g, "");
+          const matchedKey = rowKeys.find(
+            (rk) => rk.toLowerCase().replace(/[^a-z0-9]/g, "") === targetKey
+          );
+          if (
+            matchedKey &&
+            row[matchedKey] !== undefined &&
+            row[matchedKey] !== null &&
+            String(row[matchedKey]).trim() !== ""
+          ) {
+            return String(row[matchedKey]).trim();
+          }
+        }
+        return "";
+      };
+
       for (const record of results.data as any[]) {
-        const type = record.type || "password";
+        if (!record || typeof record !== "object") continue;
 
-        if (type === "password") {
-          const encryptedPassword = record.password
-            ? await encryptData(record.password, cryptoKey)
-            : "";
-          const encryptedNote = record.note
-            ? await encryptData(record.note, cryptoKey)
-            : "";
+        const rawType = getField(
+          record,
+          "type",
+          "item_type",
+          "category"
+        ).toLowerCase();
+        const name = getField(
+          record,
+          "name",
+          "title",
+          "Title",
+          "serviceName",
+          "cardName",
+          "login_name"
+        );
+        const url = getField(
+          record,
+          "url",
+          "URL",
+          "website",
+          "login_uri",
+          "uri",
+          "web",
+          "link"
+        );
+        const username = getField(
+          record,
+          "username",
+          "Username",
+          "login_username",
+          "user",
+          "email",
+          "login"
+        );
+        const password = getField(
+          record,
+          "password",
+          "Password",
+          "login_password",
+          "pass",
+          "secret"
+        );
+        const note = getField(
+          record,
+          "note",
+          "notes",
+          "Notes",
+          "comment",
+          "description",
+          "extra"
+        );
+        const cardNumber = getField(
+          record,
+          "cardNumber",
+          "card_number",
+          "number",
+          "card",
+          "cardnumber"
+        );
+        const cardType =
+          getField(record, "cardType", "card_type", "brand", "type_card") ||
+          "Others";
+        const expiry = getField(
+          record,
+          "expiry",
+          "expiration",
+          "exp",
+          "valid_thru",
+          "expiry_date"
+        );
+        const cvv = getField(
+          record,
+          "cvv",
+          "cvc",
+          "security_code",
+          "securitycode"
+        );
+        const pin = getField(record, "pin", "card_pin", "pin_code");
+        const content = getField(
+          record,
+          "content",
+          "body",
+          "text",
+          "note_content"
+        );
+        const isFavoriteVal = getField(
+          record,
+          "isFavorite",
+          "favorite",
+          "is_favorite"
+        ).toLowerCase();
+        const isFavorite =
+          isFavoriteVal === "true" ||
+          isFavoriteVal === "1" ||
+          isFavoriteVal === "yes";
+        const rawTags = getField(record, "tags", "tag", "folder");
+        const tags = rawTags
+          ? rawTags
+              .split(",")
+              .map((t: string) => t.trim())
+              .filter(Boolean)
+          : [];
+        const _id = getField(record, "_id", "id") || undefined;
+        const createdAt =
+          getField(record, "createdAt", "created_at", "timeCreated") ||
+          undefined;
+        const updatedAt =
+          getField(
+            record,
+            "updatedAt",
+            "updated_at",
+            "timeLastUsed",
+            "timePasswordChanged"
+          ) || undefined;
 
-          payload.passwords.push({
-            _id: record._id || undefined,
-            name: record.name || record.cardName || "",
-            website: record.website || record.url || "Unknown",
-            username: record.username || "",
-            password: encryptedPassword,
-            note: encryptedNote,
-            isFavorite: record.isFavorite === "true",
-            tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
-            createdAt: record.createdAt || undefined,
-            updatedAt: record.updatedAt || undefined,
-          });
-        } else if (type === "card") {
-          const encryptedCardNumber = record.cardNumber
-            ? await encryptData(record.cardNumber, cryptoKey)
+        if (
+          !name &&
+          !url &&
+          !username &&
+          !password &&
+          !note &&
+          !cardNumber &&
+          !content
+        ) {
+          continue;
+        }
+
+        const isCard =
+          rawType === "card" ||
+          rawType === "credit_card" ||
+          rawType === "debit_card" ||
+          Boolean(cardNumber);
+
+        const isNote =
+          rawType === "note" ||
+          rawType === "secure_note" ||
+          (Boolean(content) && !password && !username && !cardNumber);
+
+        if (isCard) {
+          const encryptedCardNumber = cardNumber
+            ? await encryptData(cardNumber, cryptoKey)
             : "";
-          const encryptedExpiry = record.expiry
-            ? await encryptData(record.expiry, cryptoKey)
+          const encryptedExpiry = expiry
+            ? await encryptData(expiry, cryptoKey)
             : "";
-          const encryptedCvv = record.cvv
-            ? await encryptData(record.cvv, cryptoKey)
-            : "";
-          const encryptedPin = record.pin
-            ? await encryptData(record.pin, cryptoKey)
-            : "";
-          const encryptedNote = record.note
-            ? await encryptData(record.note, cryptoKey)
-            : "";
+          const encryptedCvv = cvv ? await encryptData(cvv, cryptoKey) : "";
+          const encryptedPin = pin ? await encryptData(pin, cryptoKey) : "";
+          const encryptedNote = note ? await encryptData(note, cryptoKey) : "";
 
           payload.cards.push({
-            _id: record._id || undefined,
-            name: record.name || record.cardName || "Unknown",
+            _id,
+            name: name || "Credit Card",
             serviceName:
-              record.serviceName || record.name || record.cardName || "Unknown",
-            cardType: record.cardType || "Others",
-            website: record.website || "",
+              getField(record, "serviceName") || name || "Credit Card",
+            cardType: cardType,
+            website: url,
             cardNumber: encryptedCardNumber,
             expiry: encryptedExpiry,
             cvv: encryptedCvv,
             pin: encryptedPin,
             note: encryptedNote,
-            isFavorite: record.isFavorite === "true",
-            tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
-            createdAt: record.createdAt || undefined,
-            updatedAt: record.updatedAt || undefined,
+            isFavorite,
+            tags,
+            createdAt,
+            updatedAt,
           });
-        } else if (type === "note") {
-          const encryptedContent = record.content
-            ? await encryptData(record.content, cryptoKey)
+        } else if (isNote) {
+          const noteText = content || note || "";
+          const encryptedContent = noteText
+            ? await encryptData(noteText, cryptoKey)
             : "";
 
           payload.notes.push({
-            _id: record._id || undefined,
-            title: record.title || "Unknown",
+            _id,
+            title: name || getField(record, "title") || "Secure Note",
             content: encryptedContent,
-            isFavorite: record.isFavorite === "true",
-            tags: record.tags ? record.tags.split(",").filter(Boolean) : [],
-            createdAt: record.createdAt || undefined,
-            updatedAt: record.updatedAt || undefined,
+            isFavorite,
+            tags,
+            createdAt,
+            updatedAt,
+          });
+        } else {
+          const encryptedPassword = password
+            ? await encryptData(password, cryptoKey)
+            : "";
+          const encryptedNote = note ? await encryptData(note, cryptoKey) : "";
+
+          const site = url || name || "Unknown";
+          const displayName = name || url || "Login";
+
+          payload.passwords.push({
+            _id,
+            name: displayName,
+            website: site,
+            username: username || "",
+            password: encryptedPassword,
+            note: encryptedNote,
+            isFavorite,
+            tags,
+            createdAt,
+            updatedAt,
           });
         }
+      }
+
+      const totalItems =
+        payload.passwords.length + payload.cards.length + payload.notes.length;
+
+      if (totalItems === 0) {
+        throw new Error(
+          "No valid password, card, or note entries found in the file."
+        );
       }
 
       const endpoint = "/api/v1/data/import";
@@ -484,6 +777,75 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {action === "export" && (
+            <div className="space-y-3">
+              <label className="text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                Select Export Target
+              </label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div
+                  onClick={() => setExportFormat("browser")}
+                  className={`cursor-pointer rounded-xl border p-3.5 transition-all ${
+                    exportFormat === "browser"
+                      ? "border-emerald-500 bg-emerald-50/70 shadow-sm ring-2 ring-emerald-500/20 dark:border-emerald-500/80 dark:bg-emerald-950/20"
+                      : "border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`mt-0.5 rounded-lg p-2 ${
+                        exportFormat === "browser"
+                          ? "bg-emerald-600 text-white"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                      }`}
+                    >
+                      <Globe className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-white">
+                        Google Chrome & Browsers
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                        Strict format for Chrome, Safari, Edge, Firefox password
+                        managers.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => setExportFormat("vault")}
+                  className={`cursor-pointer rounded-xl border p-3.5 transition-all ${
+                    exportFormat === "vault"
+                      ? "border-emerald-500 bg-emerald-50/70 shadow-sm ring-2 ring-emerald-500/20 dark:border-emerald-500/80 dark:bg-emerald-950/20"
+                      : "border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`mt-0.5 rounded-lg p-2 ${
+                        exportFormat === "vault"
+                          ? "bg-emerald-600 text-white"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                      }`}
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-white">
+                        Full Vault Backup
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                        Complete backup with Passwords, Cards, Notes & Tags for
+                        SecureSyncZ.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {action === "import" && (
             <div className="space-y-2">
               <div
@@ -523,7 +885,7 @@ export function BackupModal({ isOpen, onClose, action }: BackupModalProps) {
                       Drag and drop your CSV backup here
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
-                      or click to browse files
+                      Supports Chrome, Safari, Bitwarden, or SecureSyncZ CSV
                     </p>
                   </div>
                 )}

@@ -39,6 +39,7 @@ export async function POST(req: Request) {
             {
               $set: {
                 isPremium: true,
+                subscriptionProvider: "stripe",
                 subscriptionId: session.subscription,
                 hasUsedTrial: true,
               },
