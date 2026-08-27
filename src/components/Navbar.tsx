@@ -53,7 +53,7 @@ const navLinks = [
   { href: "/cards", label: "Cards", icon: CreditCard },
   { href: "/notes", label: "Notes", icon: FileText },
   { href: "/add", label: "Add", icon: PlusCircle },
-  { href: "/health", label: "Health", icon: ShieldCheck },
+  { href: "/generator", label: "Generator", icon: Sparkles },
 ];
 
 export default function Navbar() {
@@ -256,17 +256,17 @@ export default function Navbar() {
                     <div className="flex flex-1 flex-col px-4 py-6">
                       <div className="space-y-1">
                         <div className="px-2 pb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-                          Tools & Generator
+                          Security & Health
                         </div>
                         <SheetClose asChild>
                           <Link
-                            href="/generator"
+                            href="/health"
                             className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
                           >
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                              <Sparkles className="h-4 w-4" />
+                              <ShieldCheck className="h-4 w-4" />
                             </div>
-                            Password Generator
+                            Vault Health
                           </Link>
                         </SheetClose>
 
